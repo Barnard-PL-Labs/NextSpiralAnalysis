@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-
 export async function POST(req) {
     try {
         const body = await req.json();
@@ -11,10 +10,11 @@ export async function POST(req) {
 
         let externalApiResponse;
         try {
-            externalApiResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral ", {
+            externalApiResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
+                signal: controller.signal,
             });
 
             clearTimeout(timeout);
@@ -24,12 +24,15 @@ export async function POST(req) {
                 console.error("TIMEOUT ERROR: External API took too long to respond!");
                 return NextResponse.json({ message: "TIMEOUT ERROR: External API did not respond in time" }, { status: 504 });
             }
-            throw fetchError; 
+            throw fetchError;
+        }
+
+        if (!externalApiResponse) {
+            return NextResponse.json({ message: "External API did not return a response" }, { status: 500 });
         }
 
         const responseText = await externalApiResponse.text();
-        console.log("🔍 Raw Response from External API:", responseText);
-
+        console.log("Raw Response from External API:", responseText);
 
         let externalApiData;
         try {
@@ -38,7 +41,7 @@ export async function POST(req) {
         } catch (jsonError) {
             console.warn("EXTERNAL API returned plain text instead of JSON");
             externalApiData = { rawResponse: responseText };
-
+        }
 
         return NextResponse.json({
             message: "Data sent to external API successfully!",
