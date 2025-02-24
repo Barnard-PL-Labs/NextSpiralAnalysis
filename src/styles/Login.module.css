@@ -1,0 +1,21 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.loginFormContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin:300px;
+    flex-direction: column;
+    border: 2px solid white;
+    padding:20px;
+}
+
+.metrics{
+    padding:20px;
+    width: 300px;
+}
