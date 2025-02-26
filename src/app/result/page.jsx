@@ -1,16 +1,21 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import XYChart from "../../components/Scatter";
 
 export default function ResultPage(){
-    const drawData = JSON.parse(localStorage.getItem('drawData'));
-    const result = JSON.parse(localStorage.getItem('resultFromApi'));
-    console.log(result);
-    const xValues = drawData.map(point => point.x);
-    console.log(xValues); 
-    const yValues = drawData.map(point => point.y);
-    console.log(yValues);
+    const [drawData, setDrawData] = useState([]);
+    const [result, setResult] = useState([]);
 
+    useEffect(() => {
+        if (typeof window !== "undefined") { // ✅ Prevents server-side execution
+            const storedDrawData = localStorage.getItem("drawData");
+            const storedResult = localStorage.getItem('resultFromApi')
+            if (storedDrawData && storedResult ) {
+                setDrawData(JSON.parse(storedDrawData));
+                setResult(JSON.parse(storedResult));
+            }
+        }
+    }, []);
     return (
         <div>
             <h1>Analysis Result</h1>
