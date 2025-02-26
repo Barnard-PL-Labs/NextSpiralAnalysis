@@ -32,15 +32,22 @@ export default function MachinePage() {
     const [drawData, setDrawData] = useState([]);
 
 const sendDataToBackend = async () => {
-    console.log("Preparing to send drawData:", JSON.stringify(drawData, null, 2));
+
+    const processBody = JSON.stringify(JSON.stringify(drawData));
+    console.log('procesd', processBody);
 
     try {
         const response = await fetch("/api/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(drawData),
+            body: processBody,
         });
-
+        if (!response.ok){
+            console.log('fyucked up')
+            return;
+        }else{
+            console.log('ook');
+        }
         const data = await response.json();
         console.log(" Response from external API:", data);
     } catch (error) {
