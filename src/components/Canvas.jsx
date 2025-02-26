@@ -57,7 +57,7 @@ export default function Canvas({ setDrawData }) {
             setStartTime(timeNow);
         }
 
-        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":1000.0, "t": 0 };
+        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":5000.0, "t": 0 };
         setLocalDrawData([newPoint]);
     };
 
@@ -74,7 +74,7 @@ export default function Canvas({ setDrawData }) {
             n: localDrawData.length + 1,
             x: offsetX,
             y: offsetY,
-            p: 1000.0,
+            p: 5000.0,
             t: relativeTime
         };
 
@@ -97,7 +97,7 @@ export default function Canvas({ setDrawData }) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         setLocalDrawData([]);
         if (backgroundImage) {
-            drawBackgroundImage(ctx, backgroundImage); // ✅ Redraw background after clearing
+            drawBackgroundImage(ctx, backgroundImage); 
         }
     };
 

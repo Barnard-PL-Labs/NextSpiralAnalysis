@@ -5,12 +5,12 @@ export const config = {
 
   export async function POST(req) {
       try {
-          const body = await req.json(); // ✅ Parses incoming JSON
-          console.log("✅ Received drawData:", JSON.stringify(body));
+          const body = await req.json();
+          console.log("Received drawData:", JSON.stringify(body));
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 1000000);
   
-          // ✅ Forward data to external API
+          
           const externalResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -19,23 +19,23 @@ export const config = {
               signal: controller.signal,
           });
           clearTimeout(timeout);
-          const responseText = await externalResponse.text(); // ✅ Read response
-          console.log("✅ External API Response:", responseText);
+          const responseText = await externalResponse.text();
+          console.log("External API Response(Route page):", responseText);
   
           let externalApiData;
           try {
-              externalApiData = JSON.parse(responseText); // ✅ Convert to JSON
+              externalApiData = JSON.parse(responseText); 
           } catch {
-              externalApiData = { rawResponse: responseText }; // ✅ Handle plain text response
+              externalApiData = { rawResponse: responseText };
           }
   
           return NextResponse.json({
-              message: "✅ Data sent to external API successfully!",
+              message: "Data sent to external API successfully!",
               result: externalApiData,
           });
       } catch (error) {
-          console.error("❌ Server Error:", error);
-          return NextResponse.json({ message: "SERVER ERROR: Failed to process data" }, { status: 500 });
+          console.error("Server Error:", error);
+          return NextResponse.json({ message: "Server Error: Failed to process data" }, { status: 500 });
       }
   }
 

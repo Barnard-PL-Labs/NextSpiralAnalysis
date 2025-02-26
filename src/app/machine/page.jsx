@@ -4,6 +4,7 @@ import Canvas from "@/components/Canvas";
 import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css"; 
 import Header from '@/components/Header';
+import { useRouter } from "next/navigation";
 
 // export default function MachinePage() {
 //     // const [drawData, setDrawData] = useState([]);
@@ -30,10 +31,11 @@ import Header from '@/components/Header';
 
 export default function MachinePage() {
     const [drawData, setDrawData] = useState([]);
-
+    const router = useRouter();
 const sendDataToBackend = async () => {
     const processBody = JSON.stringify(drawData);
     console.log('procesd', processBody);
+
 
     try {
         const response = await fetch("/api/analyze", {
@@ -48,11 +50,17 @@ const sendDataToBackend = async () => {
             console.log('ook');
         }
         const data = await response.json();
-        console.log(" Response from external API:", data);
+        console.log(" Response from external API(machine page):", data);
+        localStorage.setItem('drawData',processBody)
+        localStorage.setItem('resultFromApi', JSON.stringify(data.result))
+        router.push('/result');
     } catch (error) {
         console.error(" Error sending data:", error);
     }
-};
+
+
+}; 
+
 
 
     return (<>        
