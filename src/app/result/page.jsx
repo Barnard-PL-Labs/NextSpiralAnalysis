@@ -7,7 +7,7 @@ export default function ResultPage(){
     const [result, setResult] = useState([]);
 
     useEffect(() => {
-        if (typeof window !== "undefined") { // ✅ Prevents server-side execution
+        if (typeof window !== "undefined") { 
             const storedDrawData = localStorage.getItem("drawData");
             const storedResult = localStorage.getItem('resultFromApi')
             if (storedDrawData && storedResult ) {
