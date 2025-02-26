@@ -32,8 +32,7 @@ export default function MachinePage() {
     const [drawData, setDrawData] = useState([]);
 
 const sendDataToBackend = async () => {
-
-    const processBody = JSON.stringify(JSON.stringify(drawData));
+    const processBody = JSON.stringify(drawData);
     console.log('procesd', processBody);
 
     try {
