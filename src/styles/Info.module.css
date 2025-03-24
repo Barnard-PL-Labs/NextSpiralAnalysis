@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600&display=swap');
+body, .teamMember {
+    font-family: 'Linbre Franklin', sans-serif;
+  }
+
+
+.teamPage,
+.teamSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+}
+.teamPage{
+    padding-top: 100px;
+}
+
+
+
+.teamContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.teamMember {
+  border-radius: 8px;
+  overflow: hidden;
+  width: 180px;
+  text-align: center;
+  transition: transform 0.2s;
+  background: rgba(0, 0, 0, 0.5); /* translucent dark glass */
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 174, 255, 0.15);
+}
+
+.teamMemberImage {
+  border: none;
+  border-radius: 50%;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.teamMember h3 {
+  margin: 10px 0 5px;
+  font-size: 1em;
+  color: white;
+}
+
+.teamMember p {
+  margin: 5px 10px;
+  font-size: 0.7em;
+  color: white;
+}
+
+.director {
+  background-color: #f9f9f9;
+  background: rgba(0, 0, 0, 0.5); /* translucent dark glass */
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 174, 255, 0.15);
+}
+
+.directorsRow,
+.membersRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+  background: transparent;
+  padding: 10px 0;
+}
+
+
+.membersRow {
+  background-color: transparent;
+}
+
+
+
+.teamMember:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+
+.imageContainer {
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle at center, #00bfff, #0050aa);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    transform: rotate(-10deg);
+  }
+
+  
+
+  .bolt {
+    width: 16px;
+    height: 16px;
+    fill: gold;
+    transition: transform 0.3s ease;
+  }
+  
+  .badge:hover .bolt {
+    transform: scale(1.2);
+
+  }
+
+  
+  
