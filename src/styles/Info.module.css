@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600&display=swap');
-body, .teamMember {
-    font-family: 'Linbre Franklin', sans-serif;
-  }
+
 
 
 .teamPage,
@@ -10,6 +8,8 @@ body, .teamMember {
   flex-direction: column;
   align-items: center;
   background-color: transparent;
+  font-family: 'Linbre Franklin', sans-serif;
+
 }
 .teamPage{
     padding-top: 100px;
