@@ -53,9 +53,9 @@ header a{
   display: flex;
 }
 .navItems {
-  display: flex;  /* Ensures items are in a row */
-  justify-content: flex-end; /* Moves items to the right */
-  align-items: center; /* Aligns vertically */
+  display: flex; 
+  justify-content: flex-end; 
+  align-items: center;
   list-style: none;
   padding-right: 40px;
   margin: 0;
@@ -117,3 +117,212 @@ header a{
   box-shadow: 0 0 20px rgba(0, 174, 239, 0.8);
   transform: translateY(-3px);
 }
+/* below is not used anymore as i change the way i wanna show the login page */
+/* .loginContainer{
+  position:relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding:25px;
+  color:white;
+  width:100%;
+  height: 100vh;
+  z-index: -1;
+  background: black;
+}
+.loginBox{
+  width:600px;
+  height:600px;
+  padding: 25px;
+  padding-bottom:50px;
+  box-shadow: 1px 1px 1px rgb(0, 238, 255), -1px -1px 1px white;
+  border-radius: 12px;
+  display: flex;
+  background: white;
+  color:black;
+}
+*/
+input{
+  display: flex;
+  flex-direction: column;
+}
+
+
+.modal-wrapper {
+  position: fixed; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+.closeButton{
+  background: none;
+  border: none;
+  font-size: 40px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  line-height: 1; 
+  color:white;
+}
+.closeButton:hover{
+  color:#444;
+  transition: color 0.2s ease-in-out;
+
+}
+.login-modal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  background-color: #222;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  color: white;
+  height: auto;           
+  overflow: visible;
+}
+
+.modal-form-wrapper {
+  display: flex;
+  gap: 25px;
+  align-items: stretch;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 50%;
+  flex:1;
+}
+
+.modal-form input,
+.btn-primary,
+.btn-secondary {
+  width: 100%; 
+  box-sizing: border-box; 
+}
+.modal-form input {
+  padding: 17px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #333;
+  color: white;
+
+}
+
+.btn-primary {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: #444;
+}
+.vertical-divider {
+  height: 170px;
+  width: 2px;
+  background-color: #444;
+  margin: 10px;
+}
+
+
+.modal-form-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.modal-video {
+  width: 80%;
+  height: auto;
+  max-height: 80%;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  opacity: 0.9;
+}
+.modal-enter {
+  transition: all 0.3s ease-out;
+}
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.modal-enter-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-leave {
+  transition: all 0.2s ease-in;
+}
+.modal-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+
+/* Overlay background
+.fixed.inset-0.bg-black.bg-opacity-50 {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal positioning */
+/* .fixed.inset-0.overflow-y-auto {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
