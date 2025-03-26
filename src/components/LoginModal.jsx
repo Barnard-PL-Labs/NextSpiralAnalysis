@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import Image from "next/image";
+import { FaExclamationCircle } from 'react-icons/fa';
+
 
 
 export default function LoginModal({ isOpen, closeModal }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message,setMessage] = useState("");
   const router = useRouter();
   const imageSource = "/Icons/generated-icon-removebg.png";
 
@@ -21,7 +24,15 @@ export default function LoginModal({ isOpen, closeModal }) {
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert(error.message);
+    if (error){
+        if (error.message === 'Invalid login credentials') {
+            setMessage('Invalid email or password. Please try again.');
+          } else if (error.message === 'Email not confirmed') {
+            setMessage('Please confirm your email before logging in.');
+          } else {
+            setMessage('An unexpected error occurred. Please try again later.');
+          }
+    }
     else {
       alert("Logged in successfully!");
       closeModal();
@@ -34,7 +45,7 @@ export default function LoginModal({ isOpen, closeModal }) {
       <Dialog as="div"  onClose={closeModal} style={{position:'fixed', inset:'0',
     zIndex: 9999,
   }}>
-        <div className="fixed inset-0 modal-wrapper">
+        <div className="modal-wrapper">
 
           <Transition.Child
             as={Fragment}
@@ -56,6 +67,8 @@ export default function LoginModal({ isOpen, closeModal }) {
                 <h2 className="modal-title">Login</h2>
                 <div className="modal-form-wrapper">
                 <div className="modal-form">
+                {message &&     <div className="error-container"><div className="icon-background"><FaExclamationCircle className="error-icon" /></div>
+                <p className="error-text">{message}</p></div>}
                   <input
                     type="email"
                     placeholder="Email"
@@ -79,7 +92,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                 <div className="vertical-divider"></div>
 
                 <div className="modal-form-right">
-                <Image src="/Icons/popSpiral.webp" width={170} height={170} alt="SpiralPic"/>                    </div>
+                <Image src="/Icons/trueSpiralLogin.png" width={260} height={210} alt="SpiralPic"/>                    </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

@@ -127,27 +127,27 @@ const Spiral3D = ({ drawData }) => {
         .text(d => Math.round(d)); // round to nearest whole number
       
 
-        const yTicks = yScale.ticks(1).filter(d => d > 0);
-    axisGroup.selectAll(".y-tick")
-      .data(yTicks)
-      .enter()
-      .append("line")
-      .attr("x1", d => originX - yScale(d) * 0.6)
-      .attr("y1", d => originY - yScale(d) * 0.8)
-      .attr("x2", d => originX - yScale(d) * 0.6 - 5)
-      .attr("y2", d => originY - yScale(d) * 0.8 - 5)
-      .attr("stroke", "black");
+    //     const yTicks = yScale.ticks(1).filter(d => d > 0);
+    // axisGroup.selectAll(".y-tick")
+    //   .data(yTicks)
+    //   .enter()
+    //   .append("line")
+    //   .attr("x1", d => originX - yScale(d) * 0.6)
+    //   .attr("y1", d => originY - yScale(d) * 0.8)
+    //   .attr("x2", d => originX - yScale(d) * 0.6 - 5)
+    //   .attr("y2", d => originY - yScale(d) * 0.8 - 5)
+    //   .attr("stroke", "black");
 
- // only top value
-      axisGroup.selectAll(".y-label")
-        .data(yTicks)
-        .enter()
-        .append("text")
-        .attr("x", d => originX - yScale(d) * 0.6 - 10)
-        .attr("y", d => originY - yScale(d) * 0.8 - 5)
-        .attr("text-anchor", "end")
-        .attr("font-size", 10)
-        .text(d => Math.round(d));
+//  // only top value
+//       axisGroup.selectAll(".y-label")
+//         .data(yTicks)
+//         .enter()
+//         .append("text")
+//         .attr("x", d => originX - yScale(d) * 0.6 - 10)
+//         .attr("y", d => originY - yScale(d) * 0.8 - 5)
+//         .attr("text-anchor", "end")
+//         .attr("font-size", 10)
+//         .text(d => Math.round(d));
       
 
       const tTicks = tScale.ticks(2).filter(d => d > 0); // filter out 0

@@ -1,0 +1,12 @@
+.pageContainer {
+    display: flex;
+    min-height: 100vh;
+    color:black；
+  }
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+    margin-top:92px;
+  } 
+  
