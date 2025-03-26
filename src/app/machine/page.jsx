@@ -31,10 +31,10 @@ export default function MachinePage() {
             }else{
                 console.log('ook');
             }
-            router.push("/result"); 
+            
             const data = await response.json();
             console.log("API Result:", data.result);
-
+            // router.push("/result"); 
             setApiResult(data.result); 
             // After receiving API result, send user_id & save in Supabase
             await saveToDatabase(data.result);
@@ -51,7 +51,7 @@ export default function MachinePage() {
 
         try {
    
-        //  router.push("/result");             //Save drawing data first
+         router.push("/result");             //Save drawing data first
             const { data: drawing, error: drawError } = await supabase
                 .from("drawings")
                 .insert([{ user_id: user.id, drawing_data: drawData }])
