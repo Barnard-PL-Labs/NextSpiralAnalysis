@@ -5,19 +5,19 @@ import Spiral3D from '../../components/TimeTrace';
 import { SpeedTimeChart, calculateSpeed } from "../../components/ST";
 import Header from '../../components/Header';
 import styles from '../../styles/Result.module.css';
-import { useLottie } from "lottie-react";
-import animationData from '../../../public/Icons/loading.json'
+// import { useLottie } from "lottie-react";
+// import animationData from '../../../public/Icons/loading.json'
 
 export default function ResultPage() {
     const [drawData, setDrawData] = useState([]);
     const [result, setResult] = useState([]);
     const [speedData, setSpeedData] = useState([]); 
 
-    const options = {
-        animationData,
-        loop: true
-      };
-    const {View} = useLottie(options)
+    // const options = {
+    //     animationData,
+    //     loop: true
+    //   };
+    // const {View} = useLottie(options)
 
     useEffect(() => {
         if (typeof window !== "undefined") { 
@@ -76,7 +76,7 @@ export default function ResultPage() {
   <div className={styles.graphCard}>
     <h3>Tremor Polar Plot</h3>
     <div className={styles.chartContainer}>
-      <>{View}</>
+      {/* <>{View}</> */}
     </div>
   </div>
 
