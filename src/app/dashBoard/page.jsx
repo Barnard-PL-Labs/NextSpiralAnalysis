@@ -58,7 +58,12 @@ const Dashboard = () => {
         ) : entries.length === 0 ? (
           <p>No entries found.</p>
         ) : (
-          <p>Your number of entries: {entries.length}</p>
+<ul>
+  {entries.map((entry) => (
+    <li key={entry.id}>Entry #{entry.id} - created at {new Date(entry.created_at).toLocaleString()}</li>
+  ))}
+</ul>
+
         )}
       </div>
     </div>
