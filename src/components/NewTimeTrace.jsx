@@ -1,3 +1,5 @@
+'use client';
+
 import Plot from 'react-plotly.js';
 
 const SpiralPlot = ({ data }) => {

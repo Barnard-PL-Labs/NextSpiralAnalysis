@@ -1,3 +1,4 @@
+'use client';
 import Plot from 'react-plotly.js';
 import {ScatterChart,Scatter,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer} from 'recharts';
 const processData = (data) => {
