@@ -5,6 +5,9 @@ import Spiral3D from '../../components/TimeTrace';
 import { SpeedTimeChart, calculateSpeed } from "../../components/ST";
 import Header from '../../components/Header';
 import styles from '../../styles/Result.module.css';
+import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
+import {Line3DPlot, processData} from '../../components/Angle';
+import SpiralPlot from "../../components/NewTimeTrace";
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
 
@@ -12,7 +15,8 @@ export default function ResultPage() {
     const [drawData, setDrawData] = useState([]);
     const [result, setResult] = useState([]);
     const [speedData, setSpeedData] = useState([]); 
-
+    const [angleData, setAngleData] = useState([]);
+    const [pData, setPData] = useState([]);
     // const options = {
     //     animationData,
     //     loop: true
@@ -35,7 +39,10 @@ export default function ResultPage() {
     useEffect(() => {
         if (drawData.length > 1) {
             setSpeedData(calculateSpeed(drawData));
+            setAngleData(processData(drawData));
+            setPData(CanIAvoidBugByThis(drawData));
         }
+        console.log(drawData)
     }, [drawData]);
 
     return (
@@ -62,28 +69,28 @@ export default function ResultPage() {
   <div className={styles.graphCard}>
     <h3>3D Spiral View</h3>
     <div className={styles.chartContainer}>
-      <Spiral3D drawData={drawData} />
+      <SpiralPlot data={drawData} />
     </div>
   </div>
 
   <div className={styles.graphCard}>
     <h3>Pressure vs Time</h3>
     <div className={styles.chartContainer}>
-      <p>Coming soon...</p>
+      <PTChart data={drawData} />
     </div>
   </div>
 
   <div className={styles.graphCard}>
     <h3>Tremor Polar Plot</h3>
     <div className={styles.chartContainer}>
-      {/* <>{View}</> */}
+      <p>coming soon</p>
     </div>
   </div>
 
   <div className={styles.graphCard}>
     <h3>Speed vs Angle</h3>
     <div className={styles.chartContainer}>
-      <p>Coming soon...</p>
+      <Line3DPlot data={angleData} />
     </div>
   </div>
 </div>

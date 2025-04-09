@@ -57,7 +57,7 @@ export default function Canvas({ setDrawData }) {
             setStartTime(timeNow);
         }
 
-        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":pressure || 5000.0, "t": 0 };
+        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":(pressure) < 1000?  5000.0: pressure, "t": 0 };
         setLocalDrawData([newPoint]);
     };
 
@@ -74,7 +74,7 @@ export default function Canvas({ setDrawData }) {
             n: localDrawData.length + 1,
             x: offsetX,
             y: offsetY,
-            p: pressure || 5000.0,
+            p: (pressure) < 1000?  5000.0: pressure,
             t: relativeTime
         };
 

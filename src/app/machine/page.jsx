@@ -44,10 +44,10 @@ export default function MachinePage() {
     };
 
     const saveToDatabase = async (apiResult) => {
-        if (!user) {
-            alert("Please log in before saving data.");
-            return;
-        }
+        // if (!user) {
+        //     alert("Please log in before saving data.");
+        //     return;
+        // }
 
         try {
    

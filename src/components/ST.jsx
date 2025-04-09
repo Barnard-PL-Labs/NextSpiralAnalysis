@@ -3,7 +3,7 @@ import React from "react";
 import {LineChart,Line,XAxis,YAxis,CartesianGrid,Tooltip,Legend,ResponsiveContainer,} from "recharts";
 
 const calculateSpeed = (data) => {
-    let speedData = []; // ✅ Properly declare speedData
+    let speedData = []; 
     if (!data || data.length < 2) return [];
     
     for (let i = 1; i < data.length; i++) {

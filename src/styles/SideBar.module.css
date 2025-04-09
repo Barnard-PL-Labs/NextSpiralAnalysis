@@ -16,7 +16,7 @@
   
   /* Sidebar */
   .sidebar {
-    width: 250px;
+    width: 190px;
     background: linear-gradient(to bottom, black, #2c3e50);
     color: #ecf0f1;
     height: calc(100vh - 92px); /* Adjust based on your header's height */
@@ -26,6 +26,7 @@
     overflow-y: auto;
     padding-top: 20px;
     transition: width 0.3s ease;
+    position: fixed;
   }
   
   .sidebar.collapsed {
