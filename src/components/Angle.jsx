@@ -1,5 +1,6 @@
-'use client';
-import Plot from 'react-plotly.js';
+import dynamic from 'next/dynamic';
+
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 import {ScatterChart,Scatter,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer} from 'recharts';
 const processData = (data) => {
     const processedData = [];
