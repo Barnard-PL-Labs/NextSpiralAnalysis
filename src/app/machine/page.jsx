@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider"; 
 import { supabase } from "@/lib/supabaseClient"; 
 
+
 export default function MachinePage() {
     const [drawData, setDrawData] = useState([]);
     const [apiResult, setApiResult] = useState(null);
@@ -17,7 +18,7 @@ export default function MachinePage() {
     const sendDataToBackend = async () => {
         const processBody = JSON.stringify(drawData);
         console.log('procesd', processBody);
-    
+        
     
         try {
             const response = await fetch("/api/analyze", {
@@ -26,16 +27,17 @@ export default function MachinePage() {
                 body: processBody,
             });
             if (!response.ok){
-                console.log('fyucked up')
+                console.log('couldnot get fetched')
                 return;
             }else{
-                console.log('ook');
+                console.log('hihi');
             }
             
             const data = await response.json();
             console.log("API Result:", data.result);
-            // router.push("/result"); 
+            
             setApiResult(data.result); 
+            router.push("/result");
             // After receiving API result, send user_id & save in Supabase
             await saveToDatabase(data.result);
         } catch (error) {
@@ -44,14 +46,8 @@ export default function MachinePage() {
     };
 
     const saveToDatabase = async (apiResult) => {
-        // if (!user) {
-        //     alert("Please log in before saving data.");
-        //     return;
-        // }
-
-        try {
-   
-         router.push("/result");             //Save drawing data first
+        try {            
+        //Save drawing data 
             const { data: drawing, error: drawError } = await supabase
                 .from("drawings")
                 .insert([{ user_id: user.id, drawing_data: drawData }])
@@ -90,66 +86,4 @@ export default function MachinePage() {
     );
 }
 
-// "use client"; 
-// import { useState } from "react";
-// import Canvas from "@/components/Canvas";
-// import Button from "@/components/Button";
-// import styles from "@/styles/Canvas.module.css"; 
-// import Header from '@/components/Header';
-// import { useRouter } from "next/navigation";
-// import { useAuth } from "@/lib/authProvider"; 
 
-// export default function MachinePage() {
-//     const [drawData, setDrawData] = useState([]);
-//     const { user } = useAuth(); // Get logged-in user
-//     const router = useRouter();
-
-//     const sendDataToBackend = async () => {
-//         if (!user) {
-//             alert("Please log in before analyzing.");
-//             return;
-//         }
-
-//         const requestBody = JSON.stringify({
-//             user_id: user.id, //  Send user ID
-//             drawData
-//         });
-
-//         console.log("Processing:", requestBody);
-
-//         try {
-//             const response = await fetch("/api/analyze", {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: requestBody,
-//             });
-
-//             if (!response.ok) {
-//                 console.log("Request failed");
-//                 return;
-//             }
-
-//             const data = await response.json();
-//             console.log("Response from API:", data);
-
-//             localStorage.setItem("drawData", JSON.stringify(drawData));
-//             localStorage.setItem("resultFromApi", JSON.stringify(data.result));
-
-//             router.push("/result"); 
-//         } catch (error) {
-//             console.error("Error sending data:", error);
-//         }
-//     };
-
-//     return (
-//         <>        
-//             <Header />
-//             <div className={styles.machineContainer}>
-//                 <h1 className={styles.title}>Spiral Drawing Tool</h1>
-//                 <Canvas setDrawData={setDrawData} />
-//                 <p id={styles.counter}>Total points drawn: {drawData.length}</p>
-//                 <Button sendData={sendDataToBackend} />
-//             </div>
-//         </>
-//     );
-// }

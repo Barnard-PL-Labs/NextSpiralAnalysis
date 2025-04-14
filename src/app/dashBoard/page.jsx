@@ -1,184 +1,4 @@
 'use client';
-
-// import { useEffect, useState } from 'react';
-// import { supabase } from "@/lib/supabaseClient"; 
-// import Sidebar from "../../components/SideBar";
-// import styles from "../../styles/Dashboard.module.css"; // create this file
-
-// const Dashboard = () => {
-//   const [entries, setEntries] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [username, setUsername] = useState("");
-
-//   useEffect(() => {
-//     const fetchUserEntries = async () => {
-//       const {
-//         data: { session },
-//         error: sessionError,
-//       } = await supabase.auth.getSession();
-
-//       if (sessionError) {
-//         console.error('Error fetching session:', sessionError.message);
-//         setLoading(false);
-//         return;
-//       }
-
-//       const user = session?.user;
-
-//       if (!user) {
-//         console.error('No user found');
-//         setLoading(false);
-//         return;
-//       }
-//       setUsername(user.email.split('@')[0]);
-//       const { data, error } = await supabase
-//         .from('api_results')
-//         .select('*')
-//         .eq('user_id', user.id);
-
-//       if (error) {
-//         console.error('Error fetching entries:', error.message);
-//       } else {
-//         setEntries(data);
-//       }
-//       setLoading(false);
-//     };
-
-//     fetchUserEntries();
-//   }, []);
-
-//   return (
-//     <div className={styles.pageContainer}>
-//       <Sidebar />
-//       <div className={styles.content}>
-//       <h1>Welcome back{username ? `, ${username}` : ''}!</h1>
-
-//         {loading ? (
-//           <p>Loading...</p>
-//         ) : entries.length === 0 ? (
-//           <p>No entries found.</p>
-//         ) : ( 
-
-
-// <ul>
-//   {entries.map((entry) => (
-//     <li key={entry.id}>Entry #{entry.id} - created at {new Date(entry.created_at).toLocaleString()}</li>
-//   ))}
-// </ul>
-//         )}
-        
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
-
-// import { useEffect, useState } from 'react';
-// import { supabase } from "@/lib/supabaseClient"; 
-// import Sidebar from "../../components/SideBar";
-// import styles from "../../styles/Dashboard.module.css";
-// import XYChart from "../../components/Scatter";
-// import { ascending } from 'd3';
-
-// const Dashboard = () => {
-//   const [entries, setEntries] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [username, setUsername] = useState("");
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const entriesPerPage = 5;
-
-//   useEffect(() => {
-//     const fetchUserEntries = async () => {
-//       setLoading(true);
-//       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-//       if (sessionError) {
-//         console.error('Error fetching session:', sessionError.message);
-//         setLoading(false);
-//         return;
-//       }
-
-//       const user = session?.user;
-//       if (!user) {
-//         console.error('No user found');
-//         setLoading(false);
-//         return;
-//       }
-
-//       setUsername(user.email.split('@')[0]);
-
-//       const { data, error } = await supabase
-//         .from('api_results')
-//         .select('*')
-//         .eq('user_id', user.id)
-//         .order('created_at', { ascending: false });
-//       const {drawData,error2} = await supabase
-//       .from('drawings')
-//       .select('*')
-//       .order('created_at', {ascending:false});
-           
-//       if (error) {
-//         console.error('Error fetching entries:', error.message);
-//       } else {
-//         setEntries(data);
-//       }
-//       setLoading(false);
-//     };
-
-//     fetchUserEntries();
-//   }, []);
-//   return (
-//     <div className={styles.pageContainer}>
-//       <Sidebar />
-//       <div className={styles.content}>
-//         <h1>Welcome back{username ? `, ${username}` : ''}!</h1>
-
-//         {loading ? (
-//           <p>Loading...</p>
-//         ) : entries.length > 0 ? (
-//           <>
-//             {/* Latest Entry */}
-//             <div className={styles.latestResultBox}>
-//               <h2>Latest Result</h2>
-//               <p><strong>DOS Score:</strong> {entries[0].result_data?.DOS || 'N/A'}</p>
-//               <p><strong>Analyzed on:</strong> {new Date(entries[0].created_at).toLocaleString()}</p>
-//             </div>
-//                         {/* Past Results with Pagination */}
-//                         <h2>Past Results</h2>
-//                         <ul className={styles.entriesList}>
-//   {entries
-//     .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
-//     .map((entry, index) => (
-//       <li key={entry.id}>
-//         {index + 1 + (currentPage - 1) * entriesPerPage}. - DOS Score: {entry.result_data?.DOS || 'N/A'} - Analyzed on {new Date(entry.created_at).toLocaleString()}
-//       </li>
-//     ))}
-// </ul>
-
-//             {/* Pagination Controls */}
-            // <div className={styles.pagination}>
-            //   {Array.from({ length: Math.ceil((entries.length - 1) / entriesPerPage) }, (_, index) => (
-            //     <button
-            //       key={index + 1}
-            //       onClick={() => setCurrentPage(index + 1)}
-            //       className={currentPage === index + 1 ? styles.activePage : ''}
-            //     >
-            //       {index + 1}
-            //     </button>
-            //   ))}
-            // </div>
-//           </>
-//         ) : (
-//           <p>No entries found.</p>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Sidebar from '../../components/SideBar';
@@ -294,7 +114,6 @@ const Dashboard = () => {
 
             </div>
 
-            {/* Past Results */}
             <h2>Past Results</h2>
             <ul className={styles.entriesList}>
   {paginatedEntries.map((entry, index) => (
@@ -313,7 +132,7 @@ const Dashboard = () => {
       {activeIndex === index && (
         <div className={styles.accordionContent}>
           <div className={styles.entryDetails}>
-            {/* Entry details here */}
+          {/*Here can potentially enter some details of each entry*/ }
           </div>
           <div className={styles.scatterPlot}>
             {entry.drawings?.drawing_data.length > 0 ? (
@@ -331,18 +150,17 @@ const Dashboard = () => {
 </ul>
 
 
-            {/* Pagination Controls */}
-            <div className={styles.pagination}>
-              {Array.from({ length: pageCount }, (_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={currentPage === i + 1 ? styles.activePage : ''}
-                >
-                  {i + 1}
-                </button>
+      <div className={styles.pagination}>
+        {Array.from({ length: pageCount }, (_, i) => (
+          <button
+          key={i + 1}
+          onClick={() => setCurrentPage(i + 1)}
+          className={currentPage === i + 1 ? styles.activePage : ''}
+          >
+          {i + 1}
+          </button>
               ))}
-            </div>
+      </div>
           </>
         ) : (
           <p>No entries found.</p>

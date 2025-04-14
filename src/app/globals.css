@@ -75,7 +75,7 @@ header a{
   font-weight: bold;
   transition: color 0.3s ease-in-out;
   cursor: pointer;
-  text-decoration: none; /* Ensures no underlines */
+  text-decoration: none; 
 }
 
 .navItems span:hover {
@@ -118,31 +118,7 @@ header a{
   box-shadow: 0 0 20px rgba(0, 174, 239, 0.8);
   transform: translateY(-3px);
 }
-/* below is not used anymore as i change the way i wanna show the login page */
-/* .loginContainer{
-  position:relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding:25px;
-  color:white;
-  width:100%;
-  height: 100vh;
-  z-index: -1;
-  background: black;
-}
-.loginBox{
-  width:600px;
-  height:600px;
-  padding: 25px;
-  padding-bottom:50px;
-  box-shadow: 1px 1px 1px rgb(0, 238, 255), -1px -1px 1px white;
-  border-radius: 12px;
-  display: flex;
-  background: white;
-  color:black;
-}
-*/
+
 input{
   display: flex;
   flex-direction: column;
@@ -338,22 +314,3 @@ input{
   color: rgb(249, 208, 208);
   background-color: transparent;
 }
-
-
-
-/* Overlay background
-.fixed.inset-0.bg-black.bg-opacity-50 {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0,0,0,0.5);
-}
-
-/* Modal positioning */
-/* .fixed.inset-0.overflow-y-auto {
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-} */

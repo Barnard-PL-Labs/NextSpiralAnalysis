@@ -12,7 +12,7 @@ export default function NotFoundPage() {
         color: '#fff'
       }}>
         <h1 style={{ fontSize: '5rem' }}>404</h1>
-        <p style={{ fontSize: '1.5rem' }}>Oops! Page not found.</p>
+        <p style={{ fontSize: '1.5rem' }}>Page not found. Or Coming soon</p>
         <a href="/" style={{ marginTop: '1rem', color: '#0070f3' }}>← Go back home</a>
       </div>
     );

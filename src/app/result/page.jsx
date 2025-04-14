@@ -8,6 +8,8 @@ import styles from '../../styles/Result.module.css';
 import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
 import {Line3DPlot, processData} from '../../components/Angle';
 import SpiralPlot from "../../components/NewTimeTrace";
+
+//Below is my attempt to add loading animation
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
 
@@ -28,7 +30,7 @@ export default function ResultPage() {
             const storedDrawData = localStorage.getItem("drawData");
             const storedResult = localStorage.getItem("resultFromApi");
 
-            if (storedDrawData && storedResult) {
+          if (storedDrawData && storedResult) {
                 const parsedDrawData = JSON.parse(storedDrawData);
                 setDrawData(parsedDrawData);
                 setResult(JSON.parse(storedResult));
@@ -49,8 +51,10 @@ export default function ResultPage() {
         <>
         <Header showVideo={false}/>
         <div style={{backgroundColor:'black',color:'black',paddingTop:'80px'}}>
+          <div className={styles.title}>
             <h2 style={{color:'white'}}>Analysis Result</h2>
             <p style={{color:'white'}}>Your DOS result is: {result.DOS}</p>
+            </div>
             <div className={styles.chartGrid}>
   <div className={styles.graphCard}>
     <h3>Spiral XY Plot</h3>
@@ -94,8 +98,6 @@ export default function ResultPage() {
     </div>
   </div>
 </div>
-
-
         </div>
         </>
     );

@@ -31,7 +31,7 @@
   width: 180px;
   text-align: center;
   transition: transform 0.2s;
-  background: rgba(0, 0, 0, 0.5); /* translucent dark glass */
+  background: rgba(0, 0, 0, 0.5); 
   backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -60,7 +60,7 @@
 
 .director {
   background-color: #f9f9f9;
-  background: rgba(0, 0, 0, 0.5); /* translucent dark glass */
+  background: rgba(0, 0, 0, 0.5); 
   backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -83,45 +83,37 @@
   background-color: transparent;
 }
 
-
-
-.teamMember:nth-child(even) {
-  flex-direction: row-reverse;
-}
-
-
 .imageContainer {
     position: relative;
 }
 
 .badge {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    width: 32px;
-    height: 32px;
-    background: radial-gradient(circle at center, #00bfff, #0050aa);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    transform: rotate(-10deg);
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle at center, #00bfff, #0050aa);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  transform: rotate(-10deg);
   }
 
   
 
-  .bolt {
-    width: 16px;
-    height: 16px;
-    fill: gold;
-    transition: transform 0.3s ease;
-  }
+.bolt {
+  height: 16px;
+  fill: gold;
+  transition: transform 0.3s ease;
+  width: 16px;
+}
   
-  .badge:hover .bolt {
-    transform: scale(1.2);
-
+.badge:hover .bolt {
+  transform: scale(1.2);
   }
 
   

@@ -10,10 +10,6 @@ const CanIAvoidBugByThis = (data) =>{
         pdata.push({p:data[i].p, t:data[i].t})
     }
     return pdata;
-//     const plotData = data.map((d) => ({
-//   t: (d.t - startTime) / 1000,
-//   p: d.p,
-// }));
 };
 
 

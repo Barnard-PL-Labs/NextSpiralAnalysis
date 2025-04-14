@@ -34,7 +34,7 @@ export default function Header({showVideo = true}) {
                 <ul className="navItems">
                     <li><Link href="/"><span>Home</span></Link></li>
                     <li><Link href="/machine"><span>Spiral Analysis</span></Link></li>
-                    <li><Link href="/"><span>Learn More</span></Link></li>
+                    <li><Link href="/moreInfo"><span>Learn More</span></Link></li>
                     <li><Link href="/info"><span>About Us</span></Link></li>
                     {user ? (
                         <>

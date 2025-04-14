@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
-import {ScatterChart,Scatter,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer} from 'recharts';
 const processData = (data) => {
     const processedData = [];
   
@@ -27,33 +26,6 @@ const processData = (data) => {
 
     return processedData;
   };
-
-//   const SpeedAngleScatterPlot = ({ data }) => (
-//     <div style={{ width: '100%', height: '100%' }}>
-//       <ResponsiveContainer width="100%" height="100%">
-//         <ScatterChart
-//           margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-//         >
-//           <CartesianGrid />
-//           <XAxis
-//             type="number"
-//             dataKey="angle"
-//             name="Angle"
-//             unit="°"
-//             domain={[0, 360]}
-//           />
-//           <YAxis
-//             type="number"
-//             dataKey="speed"
-//             name="Speed"
-//             unit="units/s"
-//           />
-//           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-//           <Scatter name="Speed vs. Angle" data={data} fill="#8884d8" />
-//         </ScatterChart>
-//       </ResponsiveContainer>
-//     </div>
-//   );
 
 
 

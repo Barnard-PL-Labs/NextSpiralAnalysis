@@ -3,6 +3,7 @@ import styles from '../styles/Info.module.css'
 const TeamMember = ({ name, position, bio, uni, imageUrl, isDirector }) => (
   <div className={`${styles.teamMember} ${isDirector ? styles.director : ''}`}>
     <div className={styles.imageContainer}><Image src={imageUrl} alt={name} width={150} height={150} className={styles.teamMemberImage} />
+    {/*Below is to add the lighting bolt to the two directors, but will remove and replace with only text for the about us page*/}
     {isDirector && <div className={styles.badge}><svg
       className={styles.bolt}
       viewBox="0 0 24 24"

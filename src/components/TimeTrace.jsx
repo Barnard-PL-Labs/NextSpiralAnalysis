@@ -1,3 +1,6 @@
+{/* Ignore this page as it is being replace with NewTimeTrace.jsx that is more aesthetical*/}
+
+
 // "use client";
 // import React, { useEffect, useRef } from "react";
 // import * as d3 from "d3";

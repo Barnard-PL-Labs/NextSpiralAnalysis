@@ -1,5 +1,5 @@
 "use client";
-
+//Eventhough this page is called button in general but it is only used for the machine page
 import styles from "@/styles/Canvas.module.css"; 
 
 export default function Buttons({sendData}) {

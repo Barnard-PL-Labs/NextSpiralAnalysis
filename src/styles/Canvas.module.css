@@ -13,21 +13,6 @@
     border-radius: 15px;
 
 }
-/* .videoContainer {
-    position: fixed; 
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1; 
-    overflow: hidden;
-}
-
-#vid {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-} */
 
 .machineContainer {
     text-align: center;
@@ -51,8 +36,6 @@
     cursor: crosshair;
 }
 
-
-/* ✅ Change button to a local class */
 .buttonContainer {
     display: flex;
     justify-content: center;
@@ -62,9 +45,11 @@
 
 .button {
     padding: 10px 20px;
-    background-color: blue;
-    color: white;
-    border: none;
+    background-color: rgb(6, 159, 242);
+    border: 2px solid rgba(0, 174, 239, 0.5);
+    color: rgb(255, 255, 255);
+
+    border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease-in-out;
@@ -74,7 +59,22 @@
     background-color: darkblue;
 }
 
+.button:active {
+    background-color: #1e3a8a;
+    transform: scale(0.98); 
+  }
+  
+  .button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5); 
+  }
 
 #counter{
     color: #FFFFFF;
+    margin-top: 10px;
+    font-weight: 500;
 }
+
+  
+
+

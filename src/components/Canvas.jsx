@@ -20,13 +20,13 @@ export default function Canvas({ setDrawData }) {
         if (!ctx) return;
         ctxRef.current = ctx;
 
-        
-        const img = new Image();
-        img.src = "/Icons/spiraPic.png";
-        img.onload = () => {
-            setBackgroundImage(img);
-            drawBackgroundImage(ctx, img);
-        };
+        //Below is the background spiral for the machine page
+        // const img = new Image();
+        // img.src = "/Icons/spiraPic.png";
+        // img.onload = () => {
+        //     setBackgroundImage(img);
+        //     drawBackgroundImage(ctx, img);
+        // };
 
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
@@ -58,6 +58,7 @@ export default function Canvas({ setDrawData }) {
         }
 
         const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":(pressure) < 1000?  5000.0: pressure, "t": 0 };
+         {/* I set if p is lower then 1000 then key in 5000 instead*/}
         setLocalDrawData([newPoint]);
     };
 

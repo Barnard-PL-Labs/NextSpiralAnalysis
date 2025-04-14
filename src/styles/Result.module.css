@@ -1,35 +1,37 @@
 .chartGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 16px;
-    padding: 16px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+  padding: 16px 24px;
   }
   
-  .graphCard {
-    background-color: white;
-    padding: 8px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    height: 360px; /* You can tweak this as needed */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+.graphCard {
+  background-color: white;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   }
   
-  .graphCard h3 {
-    font-size: 16px;
-    text-align: center;
-    margin: 4px 0 8px 0;
-    color: #333;
-  }
+.graphCard h3 {
+  text-align: center;
+  margin: 4px 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
   
-  .chartContainer {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
+.chartContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex: 1;
+}
 
 
-  
+.title{
+text-align: center;
+}
