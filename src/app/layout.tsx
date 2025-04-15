@@ -1,3 +1,4 @@
+//Most of this page is in its default condition except the last few lines 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

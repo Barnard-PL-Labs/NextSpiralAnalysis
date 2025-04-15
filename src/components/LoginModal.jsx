@@ -40,7 +40,9 @@ export default function LoginModal({ isOpen, closeModal }) {
     }
   };
 
-  return (
+  return (  
+    //This is a pop out Login modal instead of a Login page
+    
     <Transition appear show={isOpen === true} as={Fragment}>
       <Dialog as="div"  onClose={closeModal} style={{position:'fixed', inset:'0',
     zIndex: 9999,
@@ -89,10 +91,11 @@ export default function LoginModal({ isOpen, closeModal }) {
                   </button>
                 </div>
                 
+                {/* Picture on the right of the login modal */}
                 <div className="vertical-divider"></div>
 
                 <div className="modal-form-right">
-                <Image src="/Icons/trueSpiralLogin.png" width={260} height={210} alt="SpiralPic"/>                    </div>
+                <Image src="/Icons/trueSpiralLogin!.png" width={260} height={210} alt="SpiralPic"/>                    </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

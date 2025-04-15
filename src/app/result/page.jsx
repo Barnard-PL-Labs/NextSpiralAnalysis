@@ -9,7 +9,7 @@ import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
 import {Line3DPlot, processData} from '../../components/Angle';
 import SpiralPlot from "../../components/NewTimeTrace";
 
-//Below is my attempt to add loading animation
+//The comment out part below is my attempt to add loading animation
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
 
@@ -25,6 +25,7 @@ export default function ResultPage() {
     //   };
     // const {View} = useLottie(options)
 
+    //To get the data i stored from the machine page
     useEffect(() => {
         if (typeof window !== "undefined") { 
             const storedDrawData = localStorage.getItem("drawData");
@@ -48,6 +49,7 @@ export default function ResultPage() {
     }, [drawData]);
 
     return (
+      
         <>
         <Header showVideo={false}/>
         <div style={{backgroundColor:'black',color:'black',paddingTop:'80px'}}>

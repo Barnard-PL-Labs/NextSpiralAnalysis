@@ -12,8 +12,9 @@ const Dashboard = () => {
   const [username, setUsername] = useState('');
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const entriesPerPage = 5;
+  const entriesPerPage = 5; // An variable that indicates the number of entries per page
 
+  //Get the user data
   useEffect(() => {
     const fetchUserEntries = async () => {
       setLoading(true);
@@ -83,7 +84,7 @@ const Dashboard = () => {
   const handleAccordionClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
-
+  //Setting up for the page number in case user have a lot of past entries
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.ceil((entries.length - 1) / entriesPerPage);
 

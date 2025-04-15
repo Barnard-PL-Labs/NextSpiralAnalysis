@@ -1,6 +1,4 @@
-export const config = {
-    runtime: "nodejs",
-};
+
 
 import { NextResponse } from "next/server";
 
@@ -8,8 +6,7 @@ import { NextResponse } from "next/server";
       try {
           const body = await req.json();
           console.log("Received drawData:", JSON.stringify(body));
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 1000000);
+
   
           
           const externalResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral", {
@@ -17,9 +14,7 @@ import { NextResponse } from "next/server";
               headers: { "Content-Type": "application/json" },
               credentials: "same-origin",
               body: JSON.stringify(body),
-              signal: controller.signal,
           });
-          clearTimeout(timeout);
           const responseText = await externalResponse.text();
           console.log("External API Response(Route page):", responseText);
 

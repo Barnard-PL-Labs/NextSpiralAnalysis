@@ -19,6 +19,7 @@ export default function Header({showVideo = true}) {
 
     return (
         <div>
+            {/*background video*/}
             {showVideo && (<div className="video">
                 <video src="/Icons/indexBackgroundVid.mp4.mp4" id="vid" autoPlay loop muted></video>
             </div>)}
