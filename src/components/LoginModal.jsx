@@ -95,7 +95,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                 <div className="vertical-divider"></div>
 
                 <div className="modal-form-right">
-                <Image src="/Icons/trueSpiralLogin!.png" width={260} height={210} alt="SpiralPic"/>                    </div>
+                <Image src="/Icons/trueSpiralLogin.png" width={260} height={210} alt="SpiralPic"/>                    </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

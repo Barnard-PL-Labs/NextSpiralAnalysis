@@ -50,7 +50,7 @@ export default function ResultPage() {
 
     return (
       
-        <>
+        <div className={styles.pageWrapper}>
         <Header showVideo={false}/>
         <div style={{backgroundColor:'black',color:'black',paddingTop:'80px'}}>
           <div className={styles.title}>
@@ -101,6 +101,6 @@ export default function ResultPage() {
   </div>
 </div>
         </div>
-        </>
+        </div>
     );
 }

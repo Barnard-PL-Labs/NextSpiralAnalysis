@@ -11,7 +11,7 @@ export default function Canvas({ setDrawData }) {
     const [backgroundImage, setBackgroundImage] = useState(null);
     const [lastRecordedTime, setLastRecordedTime] = useState(0);
 
-    const RECORD_INTERVAL = 10; 
+    const RECORD_INTERVAL = 1; 
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -31,25 +31,60 @@ export default function Canvas({ setDrawData }) {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
         ctx.lineCap = "round";
+        drawCenterCross(ctx);
     }, []);
 
-
-    const drawBackgroundImage = (ctx, img) => {
-        if (!ctx || !img) return;
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.globalAlpha = 0.1; // 
-        ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.globalAlpha = 1;
+    
+    const drawCenterCross = (ctx) => {
+        if (!ctx) return;
+        const { width, height } = ctx.canvas;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const crossSize = 10;
+    
+        ctx.save();
+        ctx.beginPath(); // ✅ important to reset the path before drawing cross
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 1.5;
+    
+        // Horizontal line
+        ctx.moveTo(centerX - crossSize, centerY);
+        ctx.lineTo(centerX + crossSize, centerY);
+    
+        // Vertical line
+        ctx.moveTo(centerX, centerY - crossSize);
+        ctx.lineTo(centerX, centerY + crossSize);
+    
+        ctx.stroke();
+        ctx.restore();
     };
+    
+    
+    // const drawBackgroundImage = (ctx, img) => {
+    //     if (!ctx || !img) return;
+    //     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    //     ctx.globalAlpha = 0.1; // 
+    //     ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    //     ctx.globalAlpha = 1;
+    // };
 
     useEffect(() => {
         if (setDrawData && localDrawData.length > 0) {
             setDrawData(localDrawData);
         }
     }, [localDrawData, setDrawData]);
-
+    useEffect(() => {
+        if (canvasRef.current) {
+          canvasRef.current.style.touchAction = "none";
+        }
+      }, []);
+      
     const startDrawing = (event) => {
         setIsDrawing(true);
+        const ctx = ctxRef.current;
+        if (!ctx) return;
+    
+        ctx.beginPath();
         const { offsetX, offsetY, pressure } = event.nativeEvent;
         const timeNow = Date.now();
 

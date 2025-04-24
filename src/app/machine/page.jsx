@@ -7,44 +7,49 @@ import Header from '@/components/Header';
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider"; 
 import { supabase } from "@/lib/supabaseClient"; 
-
+import Loading from '@/components/Loading';
 
 export default function MachinePage() {
     const [drawData, setDrawData] = useState([]);
     const [apiResult, setApiResult] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const { user } = useAuth(); 
     const router = useRouter();
-
-    const sendDataToBackend = async () => {
-        const processBody = JSON.stringify(drawData);
-        console.log('procesd', processBody);
-        
     
+    const sendDataToBackend = async () => {
+        setIsLoading(true); // Start loading
+        const processBody = JSON.stringify(drawData);
         try {
             const response = await fetch("/api/analyze", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: processBody,
             });
-            if (!response.ok){
-                console.log('couldnot get fetched')
+    
+            if (!response.ok) {
+                console.log("couldnot get fetched");
+                setIsLoading(false);
                 return;
-            }else{
-                console.log('hihi');
             }
-            
+    
             const data = await response.json();
             console.log("API Result:", data.result);
+            setApiResult(data.result);
             
-            setApiResult(data.result); 
+            //save if logged in
+            if (user && user.id) {
+                await saveToDatabase(data.result);
+            } else {
+                console.log("Skipping Supabase save: no user logged in");
+            }
             router.push("/result");
-            // After receiving API result, send user_id & save in Supabase
-            await saveToDatabase(data.result);
         } catch (error) {
             console.error("Error in processing:", error);
+        } finally {
+            setIsLoading(false); //  Stop loading regardless of outcome
         }
     };
-
+    
     const saveToDatabase = async (apiResult) => {
         try {            
         //Save drawing data 
@@ -73,12 +78,13 @@ export default function MachinePage() {
     };
 
     return (
-        <>        
+        <> 
+        {isLoading && <Loading />}       
             <Header showVideo={true}/>
             <div className={styles.machineContainer}>
                 <h1 className={styles.title}>Spiral Drawing Tool</h1>
                 <Canvas setDrawData={setDrawData} />
-                <p id={styles.counter}>Total points drawn: {drawData.length}</p>
+                {/* <p id={styles.counter}>Total points drawn: {drawData.length}</p> */}
                 <Button sendData={sendDataToBackend} />
 
             </div>
