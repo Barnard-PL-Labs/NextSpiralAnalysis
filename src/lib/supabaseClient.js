@@ -15,11 +15,11 @@ const mockSupabaseClient = {
     signIn: async () => ({ user: null, error: null }),
     signOut: async () => ({ error: null }),
     onAuthStateChange: () => ({ data: null, error: null }),
+    getUser: async () => ({ data: { user: null }, error: null }),
   },
 };
 
-// Use mock client in development, real client in production
-export const supabase = process.env.NODE_ENV === 'development' 
-  ? mockSupabaseClient 
+// Create the Supabase client
+export const supabase = !supabaseUrl || !supabaseAnonKey
+  ? mockSupabaseClient
   : createClient(supabaseUrl, supabaseAnonKey);
-

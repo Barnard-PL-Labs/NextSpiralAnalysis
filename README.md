@@ -4,7 +4,24 @@ Clone the repository
 
 ```
 git clone https://github.com/Alcasni/NextSpiralAnalysis.git
-cd spiral-analysis-tool
+cd NextSpiralAnalysis
+```
+
+Start a virtual environment
+
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+
+# On macOS/Linux:
+source venv/bin/activate
+
+# To deactivate the virtual environment when you're done
+deactivate
 ```
 
 Install dependencies with either:

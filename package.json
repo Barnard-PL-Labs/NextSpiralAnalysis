@@ -17,7 +17,7 @@
     "d3": "^7.9.0",
     "hamburger-react": "^2.5.2",
     "lottie-react": "^2.4.1",
-    "next": "15.1.7",
+    "next": "^15.3.1",
     "plotly.js": "^3.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
