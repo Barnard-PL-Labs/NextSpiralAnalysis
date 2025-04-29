@@ -1,4 +1,5 @@
 Installation
+
 Clone the repository
 git clone https://github.com/Alcasni/NextSpiralAnalysis.git
 cd spiral-analysis-tool
