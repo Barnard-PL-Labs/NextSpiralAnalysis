@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import Sidebar from '../../components/SideBar';
 import XYChart from '../../components/Scatter';
 import styles from '../../styles/Dashboard.module.css';
+import Link from 'next/link';
 
 const SUPERUSER_EMAIL = process.env.NEXT_PUBLIC_SUPERUSER_EMAIL;
 
@@ -36,6 +37,7 @@ const Dashboard = () => {
         .from('api_results')
         .select(`
           id,
+          drawing_id,
           created_at,
           result_data,
           user_id,
@@ -133,38 +135,42 @@ const Dashboard = () => {
             </div>
 
             <h2>Past Results</h2>
-            <ul className={styles.entriesList}>
-              {paginatedEntries.map((entry, index) => (
-                <li key={entry.id} className={styles.accordionItem}>
-                  <div
-                    className={styles.accordionHeader}
-                    onClick={() => handleAccordionClick(index)}
-                  >
-                    <span>
-                      {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} - {new Date(entry.created_at).toLocaleString()}
-                      {userEmail === SUPERUSER_EMAIL && entry.users?.email && (
-                      <> — <strong>User:</strong> {entry.users.email}</>
-                    )}
-                    </span>
-                    <span className={styles.arrow}>
-                      {activeIndex === index ? '▲' : '▼'}
-                    </span>
-                  </div>
-                  {activeIndex === index && (
-                    <div className={styles.accordionContent}>
-                      <div className={styles.scatterPlot}>
-                        {entry.drawings?.drawing_data.length > 0 ? (
-                          <XYChart data={entry.drawings.drawing_data} />
-                        ) : (
-                          <p>No drawing data available for this entry.</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-
+<ul className={styles.entriesList}>
+  {paginatedEntries.map((entry, index) => (
+    <li key={entry.id} className={styles.accordionItem}>
+      <div
+        className={styles.accordionHeader}
+        onClick={() => handleAccordionClick(index)}
+      >
+        <span>
+          {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} - {new Date(entry.created_at).toLocaleString()}
+          {userEmail === SUPERUSER_EMAIL && entry.users?.email && (
+            <> — <strong>User:</strong> {entry.users.email}</>
+          )}
+        </span>
+        <span className={styles.arrow}>
+          {activeIndex === index ? '▲' : '▼'}
+        </span>
+      </div>
+      {activeIndex === index && (
+        <div className={styles.accordionContent}>
+          <div className={styles.scatterPlot}>
+            {entry.drawings?.drawing_data.length > 0 ? (
+              <XYChart data={entry.drawings.drawing_data} />
+            ) : (
+              <p>No drawing data available for this entry.</p>
+            )}
+          </div>
+          <div className={styles.resultLink}>
+            <Link style={{textDecoration:'none'}} href={`/result/${entry.drawing_id}`}>
+              View Full Analysis
+            </Link>
+          </div>
+        </div>
+      )}
+    </li>
+  ))}
+</ul>
             <div className={styles.pagination}>
               {Array.from({ length: pageCount }, (_, i) => (
                 <button
