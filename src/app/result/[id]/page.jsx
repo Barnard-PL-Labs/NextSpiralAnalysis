@@ -12,7 +12,7 @@ import { Line3DPlot, processData } from '@/components/Angle';
 import SpiralPlot from '@/components/NewTimeTrace';
 import { supabase } from '@/lib/supabaseClient';
 import { useParams } from 'next/navigation';
-
+import LineGraph from '../../../components/LineGraph';
 export default function ResultPage() {
   const params = useParams();
   const id = params?.id;
@@ -75,7 +75,7 @@ export default function ResultPage() {
           <div className={styles.graphCard}>
             <h3>Spiral XY Plot</h3>
             <div className={styles.chartContainer}>
-              <XYChart data={drawData} />
+              <LineGraph data={drawData} />
             </div>
           </div>
 
