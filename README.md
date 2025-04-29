@@ -40,7 +40,12 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Run the development server
+Or, to run without a db, just leave these blank or omit .env.local
+
+Use the values for the `spiral-db-dev` supabase instance.
+Only the values from `spiral-db-prod` for the deployment.
+
+Then, to run the development server locally
 
 ```
 npm run dev
