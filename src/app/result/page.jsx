@@ -8,7 +8,7 @@ import styles from '../../styles/Result.module.css';
 import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
 import {Line3DPlot, processData} from '../../components/Angle';
 import SpiralPlot from "../../components/NewTimeTrace";
-
+import LineGraph from "../../components/LineGraph";
 //The comment out part below is my attempt to add loading animation
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
@@ -50,7 +50,7 @@ export default function ResultPage() {
 
     return (
       
-        <>
+        <div className={styles.pageWrapper}>
         <Header showVideo={false}/>
         <div style={{backgroundColor:'black',color:'black',paddingTop:'80px'}}>
           <div className={styles.title}>
@@ -61,7 +61,7 @@ export default function ResultPage() {
   <div className={styles.graphCard}>
     <h3>Spiral XY Plot</h3>
     <div className={styles.chartContainer}>
-      <XYChart data={drawData} />
+      <LineGraph data={drawData} />
     </div>
   </div>
 
@@ -101,6 +101,6 @@ export default function ResultPage() {
   </div>
 </div>
         </div>
-        </>
+        </div>
     );
 }

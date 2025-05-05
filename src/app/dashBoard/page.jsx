@@ -4,56 +4,62 @@ import { supabase } from '@/lib/supabaseClient';
 import Sidebar from '../../components/SideBar';
 import XYChart from '../../components/Scatter';
 import styles from '../../styles/Dashboard.module.css';
-import SpiralPlot from "../../components/NewTimeTrace";
+import Link from 'next/link';
+
+const SUPERUSER_EMAIL = process.env.NEXT_PUBLIC_SUPERUSER_EMAIL;
 
 const Dashboard = () => {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const entriesPerPage = 5; // An variable that indicates the number of entries per page
+  const [viewAll, setViewAll] = useState(false);
+  const entriesPerPage = 5;
 
-  //Get the user data
   useEffect(() => {
-    const fetchUserEntries = async () => {
+    const fetchEntries = async () => {
       setLoading(true);
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (sessionError) {
-        console.error('Error fetching session:', sessionError.message);
+      if (sessionError || !session?.user) {
+        console.error('Error fetching session or user not found');
         setLoading(false);
         return;
       }
 
-      const user = session?.user;
-      if (!user) {
-        console.error('No user found');
-        setLoading(false);
-        return;
-      }
-
+      const user = session.user;
       setUsername(user.email.split('@')[0]);
+      setUserEmail(user.email);
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('api_results')
         .select(`
           id,
+          drawing_id,
           created_at,
           result_data,
-          drawing_id,
+          user_id,
           drawings (
             id,
             drawing_data
+          ),
+          users (
+            email
           )
-        `)
-        .eq('user_id', user.id)
+        `)        
         .order('created_at', { ascending: false });
+
+      if (user.email !== SUPERUSER_EMAIL || !viewAll) {
+        query = query.eq('user_id', user.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching entries:', error.message);
       } else {
-        console.log('Fetched entries:', data);
         const parsedEntries = data.map(entry => {
           let drawingData = [];
           if (entry.drawings?.drawing_data) {
@@ -78,13 +84,13 @@ const Dashboard = () => {
       setLoading(false);
     };
 
-    fetchUserEntries();
-  }, []);
+    fetchEntries();
+  }, [viewAll]);
 
   const handleAccordionClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
-  //Setting up for the page number in case user have a lot of past entries
+
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.ceil((entries.length - 1) / entriesPerPage);
 
@@ -94,29 +100,42 @@ const Dashboard = () => {
       <div className={styles.content}>
         <h1 className={styles.welcome}>Welcome back{username ? `, ${username}` : ''}!</h1>
 
+        {/* Superuser view toggle */}
+        {userEmail === SUPERUSER_EMAIL && (
+          <div style={{ margin: '1rem 0' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={viewAll}
+                onChange={(e) => setViewAll(e.target.checked)}
+              />{' '}
+              View all user entries (superuser mode)
+            </label>
+          </div>
+        )}
+
         {loading ? (
           <p>Loading...</p>
         ) : entries.length > 0 ? (
           <>
-            {/* Latest Entry */}
+            {/* Latest entry */}
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
                 <h2>Latest Result</h2>
                 <p><strong>DOS Score:</strong> {entries[0].result_data?.DOS || 'N/A'}</p>
                 <p><strong>Analyzed on:</strong> {new Date(entries[0].created_at).toLocaleString()}</p>
                 <div className={styles.scatterPlot}>
-                {entries[0]?.drawings?.drawing_data.length > 0 ? (
-                  <XYChart data={entries[0].drawings.drawing_data} />
-                ) : (
-                  <p>No drawing data available for this entry.</p>
-                )}
+                  {entries[0]?.drawings?.drawing_data.length > 0 ? (
+                    <XYChart data={entries[0].drawings.drawing_data} />
+                  ) : (
+                    <p>No drawing data available for this entry.</p>
+                  )}
+                </div>
               </div>
-              </div>
-
             </div>
 
             <h2>Past Results</h2>
-            <ul className={styles.entriesList}>
+<ul className={styles.entriesList}>
   {paginatedEntries.map((entry, index) => (
     <li key={entry.id} className={styles.accordionItem}>
       <div
@@ -125,6 +144,9 @@ const Dashboard = () => {
       >
         <span>
           {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} - {new Date(entry.created_at).toLocaleString()}
+          {userEmail === SUPERUSER_EMAIL && entry.users?.email && (
+            <> — <strong>User:</strong> {entry.users.email}</>
+          )}
         </span>
         <span className={styles.arrow}>
           {activeIndex === index ? '▲' : '▼'}
@@ -132,36 +154,34 @@ const Dashboard = () => {
       </div>
       {activeIndex === index && (
         <div className={styles.accordionContent}>
-          <div className={styles.entryDetails}>
-          {/*Here can potentially enter some details of each entry*/ }
-          </div>
           <div className={styles.scatterPlot}>
             {entry.drawings?.drawing_data.length > 0 ? (
-
               <XYChart data={entry.drawings.drawing_data} />
-
             ) : (
               <p>No drawing data available for this entry.</p>
             )}
+          </div>
+          <div className={styles.resultLink}>
+            <Link style={{textDecoration:'none'}} href={`/result/${entry.drawing_id}`}>
+              View Full Analysis
+            </Link>
           </div>
         </div>
       )}
     </li>
   ))}
 </ul>
-
-
-      <div className={styles.pagination}>
-        {Array.from({ length: pageCount }, (_, i) => (
-          <button
-          key={i + 1}
-          onClick={() => setCurrentPage(i + 1)}
-          className={currentPage === i + 1 ? styles.activePage : ''}
-          >
-          {i + 1}
-          </button>
+            <div className={styles.pagination}>
+              {Array.from({ length: pageCount }, (_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={currentPage === i + 1 ? styles.activePage : ''}
+                >
+                  {i + 1}
+                </button>
               ))}
-      </div>
+            </div>
           </>
         ) : (
           <p>No entries found.</p>

@@ -1,0 +1,56 @@
+.loaderContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 30px;
+  }
+  
+  .orbitSpinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    animation: rotateOrbit 1.2s linear infinite;
+  }
+  
+  .orbitDot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background-color: #4b9ce2;
+  }
+  
+  @keyframes rotateOrbit {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loadingText {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    font-family: "Segoe UI", sans-serif;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Add to Loading.module.css */
+.loaderContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  

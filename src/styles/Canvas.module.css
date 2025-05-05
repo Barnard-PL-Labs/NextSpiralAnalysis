@@ -34,6 +34,10 @@
     border: 2px solid black;
     background-color: white;
     cursor: crosshair;
+    touch-action: none;  /* Prevent iOS scroll/zoom on touch */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .buttonContainer {
