@@ -85,21 +85,53 @@ export default function Canvas({ setDrawData }) {
         if (!ctx) return;
     
         ctx.beginPath();
-        const { offsetX, offsetY, pressure } = event.nativeEvent;
+        
+        // Get coordinates relative to canvas
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Handle pressure for different input types
+        let pressure = 0.5; // Default pressure
+        if (event.pressure !== undefined) {
+            pressure = event.pressure;
+        } else if (event.touches && event.touches[0]) {
+            // For touch devices that support pressure
+            pressure = event.touches[0].force || 0.5;
+        }
+        
         const timeNow = Date.now();
-
         if (startTime === null) {
             setStartTime(timeNow);
         }
 
-        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":(pressure) < 1000?  5000.0: pressure, "t": 0 };
-         {/* I set if p is lower then 1000 then key in 5000 instead*/}
+        const newPoint = { 
+            "n": 1, 
+            "x": x, 
+            "y": y, 
+            "p": pressure * 10000, // Scale pressure to match expected range
+            "t": 0 
+        };
         setLocalDrawData([newPoint]);
     };
 
     const draw = (event) => {
         if (!isDrawing) return;
-        const { offsetX, offsetY, pressure } = event.nativeEvent;
+        
+        // Get coordinates relative to canvas
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Handle pressure for different input types
+        let pressure = 0.5; // Default pressure
+        if (event.pressure !== undefined) {
+            pressure = event.pressure;
+        } else if (event.touches && event.touches[0]) {
+            // For touch devices that support pressure
+            pressure = event.touches[0].force || 0.5;
+        }
+        
         const timeNow = Date.now();
         const relativeTime = startTime ? timeNow - startTime : 0;
 
@@ -108,9 +140,9 @@ export default function Canvas({ setDrawData }) {
 
         const newPoint = {
             n: localDrawData.length + 1,
-            x: offsetX,
-            y: offsetY,
-            p: (pressure) < 1000?  5000.0: pressure,
+            x: x,
+            y: y,
+            p: pressure * 10000, // Scale pressure to match expected range
             t: relativeTime
         };
 
@@ -118,7 +150,7 @@ export default function Canvas({ setDrawData }) {
 
         const ctx = ctxRef.current;
         if (!ctx) return;
-        ctx.lineTo(offsetX, offsetY);
+        ctx.lineTo(x, y);
         ctx.stroke();
     };
 

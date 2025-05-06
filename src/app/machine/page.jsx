@@ -17,7 +17,10 @@ export default function MachinePage() {
     const router = useRouter();
     
     const sendDataToBackend = async () => {
-        setIsLoading(true); // Start loading
+        setIsLoading(true);
+        console.log("Sending data to backend:", drawData);
+        console.log("Number of points:", drawData.length);
+        
         const processBody = JSON.stringify(drawData);
         try {
             const response = await fetch("/api/analyze", {
@@ -27,7 +30,9 @@ export default function MachinePage() {
             });
     
             if (!response.ok) {
-                console.log("couldnot get fetched");
+                const errorData = await response.json();
+                console.error("API Error:", errorData);
+                alert("Error analyzing drawing: " + (errorData.message || "Unknown error"));
                 setIsLoading(false);
                 return;
             }
@@ -36,17 +41,29 @@ export default function MachinePage() {
             console.log("API Result:", data.result);
             setApiResult(data.result);
             
+            // Store data in localStorage before navigation
+            try {
+                localStorage.setItem("drawData", JSON.stringify(drawData));
+                localStorage.setItem("resultFromApi", JSON.stringify(data.result));
+                console.log("Data stored in localStorage");
+            } catch (storageError) {
+                console.error("Error storing data:", storageError);
+            }
+            
             //save if logged in
             if (user && user.id) {
                 await saveToDatabase(data.result);
             } else {
                 console.log("Skipping Supabase save: no user logged in");
             }
+            
+            // Navigate after ensuring data is stored
             router.push("/result");
         } catch (error) {
             console.error("Error in processing:", error);
+            alert("Error processing drawing: " + error.message);
         } finally {
-            setIsLoading(false); //  Stop loading regardless of outcome
+            setIsLoading(false);
         }
     };
     
