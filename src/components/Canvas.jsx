@@ -10,10 +10,14 @@ export default function Canvas({ setDrawData }) {
     const [startTime, setStartTime] = useState(null);
     const [backgroundImage, setBackgroundImage] = useState(null);
     const [lastRecordedTime, setLastRecordedTime] = useState(0);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
     const RECORD_INTERVAL = 1; 
 
     useEffect(() => {
+        // Detect if the device is touch-enabled
+        setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+        
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
@@ -91,13 +95,11 @@ export default function Canvas({ setDrawData }) {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         
-        // Handle pressure for different input types
+        // Handle pressure based on device type
         let pressure = 0.5; // Default pressure
-        if (event.pressure !== undefined) {
-            pressure = event.pressure;
-        } else if (event.touches && event.touches[0]) {
-            // For touch devices that support pressure
-            pressure = event.touches[0].force || 0.5;
+        if (event.pointerType === 'pen' || (event.touches && event.touches[0])) {
+            // For iPad/tablet: use actual pressure from touch
+            pressure = event.pressure || (event.touches && event.touches[0].force) || 0.5;
         }
         
         const timeNow = Date.now();
@@ -109,7 +111,7 @@ export default function Canvas({ setDrawData }) {
             "n": 1, 
             "x": x, 
             "y": y, 
-            "p": pressure * 10000, // Scale pressure to match expected range
+            "p": pressure * 1000, // Scale pressure to a reasonable range
             "t": 0 
         };
         setLocalDrawData([newPoint]);
@@ -123,13 +125,11 @@ export default function Canvas({ setDrawData }) {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         
-        // Handle pressure for different input types
+        // Handle pressure based on device type
         let pressure = 0.5; // Default pressure
-        if (event.pressure !== undefined) {
-            pressure = event.pressure;
-        } else if (event.touches && event.touches[0]) {
-            // For touch devices that support pressure
-            pressure = event.touches[0].force || 0.5;
+        if (event.pointerType === 'pen' || (event.touches && event.touches[0])) {
+            // For iPad/tablet: use actual pressure from touch
+            pressure = event.pressure || (event.touches && event.touches[0].force) || 0.5;
         }
         
         const timeNow = Date.now();
@@ -142,7 +142,7 @@ export default function Canvas({ setDrawData }) {
             n: localDrawData.length + 1,
             x: x,
             y: y,
-            p: pressure * 10000, // Scale pressure to match expected range
+            p: pressure * 1000, // Scale pressure to a reasonable range
             t: relativeTime
         };
 
