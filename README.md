@@ -1,4 +1,4 @@
-Installation
+## Local Installation
 
 Clone the repository
 
@@ -28,6 +28,8 @@ Install dependencies with either:
 
 ```
 npm install
+
+# Or using yarn
 yarn install
 ```
 
@@ -40,7 +42,12 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Run the development server
+Or, to run without a db, just leave these blank or omit .env.local
+
+Use the values for the `spiral-db-dev` supabase instance.
+Only the values from `spiral-db-prod` for the deployment.
+
+Then, to run the development server locally
 
 ```
 npm run dev
@@ -51,3 +58,9 @@ The code for the page is under src > app > {xxx} > page.jsx
 The home page is page.jsx directly under app, meaningly src > app > page.jsx
 Components contains of separate items that can just be imported or can be used in multiple pages, such as Header
 Styles is the list of CSS for designed specifically in pages or components where it imports for styles from it, or otherwise it follow the styles in global.css under app
+
+## Deployment
+
+To deploy, we use Vercel. Go to vercel and click deploy...
+
+We use Supabase for the db. You need an account there too 
