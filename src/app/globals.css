@@ -4,13 +4,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
-/* body {
-  margin:0;
-  font-family: 'EB Garamond', serif;
-  background-color: #000000; 
-  background: linear-gradient(to bottom, black, #2c3e50);
-} */
-
 body {
   margin: 0;
   font-family: var(--font-eb-garamond), serif;
@@ -27,11 +20,11 @@ h1 {
 }
 
 #vid{
-  position:absolute;
+  position:fixed;
   right: 0;
   bottom: 0;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   object-fit: cover;
   z-index:-1 ;
 }
@@ -324,6 +317,10 @@ input{
   color: rgb(249, 208, 208);
   background-color: transparent;
 }
+
+
+
+
 
 
 

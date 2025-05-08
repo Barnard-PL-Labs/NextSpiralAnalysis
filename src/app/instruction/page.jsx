@@ -6,7 +6,7 @@ import {FaStarHalf, FaStar} from 'react-icons/fa';
 export default function DirectionsPage() {
     return (
         <>
-            <Header showVideo={false} />
+            <Header showVideo={true} />
 
             <div className={styles.mainContainer}>
                 <div className={styles.directionsContainer}>

@@ -44,27 +44,26 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 Database setup:
 
 Create 2 tables in Supabase named api_results and drawings.
-To create api_results table
-```
-CREATE TABLE api_results (
-    id UUID PRIMARY KEY,
-    user_id UUID REFERENCES users(id),
-    drawing_id UUID REFERENCES drawings(id),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    result_data JSONB
-);
-
-```
 To create drawings table
 ```
 CREATE TABLE drawings (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    user_id UUID REFERENCES users(id),
-    drawing_data JSONB
+    drawing_data JSONB NOT NULL
 );
-
 ```
+To create api_results table
+```
+CREATE TABLE api_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    drawing_id UUID REFERENCES drawings(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    result_data JSONB NOT NULL
+);
+```
+
 Also add in these following Row-Level Security (RLS) Policies:
 ```
 CREATE POLICY "Allow user to insert api_results"
@@ -81,7 +80,8 @@ USING (
     auth.uid() = user_id
 );
 ```
-```CREATE POLICY "Allow user to insert drawings"
+```
+CREATE POLICY "Allow user to insert drawings"
 ON public.drawings
 FOR INSERT
 WITH CHECK (
