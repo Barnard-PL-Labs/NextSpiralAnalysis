@@ -1,6 +1,7 @@
 /* Settings.module.css */
 
 .settingsContainer {
+    background: linear-gradient(to bottom, #0d1117, #141b25, #0d1117) !important;
     max-width: 500px;
     margin: 40px auto;
     padding: 30px;
@@ -92,16 +93,6 @@
     border-left-color: #28a745;
     background-color: #e6f4ea;
 }
-
-body {
-    background: linear-gradient(to bottom, #0d1117, #141b25, #0d1117) !important;
-}
-
-/* Main Background */
-body {
-    background: linear-gradient(to bottom, #0d1117, #141b25, #0d1117) !important;
-}
-
 
 .settingsContainer > * {
     width: 100%;
