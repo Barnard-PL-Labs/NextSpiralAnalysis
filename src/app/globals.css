@@ -112,6 +112,7 @@ header a{
   backdrop-filter: blur(10px);
   box-shadow: 0 0 10px rgba(0, 174, 239, 0.5);
   transition: all 0.3s ease-in-out;
+  margin: 0 10px;
 }
 .indexButton:hover {
   background: rgba(0, 174, 239, 0.5);
