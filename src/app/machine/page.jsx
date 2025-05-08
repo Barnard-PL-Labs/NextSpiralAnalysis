@@ -1,5 +1,5 @@
 "use client"; 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Canvas from "@/components/Canvas";
 import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css"; 
@@ -15,12 +15,16 @@ export default function MachinePage() {
     const [isLoading, setIsLoading] = useState(false);
     const { user } = useAuth(); 
     const router = useRouter();
-    
+
+    useEffect(() => {
+        router.prefetch("/result");
+    }, [router]);
+
     const sendDataToBackend = async () => {
         setIsLoading(true);
         console.log("Sending data to backend:", drawData);
         console.log("Number of points:", drawData.length);
-        
+        router.push("/result");
         const processBody = JSON.stringify(drawData);
         try {
             const response = await fetch("/api/analyze", {
@@ -58,7 +62,7 @@ export default function MachinePage() {
             }
             
             // Navigate after ensuring data is stored
-            router.push("/result");
+
         } catch (error) {
             console.error("Error in processing:", error);
             alert("Error processing drawing: " + error.message);

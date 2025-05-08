@@ -9,6 +9,7 @@ import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
 import {Line3DPlot, processData} from '../../components/Angle';
 import SpiralPlot from "../../components/NewTimeTrace";
 import LineGraph from "../../components/LineGraph";
+import TremorPolarPlot from "../../components/Tremor";
 //The comment out part below is my attempt to add loading animation
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
@@ -104,7 +105,7 @@ export default function ResultPage() {
   <div className={styles.graphCard}>
     <h3>Tremor Polar Plot</h3>
     <div className={styles.chartContainer}>
-      <p>coming soon</p>
+      <TremorPolarPlot result={result} />
     </div>
   </div>
 

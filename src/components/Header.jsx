@@ -66,7 +66,7 @@ export default function Header({ showVideo = true }) {
             </Link>
           </li>
           <li>
-            <Link href="/moreInfo">
+            <Link href="/instruction">
               <span>Learn More</span>
             </Link>
           </li>
