@@ -9,13 +9,14 @@ import {CanIAvoidBugByThis,PTChart} from '../../components/PressureTime'
 import {Line3DPlot, processData} from '../../components/Angle';
 import SpiralPlot from "../../components/NewTimeTrace";
 import LineGraph from "../../components/LineGraph";
+import TremorPolarPlot from "../../components/Tremor";
 //The comment out part below is my attempt to add loading animation
 // import { useLottie } from "lottie-react";
 // import animationData from '../../../public/Icons/loading.json'
 
 export default function ResultPage() {
     const [drawData, setDrawData] = useState([]);
-    const [result, setResult] = useState([]);
+    const [result, setResult] = useState({});
     const [speedData, setSpeedData] = useState([]); 
     const [angleData, setAngleData] = useState([]);
     const [pData, setPData] = useState([]);
@@ -30,23 +31,38 @@ export default function ResultPage() {
         if (typeof window !== "undefined") { 
             const storedDrawData = localStorage.getItem("drawData");
             const storedResult = localStorage.getItem("resultFromApi");
+            
+            console.log("Stored Draw Data:", storedDrawData);
+            console.log("Stored Result:", storedResult);
 
-          if (storedDrawData && storedResult) {
-                const parsedDrawData = JSON.parse(storedDrawData);
-                setDrawData(parsedDrawData);
-                setResult(JSON.parse(storedResult));
+            if (storedDrawData && storedResult) {
+                try {
+                    const parsedDrawData = JSON.parse(storedDrawData);
+                    const parsedResult = JSON.parse(storedResult);
+                    console.log("Parsed Draw Data:", parsedDrawData);
+                    console.log("Parsed Result:", parsedResult);
+                    
+                    setDrawData(parsedDrawData);
+                    setResult(parsedResult);
+                } catch (error) {
+                    console.error("Error parsing stored data:", error);
+                }
+            } else {
+                console.log("No stored data found");
             }
         }
     }, []);
 
     useEffect(() => {
+        console.log("Current result state:", result);
+        console.log("Current drawData state:", drawData);
+        
         if (drawData.length > 1) {
             setSpeedData(calculateSpeed(drawData));
             setAngleData(processData(drawData));
             setPData(CanIAvoidBugByThis(drawData));
         }
-        console.log(drawData)
-    }, [drawData]);
+    }, [drawData, result]);
 
     return (
       
@@ -55,7 +71,7 @@ export default function ResultPage() {
         <div style={{backgroundColor:'black',color:'black',paddingTop:'80px'}}>
           <div className={styles.title}>
             <h2 style={{color:'white'}}>Analysis Result</h2>
-            <p style={{color:'white'}}>Your DOS result is: {result.DOS}</p>
+            <p style={{color:'white'}}>Your DOS result is: {result?.DOS || 'Loading...'}</p>
             </div>
             <div className={styles.chartGrid}>
   <div className={styles.graphCard}>
@@ -89,7 +105,7 @@ export default function ResultPage() {
   <div className={styles.graphCard}>
     <h3>Tremor Polar Plot</h3>
     <div className={styles.chartContainer}>
-      <p>coming soon</p>
+      <TremorPolarPlot result={result} />
     </div>
   </div>
 

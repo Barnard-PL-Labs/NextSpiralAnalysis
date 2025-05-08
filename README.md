@@ -41,6 +41,76 @@ Add the following variables:
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
+Database setup:
+
+Create 2 tables in Supabase named api_results and drawings.
+To create drawings table
+```
+CREATE TABLE drawings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    drawing_data JSONB NOT NULL
+);
+```
+To create api_results table
+```
+CREATE TABLE api_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    drawing_id UUID REFERENCES drawings(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    result_data JSONB NOT NULL
+);
+```
+
+Also add in these following Row-Level Security (RLS) Policies:
+```
+CREATE POLICY "Allow user to insert api_results"
+ON public.api_results
+FOR INSERT
+WITH CHECK (
+    auth.uid() = user_id
+);
+
+CREATE POLICY "Users can view their own api_results"
+ON public.api_results
+FOR SELECT
+USING (
+    auth.uid() = user_id
+);
+```
+```
+CREATE POLICY "Allow user to insert drawings"
+ON public.drawings
+FOR INSERT
+WITH CHECK (
+    auth.uid() = user_id
+);
+
+CREATE POLICY "Users can view their own drawings"
+ON public.drawings
+FOR SELECT
+USING (
+    auth.uid() = user_id
+);
+```
+If you want to add in the SuperUser function, then:
+```
+CREATE POLICY "Superuser can read all api_results"
+ON public.api_results
+FOR SELECT
+USING (
+    auth.email() = 'xxx@xxx'::text
+);
+CREATE POLICY "Superuser can read all drawings"
+ON public.drawomgs
+FOR SELECT
+USING (
+    auth.email() = 'xxx@xxx'::text
+);
+```
+Replace the auth.email() with the one you want to put as SuperUser
 
 Or, to run without a db, just leave these blank or omit .env.local
 

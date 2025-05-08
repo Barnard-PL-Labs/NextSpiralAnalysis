@@ -102,7 +102,7 @@ const Dashboard = () => {
 
         {/* Superuser view toggle */}
         {userEmail === SUPERUSER_EMAIL && (
-          <div style={{ margin: '1rem 0' }}>
+          <div style={{ margin: '1rem 0',color:'white' }}>
             <label>
               <input
                 type="checkbox"
@@ -134,7 +134,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2>Past Results</h2>
+            <h2 style={{color:'white' }}>Past Results</h2>
 <ul className={styles.entriesList}>
   {paginatedEntries.map((entry, index) => (
     <li key={entry.id} className={styles.accordionItem}>

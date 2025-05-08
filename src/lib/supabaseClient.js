@@ -20,6 +20,8 @@ const mockSupabaseClient = {
 };
 
 // Create the Supabase client
-export const supabase = !supabaseUrl || !supabaseAnonKey
+const supabase = !supabaseUrl || !supabaseAnonKey
   ? mockSupabaseClient
   : createClient(supabaseUrl, supabaseAnonKey);
+
+export {supabase};

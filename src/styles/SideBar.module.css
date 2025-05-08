@@ -15,7 +15,9 @@
 .sidebar {
   width: 190px;
   background: linear-gradient(to bottom, black, #2c3e50);
-  color: #ecf0f1;
+  /* background: #000000; */
+  border: yellow;
+  color: #ffffff;
   height: calc(100vh - 92px); 
   position: relative;
   top: 92px; 
@@ -33,10 +35,12 @@
 .navItems {
   list-style-type: none;
   padding: 0;
+  
 }
   
 .navItems li {
   margin: 20px 0;
+
 }
   
 .navItems a {
@@ -50,6 +54,7 @@
   
 .navItems a:hover {
   background-color: #34495e;
+  
   }
   
 .icon {

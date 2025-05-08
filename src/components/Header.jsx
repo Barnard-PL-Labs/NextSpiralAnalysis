@@ -35,6 +35,7 @@ export default function Header({ showVideo = true }) {
             loop
             playsInline
             preload="auto"
+            loading='lazy'
             style={{ objectFit: "cover", width: "100%", height: "100%" }}
           ></video>
         </div>
@@ -66,7 +67,7 @@ export default function Header({ showVideo = true }) {
             </Link>
           </li>
           <li>
-            <Link href="/moreInfo">
+            <Link href="/instruction">
               <span>Learn More</span>
             </Link>
           </li>

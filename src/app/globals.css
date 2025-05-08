@@ -5,9 +5,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
 body {
-  margin:0;
-  font-family: 'EB Garamond', serif;
-  background-color: #B9D9EB; 
+  margin: 0;
+  font-family: var(--font-eb-garamond), serif;
+  background: linear-gradient(to bottom, #000000, #2c3e50);
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1 {
@@ -17,11 +20,11 @@ h1 {
 }
 
 #vid{
-  position:absolute;
+  position:fixed;
   right: 0;
   bottom: 0;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   object-fit: cover;
   z-index:-1 ;
 }
@@ -39,7 +42,7 @@ h1 {
   justify-content: space-between;
   align-items: center;
   backdrop-filter: blur(5px);
-  z-index: 10000;
+  z-index: 9998;
 }
 
 #logo{
@@ -315,6 +318,10 @@ input{
   color: rgb(249, 208, 208);
   background-color: transparent;
 }
+
+
+
+
 
 
 

@@ -10,10 +10,14 @@ export default function Canvas({ setDrawData }) {
     const [startTime, setStartTime] = useState(null);
     const [backgroundImage, setBackgroundImage] = useState(null);
     const [lastRecordedTime, setLastRecordedTime] = useState(0);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
     const RECORD_INTERVAL = 1; 
 
     useEffect(() => {
+        // Detect if the device is touch-enabled
+        setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+        
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
@@ -85,21 +89,49 @@ export default function Canvas({ setDrawData }) {
         if (!ctx) return;
     
         ctx.beginPath();
-        const { offsetX, offsetY, pressure } = event.nativeEvent;
+        
+        // Get coordinates relative to canvas
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Handle pressure based on device type
+        let pressure = 0.5; // Default pressure
+        if (event.pointerType === 'pen' || (event.touches && event.touches[0])) {
+            // For iPad/tablet: use actual pressure from touch
+            pressure = event.pressure || (event.touches && event.touches[0].force) || 0.5;
+        }
+        
         const timeNow = Date.now();
-
         if (startTime === null) {
             setStartTime(timeNow);
         }
 
-        const newPoint = { "n": 1, "x": offsetX, "y": offsetY, "p":(pressure) < 1000?  5000.0: pressure, "t": 0 };
-         {/* I set if p is lower then 1000 then key in 5000 instead*/}
+        const newPoint = { 
+            "n": 1, 
+            "x": x, 
+            "y": y, 
+            "p": pressure * 1000, // Scale pressure to a reasonable range
+            "t": 0 
+        };
         setLocalDrawData([newPoint]);
     };
 
     const draw = (event) => {
         if (!isDrawing) return;
-        const { offsetX, offsetY, pressure } = event.nativeEvent;
+        
+        // Get coordinates relative to canvas
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Handle pressure based on device type
+        let pressure = 0.5; // Default pressure
+        if (event.pointerType === 'pen' || (event.touches && event.touches[0])) {
+            // For iPad/tablet: use actual pressure from touch
+            pressure = event.pressure || (event.touches && event.touches[0].force) || 0.5;
+        }
+        
         const timeNow = Date.now();
         const relativeTime = startTime ? timeNow - startTime : 0;
 
@@ -108,9 +140,9 @@ export default function Canvas({ setDrawData }) {
 
         const newPoint = {
             n: localDrawData.length + 1,
-            x: offsetX,
-            y: offsetY,
-            p: (pressure) < 1000?  5000.0: pressure,
+            x: x,
+            y: y,
+            p: pressure * 1000, // Scale pressure to a reasonable range
             t: relativeTime
         };
 
@@ -118,7 +150,7 @@ export default function Canvas({ setDrawData }) {
 
         const ctx = ctxRef.current;
         if (!ctx) return;
-        ctx.lineTo(offsetX, offsetY);
+        ctx.lineTo(x, y);
         ctx.stroke();
     };
 
