@@ -108,12 +108,13 @@ export default function Canvas({ setDrawData }) {
         }
 
         const newPoint = { 
-            "n": 1, 
-            "x": x, 
-            "y": y, 
-            "p": pressure * 1000, // Scale pressure to a reasonable range
-            "t": 0 
+            n: 1, 
+            x: Number(x.toFixed(4)), 
+            y: Number(y.toFixed(4)), 
+            p: Number((pressure * 1000).toFixed(4)), 
+            t: 0 
         };
+        
         setLocalDrawData([newPoint]);
     };
 
@@ -140,11 +141,12 @@ export default function Canvas({ setDrawData }) {
 
         const newPoint = {
             n: localDrawData.length + 1,
-            x: x,
-            y: y,
-            p: pressure * 1000, // Scale pressure to a reasonable range
+            x: Number(x.toFixed(4)),
+            y: Number(y.toFixed(4)),
+            p: Number((pressure * 1000).toFixed(4)),
             t: relativeTime
         };
+        
 
         setLocalDrawData((prevData) => [...prevData, newPoint]);
 

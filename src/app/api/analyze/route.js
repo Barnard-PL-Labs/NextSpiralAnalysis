@@ -3,14 +3,15 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log("Received drawData:", JSON.stringify(body));
-        console.log("Number of points:", body.length);
+        console.log('User: ',body.user);
+        console.log("Received drawData:", JSON.stringify(body.drawData));
+        console.log("Number of points:", body.drawData.length);
 
         const externalResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "same-origin",
-            body: JSON.stringify(body),
+            body: JSON.stringify(body.drawData),
         });
         
         console.log("External API Status:", externalResponse.status);

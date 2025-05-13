@@ -34,22 +34,20 @@ const Dashboard = () => {
       setUserEmail(user.email);
 
       let query = supabase
-        .from('api_results')
-        .select(`
+      .from('api_results')
+      .select(`
+        id,
+        drawing_id,
+        created_at,
+        result_data,
+        user_id,
+        drawings (
           id,
-          drawing_id,
-          created_at,
-          result_data,
-          user_id,
-          drawings (
-            id,
-            drawing_data
-          ),
-          users (
-            email
-          )
-        `)        
-        .order('created_at', { ascending: false });
+          drawing_data
+        )
+      `)
+      .order('created_at', { ascending: false });
+    
 
       if (user.email !== SUPERUSER_EMAIL || !viewAll) {
         query = query.eq('user_id', user.id);
@@ -144,9 +142,10 @@ const Dashboard = () => {
       >
         <span>
           {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} - {new Date(entry.created_at).toLocaleString()}
-          {userEmail === SUPERUSER_EMAIL && entry.users?.email && (
-            <> — <strong>User:</strong> {entry.users.email}</>
-          )}
+          {userEmail === SUPERUSER_EMAIL && (
+  <> — <strong>User:</strong> {entry.user_id}</>
+)}
+
         </span>
         <span className={styles.arrow}>
           {activeIndex === index ? '▲' : '▼'}
@@ -184,7 +183,7 @@ const Dashboard = () => {
             </div>
           </>
         ) : (
-          <p>No entries found.</p>
+          <p className={styles.noEntry}>No entries found.</p>
         )}
       </div>
     </div>
