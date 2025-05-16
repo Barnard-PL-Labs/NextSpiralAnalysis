@@ -36,6 +36,7 @@ export default function LoginModal({ isOpen, closeModal }) {
       router.push("/machine");
     }
   };
+  console.log("NEXT_PUBLIC_SITE_URL =", process.env.NEXT_PUBLIC_SITE_URL);
 
   const handleForgotPassword = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

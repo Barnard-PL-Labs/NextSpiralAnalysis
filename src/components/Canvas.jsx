@@ -115,7 +115,7 @@ export default function Canvas({ setDrawData }) {
             n: 1,
             x: Number(x.toFixed(4)),
             y: Number(y.toFixed(4)),
-            p: Number((pressure * 1000).toFixed(4)),
+            p: Number((pressure * 1000).toFixed()),
             t: 0
         };
 
@@ -147,7 +147,7 @@ export default function Canvas({ setDrawData }) {
             n: pointBufferRef.current.length + 1, // !!! use buffer for length
             x: Number(x.toFixed(4)),
             y: Number(y.toFixed(4)),
-            p: Number((pressure * 1000).toFixed(4)),
+            p: Number((pressure * 1000).toFixed()),
             t: relativeTime
         };
 
