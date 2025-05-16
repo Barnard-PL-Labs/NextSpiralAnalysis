@@ -127,7 +127,15 @@ create policy "Users can access their own avatars"
     and auth.uid()::text = split_part(name, '/', 1)  -- ensures folder is user ID
   );
 ```
-
+Mannually key in these would be:
+1.Going to Storage -> Policies 
+2.Click New Policy for avatars
+3.Select Full customization
+4.Policy Name: Allow user to modify their own profile
+  Allowed Operation: SELECT INSERT UPDATE
+  Target Roles:authenticated
+  Policy definition: ((bucket_id = 'avatars'::text) AND ((( SELECT auth.uid() AS uid))::text = split_part(name, '/'::text, 1)))
+5.Click Review and save policy
 
 If you want to add in the SuperUser function, then:
 ```
