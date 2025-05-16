@@ -8,6 +8,8 @@ body {
   margin: 0;
   font-family: var(--font-eb-garamond), serif;
   background: linear-gradient(to bottom, #000000, #2c3e50);
+  background-attachment: fixed;
+  min-height: 100vh;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

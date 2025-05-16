@@ -95,6 +95,40 @@ USING (
     auth.uid() = user_id
 );
 ```
+Also run the followings to add in the profiles:
+```create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text,
+  bio text,
+  avatar_path text,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+```
+```
+alter table profiles enable row level security;
+
+create policy "Users can read their own profile" on profiles
+for select using (auth.uid() = id);
+
+create policy "Users can insert their own profile" on profiles
+for insert with check (auth.uid() = id);
+
+create policy "Users can update their own profile" on profiles
+for update using (auth.uid() = id);
+```
+Then create a private bucket callled 'avatars' mannually and run folloing policy
+```
+-- Allow users to access only their own files
+create policy "Users can access their own avatars"
+  on storage.objects
+  for all
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = split_part(name, '/', 1)  -- ensures folder is user ID
+  );
+```
+
+
 If you want to add in the SuperUser function, then:
 ```
 CREATE POLICY "Superuser can read all api_results"

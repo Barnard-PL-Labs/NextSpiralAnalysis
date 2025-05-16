@@ -11,8 +11,26 @@
   margin-left: 250px;
 }
 
+.welcomeContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.avatarImage {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  background-color: white;
+}
+
 .welcome {
   color: white;
+  font-size: 1.75rem;
+  font-weight: 600;
 }
 
 .latestResultBox {
@@ -41,6 +59,27 @@
 
 .entriesList li:hover {
   background-color: #e2e8f0;
+}
+
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.accordionContent {
+  margin-top: 10px;
+}
+
+.arrow {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.resultLink {
+  margin-top: 10px;
+  font-weight: 500;
 }
 
 .pagination {
@@ -78,8 +117,8 @@
   display: block;
 }
 
-.noEntry{
-  color:white;
+.noEntry {
+  color: white;
   font-size: 2rem;
   font-weight: 500;
 }
