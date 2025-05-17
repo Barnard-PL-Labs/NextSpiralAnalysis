@@ -22,6 +22,11 @@ const mockSupabaseClient = {
 // Create the Supabase client
 const supabase = !supabaseUrl || !supabaseAnonKey
   ? mockSupabaseClient
-  : createClient(supabaseUrl, supabaseAnonKey);
-
+  : createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
 export {supabase};
+

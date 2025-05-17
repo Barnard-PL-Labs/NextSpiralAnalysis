@@ -5,26 +5,32 @@ import { supabase } from "./supabaseClient";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data } = await supabase.auth.getUser();
-            setUser(data?.user || null);
-        };
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error);
+      } else {
+        setUser(data?.session?.user || null);
+        console.log("Initial session:", data?.session);
+      }
+    };
 
-        fetchUser();
+    fetchSession();
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user || null);
-        });
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event, session);
+      setUser(session?.user || null);
+    });
 
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
-    return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
