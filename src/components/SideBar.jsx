@@ -47,14 +47,14 @@ const Sidebar = () => {
                 </span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/profile">
                 <span>
                   <FaUser className={styles.icon} />
                   {!isCollapsed && <span>Profile</span>}
                 </span>
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/setting">
                 <span>

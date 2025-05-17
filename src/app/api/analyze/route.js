@@ -4,9 +4,10 @@ export async function POST(req) {
     try {
         const body = await req.json();
         console.log('User: ',body.user);
+        console.log("Site URL:", process.env.NEXT_PUBLIC_SITE_URL);
         console.log("Received drawData:", JSON.stringify(body.drawData));
         console.log("Number of points:", body.drawData.length);
-
+        
         const externalResponse = await fetch("https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
