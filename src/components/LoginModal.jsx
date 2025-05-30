@@ -9,19 +9,40 @@ import { FaExclamationCircle } from "react-icons/fa";
 export default function LoginModal({ isOpen, closeModal }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [message, setMessage] = useState("");
   const [isForgot, setIsForgot] = useState(false);
+  const [signupMode, setSignupMode] = useState(false);
   const router = useRouter();
   const imageSource = "/Icons/generated-icon-removebg.png";
 
-  const handleSignUp = async () => {
+  const handleCreateAccount = async () => {
+    if (password != confirmPassword) {
+      setMessage("Passwords don't match!");
+      return;
+    }
     const { error } = await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else alert("Check your email to confirm your account!");
+    if (error) setMessage(error.message);
+    else setMessage("Check your email to confirm your account!");
+  };
+
+  const switchToSignup = () => {
+    setSignupMode(true);
+    setMessage("");
+  };
+
+  const switchToLogin = () => {
+    setSignupMode(false);
+    setMessage("");
+    setIsForgot(false);
   };
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) {
       if (error.message === "Invalid login credentials") {
         setMessage("Invalid email or password. Please try again.");
@@ -53,7 +74,11 @@ export default function LoginModal({ isOpen, closeModal }) {
 
   return (
     <Transition appear show={isOpen === true} as={Fragment}>
-      <Dialog as="div" onClose={closeModal} style={{ position: "fixed", inset: "0", zIndex: 9999 }}>
+      <Dialog
+        as="div"
+        onClose={closeModal}
+        style={{ position: "fixed", inset: "0", zIndex: 9999 }}
+      >
         <div className="modal-wrapper">
           <Transition.Child
             as={Fragment}
@@ -65,16 +90,32 @@ export default function LoginModal({ isOpen, closeModal }) {
             leaveTo="modal-leave-to"
           >
             <Dialog.Panel className="login-modal">
-              <button type="button" className="closeButton" onClick={closeModal}>
+              <button
+                type="button"
+                className="closeButton"
+                onClick={closeModal}
+              >
                 &times;
               </button>
 
               <div className="modal-header">
-                <Image src={imageSource} width={50} height={50} alt="Logo" priority />
+                <Image
+                  src={imageSource}
+                  width={50}
+                  height={50}
+                  alt="Logo"
+                  priority
+                />
                 <h2>Spiral Analysis</h2>
               </div>
 
-              <h2 className="modal-title">{isForgot ? "Reset Password" : "Login"}</h2>
+              <h2 className="modal-title">
+                {isForgot
+                  ? "Reset Password"
+                  : signupMode
+                  ? "Create Account"
+                  : "Login"}
+              </h2>
 
               <div className="modal-form-wrapper">
                 <div className="modal-form">
@@ -87,6 +128,15 @@ export default function LoginModal({ isOpen, closeModal }) {
                     </div>
                   )}
 
+                  {signupMode && !isForgot && (
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  )}
+
                   <input
                     type="email"
                     placeholder="Email"
@@ -97,38 +147,89 @@ export default function LoginModal({ isOpen, closeModal }) {
                   {!isForgot && (
                     <input
                       type="password"
-                      placeholder="Password"
+                      placeholder={signupMode ? "Create Password" : "Password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
                   )}
 
-                  <div style={{ textAlign: "right", marginBottom: "10px" }}>
-                    <button
-                      onClick={() => setIsForgot(!isForgot)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#00AEEF",
-                        cursor: "pointer",
-                        fontSize: "0.9em",
-                        padding: 0,
-                      }}
-                    >
-                      {isForgot ? "Back to Login" : "Forgot Password?"}
-                    </button>
-                  </div>
+                  {signupMode && !isForgot && (
+                    <input
+                      type="password"
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  )}
+                  {!signupMode && (
+                    <div style={{ textAlign: "right", marginBottom: "10px" }}>
+                      <button
+                        onClick={() => setIsForgot(!isForgot)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#00AEEF",
+                          cursor: "pointer",
+                          fontSize: "0.9em",
+                          padding: 0,
+                        }}
+                      >
+                        {isForgot ? "Back to Login" : "Forgot Password?"}
+                      </button>
+                    </div>
+                  )}
 
+                  {signupMode && !isForgot && (
+                    <>
+                      <div style={{ textAlign: "right", marginBottom: "10px" }}>
+                        <button
+                          onClick={switchToLogin}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#00AEEF",
+                            cursor: "pointer",
+                            fontSize: "0.9em",
+                            padding: 0,
+                          }}
+                        >
+                          Already have an account? Login
+                        </button>
+                      </div>
+                    </>
+                  )}
                   {isForgot ? (
-                    <button onClick={handleForgotPassword} className="btn-primary">
+                    <button
+                      onClick={handleForgotPassword}
+                      className="btn-primary"
+                    >
                       Send Reset Email
                     </button>
+                  ) : signupMode ? (
+                    // Signup mode buttons
+                    <>
+                      <button
+                        onClick={handleCreateAccount}
+                        className="btn-primary"
+                      >
+                        Create Account
+                      </button>
+                      <button onClick={switchToLogin} className="btn-secondary">
+                        Back to Login
+                      </button>
+                    </>
                   ) : (
+                    // Login buttons
                     <>
                       <button onClick={handleLogin} className="btn-primary">
                         Login
                       </button>
-                      <button onClick={handleSignUp} className="btn-secondary">
+                      <button
+                        onClick={() => {
+                          setSignupMode(true);
+                        }}
+                        className="btn-secondary"
+                      >
                         Sign Up
                       </button>
                     </>
@@ -138,7 +239,12 @@ export default function LoginModal({ isOpen, closeModal }) {
                 <div className="vertical-divider"></div>
 
                 <div className="modal-form-right">
-                  <Image src="/Icons/trueSpiralLogin.png" width={260} height={210} alt="SpiralPic" />
+                  <Image
+                    src="/Icons/trueSpiralLogin.png"
+                    width={260}
+                    height={210}
+                    alt="SpiralPic"
+                  />
                 </div>
               </div>
             </Dialog.Panel>
