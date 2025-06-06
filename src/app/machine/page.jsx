@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Canvas from "@/components/Canvas";
 import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css";
+import MiniSpiralHistory from "@/components/MiniSpiralHistory";
 import Header from "@/components/Header";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
@@ -71,8 +72,10 @@ export default function MachinePage() {
     // Update saved drawings state immediately
     const newDrawings = [...savedDrawings, drawingToSave];
 
-    // Loading state check
+
+    // Loading state check 
     const isLastDrawing = newDrawings.length === 5;
+
     if (isLastDrawing) {
       setIsProcessingFinal(true);
     }
@@ -106,7 +109,6 @@ export default function MachinePage() {
         // calculating and storing avg DOS if we have 5 drawings
         if (newResults.length === 5) {
           console.log("🎯 REACHED 5 DRAWINGS!");
-          setIsProcessingFinal(false);
           const averageDOS = calculateAverageDOS(newResults);
           console.log("Calculated average DOS:", averageDOS);
 
@@ -126,6 +128,7 @@ export default function MachinePage() {
             JSON.stringify(finalResults)
           );
           console.log("✅ Average calculation completed and saved!");
+          setIsAnalysisComplete(true);
         } else {
           localStorage.setItem(
             "analysisHistory",
@@ -254,6 +257,8 @@ export default function MachinePage() {
     if (canvasRef.current?.clearCanvas) {
       canvasRef.current.clearCanvas();
     }
+    setIsProcessingFinal(false);
+    setIsAnalysisComplete(false);
   };
 
   // Clears all drawings after results
@@ -285,51 +290,60 @@ export default function MachinePage() {
     console.log(`Analyzing ${savedDrawings.length} drawings...`);
     router.push("/result");
   };
+  console.log("🔍 RENDER DEBUG:");
+  console.log("- isProcessingFinal:", isProcessingFinal);
+  console.log("- isAnalysisComplete:", isAnalysisComplete);
+  console.log("- savedDrawings.length:", savedDrawings.length);
+  console.log("- savedResults.length:", savedResults.length);
 
   return (
     <>
       <Header showVideo={true} />
-      <div className={styles.machineContainer}>
-        <h1 className={styles.title}>Draw Here</h1>
 
-        {isProcessingFinal ? (
-          <div className={styles.loadingContainer}>
-            {!isAnalysisComplete? (
-            <h2> Preparing Your Final Results... </h2>
+        <div
+          className={styles.drawingContainer}
+          style={{ position: "relative" }}
+        >
+
+          {isProcessingFinal ? (
+            <div className={styles.loadingContainer}>
+              {!isAnalysisComplete ? (
+                <h2> Preparing Your Final Results... </h2>
+              ) : (
+                <>
+                  <h2> Analysis Complete!</h2>
+                  <button className={styles.button} onClick={sendDataToBackend}>
+                    View Your Results
+                  </button>
+                </>
+              )}
+            </div>
           ) : (
             <>
-              <h2> Analysis Complete!</h2>
-              <button
-                className={styles.button}
-                onClick={sendDataToBackend}
-              >
-                View Your Results
+              <div className={styles.machineContainer}>
+              <h1 className={styles.title}>Draw Here</h1>
+
+              <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
+              <MiniSpiralHistory savedDrawings={savedDrawings} />
+              <button onClick={clearAllDrawings} className={styles.clearButton}>
+                Clear All Drawings
               </button>
-            </>
-          )}
-          </div>
-        ) : (
-          <>
-            <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
-            <button onClick={clearAllDrawings} className={styles.clearButton}>
-              Clear All Drawings
-            </button>
+            </div>
           </>
         )}
 
-        {!isProcessingFinal && (
-          <Button
-            sendData={sendDataToBackend}
-            clearDrawing={clearCurrentDrawing}
-            savedDrawingsCount={savedDrawings.length}
-            savedResultsCount={savedResults.length}
-            isProcessingFinal={isProcessingFinal}
-            onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
-            isAnalyzing={isAnalyzing}
-          />
-        )}
-      </div>
+          {!isProcessingFinal && (
+            <Button
+              sendData={sendDataToBackend}
+              clearDrawing={clearCurrentDrawing}
+              savedDrawingsCount={savedDrawings.length}
+              savedResultsCount={savedResults.length}
+              isProcessingFinal={isProcessingFinal}
+              onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
+              isAnalyzing={isAnalyzing}
+            />
+          )}
+        </div>
     </>
   );
 }
-
