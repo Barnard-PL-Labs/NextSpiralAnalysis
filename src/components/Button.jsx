@@ -1,23 +1,42 @@
 "use client";
 //Eventhough this page is called button in general but it is only used for the machine page
-import styles from "@/styles/Canvas.module.css"; 
+import styles from "@/styles/Canvas.module.css";
 
-export default function Buttons({sendData}) {
-    const analyzeDrawing = async () => {
-        const response = await fetch("/api/analyze", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Analyze button clicked!" }),
-        });
+export default function Buttons({
+  sendData,
+  clearDrawing,
+  savedDrawingsCount = 0,
+  savedResultsCount = 0,
+  isProcessingFinal = false,
+  onSaveAndAnalyze,
+}) {
+  const handleClear = () => {
+    clearDrawing();
+    window.location.reload();
+  };
 
-        const data = await response.json();
-        alert(`Analysis Result: ${data.message}`);
-    };
+  return (
+    <div className={styles.buttonContainer}>
+      {!isProcessingFinal && (
+        <button className={styles.button} onClick={clearDrawing}>
+          Clear
+        </button>
+      )}
 
-    return (
-        <div className={styles.buttonContainer}>
-            <button className={styles.button} onClick={() => window.location.reload()}>Clear</button>
-            <button className={styles.button} onClick={sendData}>Analyze</button>
-        </div>
-    );
+      {isProcessingFinal ? (
+        <button className={styles.button} disabled>
+          Processing DOS Score...
+        </button>
+      ) : savedResultsCount < 5 && savedDrawingsCount < 5 ? (
+        <button className={styles.button} onClick={onSaveAndAnalyze}>
+          Save ({savedDrawingsCount + 1}/5)
+        </button>
+      ) : savedResultsCount >= 5 ? (
+        <button className={styles.button} onClick={sendData}>
+          View Results
+        </button>
+      ) : null}
+    </div>
+  );
 }
+

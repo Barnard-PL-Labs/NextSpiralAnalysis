@@ -11,7 +11,7 @@ export default function LineGraph({ data }) {
                 >
                     <CartesianGrid />
                     <XAxis type="number" dataKey="x" name="X Coordinate" />
-                    <YAxis type="number" dataKey="y" name="Y Coordinate" />
+                    <YAxis type="number" dataKey="y" name="Y Coordinate" reversed={true} />
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} />
                     <Line type="monotone" dataKey="y" stroke="#8884d8" dot={false} />
                 </LineChart>

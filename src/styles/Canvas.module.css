@@ -19,6 +19,24 @@
     margin-top: 100px;
 
 }
+.loadingContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    min-height: 300px;
+}
+.loadingContainer h2 {
+    margin-bottom: 1rem;
+    color: rgb(255, 255, 255);
+  }
+  
+  .loadingContainer .button {
+    margin-top: 1rem;
+    
+  }
 
 .title {
     font-family: 'Cinzel', serif;
@@ -28,6 +46,14 @@
 .canvasContainer {
     text-align: center;
     margin-top: 20px;
+    position: relative;
+}
+
+.canvasHelper {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-style: italic;
 }
 
 .spiralCanvas {
@@ -43,24 +69,25 @@
 .buttonContainer {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 85px;
+    margin-top: 15px;
 }
 
 .button {
-    padding: 10px 20px;
+    padding: 10px 45px;
     background-color: rgb(6, 159, 242);
-    border: 2px solid rgba(0, 174, 239, 0.5);
+    border: none;
     color: rgb(255, 255, 255);
-
-    border-radius: 10px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease-in-out;
 }
 
 .button:hover {
-    background-color: darkblue;
+    background-color: rgb(2, 66, 138);
 }
 
 .button:active {
@@ -79,6 +106,48 @@
     font-weight: 500;
 }
 
+.saveButton {
+    padding: 10px 35px;
+    background-color: rgb(6, 159, 242);
+    border: 2px solid rgba(0, 174, 239, 0.5);
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+    margin-bottom: 10px;
+}
+
+.clearButton {
+    padding: 5px 10px;
+    background-color: rgb(159, 37, 18);
+    border: none;
+    color: rgb(255, 255, 255);
+    font-family: var(--font-inter);
+    font-weight: 500;
+    border-radius: 0px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease-in-out;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.saveButton:hover {
+    background-color: rgb(2, 66, 138);
+}
+
+.clearButton:hover {
+    background-color: rgb(100, 0, 0);
+}
+
+.saveButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    border-color: #999999;
+}
+
   
+
 
 

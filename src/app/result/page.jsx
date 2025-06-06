@@ -2,14 +2,14 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
-import Header from '../../components/Header';
-import styles from '../../styles/Result.module.css';
+import Header from "../../components/Header";
+import styles from "../../styles/Result.module.css";
 import LineGraph from "../../components/LineGraph";
 import { SpeedTimeChart, calculateSpeed } from "../../components/ST";
 import SpiralPlot from "../../components/NewTimeTrace";
-import { CanIAvoidBugByThis, PTChart } from '../../components/PressureTime';
+import { CanIAvoidBugByThis, PTChart } from "../../components/PressureTime";
 import TremorPolarPlot from "../../components/Tremor";
-import { Line3DPlot, processData } from '../../components/Angle';
+import { Line3DPlot, processData } from "../../components/Angle";
 
 export default function ResultPage() {
   const [drawData, setDrawData] = useState([]);
@@ -19,6 +19,7 @@ export default function ResultPage() {
   const [pData, setPData] = useState([]);
   const [loadingResult, setLoadingResult] = useState(true);
   const [error, setError] = useState(null);
+  const [analysisHistory, setAnalysisHistory] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -27,51 +28,127 @@ export default function ResultPage() {
       return;
     }
 
-    const storedDrawData = localStorage.getItem("drawData");
-    if (!storedDrawData) {
-      setError("No drawing data found. Please draw something first.");
-      setLoadingResult(false);
-      return;
-    }
-
-    const parsedDrawData = JSON.parse(storedDrawData);
-    setDrawData(parsedDrawData);
-
-    setSpeedData(calculateSpeed(parsedDrawData));
-    setAngleData(processData(parsedDrawData));
-    setPData(CanIAvoidBugByThis(parsedDrawData));
-
-    const email = user?.email || "anonymous";
-    const username = email.split("@")[0];
-
-    const fetchAndSaveResult = async () => {
+    const loadAnalysisResults = async () => {
       setLoadingResult(true);
+
       try {
-        const response = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ drawData: parsedDrawData, user: { email, username } }),
-        });
+        // FIRST: Check for completed 5-drawing analysis
+        const storedAnalysis = localStorage.getItem("analysisHistory");
+        if (storedAnalysis) {
+          console.log("Loading completed 5-drawing analysis...");
+          const analysisData = JSON.parse(storedAnalysis);
+          setAnalysisHistory(analysisData);
 
-        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+          // Use the average DOS and the latest individual result for display
+          if (analysisData.average_DOS) {
+            console.log("Found average DOS:", analysisData.average_DOS);
 
-        const data = await response.json();
-        setResult(data.result);
-        localStorage.setItem("resultFromApi", JSON.stringify(data.result));
+            // Get the most recent individual result for tremor analysis
+            const latestResult =
+              analysisData.individual_results?.[
+                analysisData.individual_results.length - 1
+              ];
 
-        if (user?.id) {
-          await saveToDatabase(user.id, parsedDrawData, data.result);
+            setResult({
+              ...latestResult,
+              average_DOS: analysisData.average_DOS,
+              analysis_type: "5_drawing_average",
+            });
+          }
+
+          // Get the most recent drawing data for charts
+          const storedDrawings = localStorage.getItem("drawData");
+          if (storedDrawings) {
+            const drawings = JSON.parse(storedDrawings);
+            const latestDrawing = Array.isArray(drawings[0])
+              ? drawings[drawings.length - 1]
+              : drawings;
+            setDrawData(latestDrawing);
+            setSpeedData(calculateSpeed(latestDrawing));
+            setAngleData(processData(latestDrawing));
+            setPData(CanIAvoidBugByThis(latestDrawing));
+          }
+
+          setLoadingResult(false);
+          return;
         }
+
+        // Single drawing analysis
+        console.log(
+          "No 5-drawing analysis found, checking for single drawing..."
+        );
+        const storedDrawData = localStorage.getItem("drawData");
+        if (!storedDrawData) {
+          setError(
+            "No analysis results found. Please complete the spiral analysis first."
+          );
+          setLoadingResult(false);
+          return;
+        }
+
+        const parsedDrawData = JSON.parse(storedDrawData);
+        // Handle both single drawing and array of drawings
+        const singleDrawing = Array.isArray(parsedDrawData[0])
+          ? parsedDrawData[0]
+          : parsedDrawData;
+        setDrawData(singleDrawing);
+        setSpeedData(calculateSpeed(singleDrawing));
+        setAngleData(processData(singleDrawing));
+        setPData(CanIAvoidBugByThis(singleDrawing));
+
+        const storedResult = localStorage.getItem("resultFromApi");
+        if (storedResult) {
+          console.log("Using stored single-drawing result");
+          setResult(JSON.parse(storedResult));
+          setLoadingResult(false);
+          return;
+        }
+
+        // Last resort: Make API call for single drawing
+        console.log("Making API call for single drawing analysis...");
+        await performSingleDrawingAnalysis(singleDrawing);
       } catch (err) {
-        console.error(err);
-        setError("Failed to get analysis result. Please try again.");
-      } finally {
+        console.error("Error loading analysis results:", err);
+        setError("Failed to load analysis results. Please try again.");
         setLoadingResult(false);
       }
     };
 
-    fetchAndSaveResult();
+    loadAnalysisResults();
   }, [user]);
+
+  const performSingleDrawingAnalysis = async (drawingData) => {
+    try {
+      const email = user?.email || "anonymous";
+      const username = email.split("@")[0];
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          drawData: drawingData,
+          user: { email, username },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setResult(data.result);
+      localStorage.setItem("resultFromApi", JSON.stringify(data.result));
+
+      if (user?.id) {
+        await saveToDatabase(user.id, drawingData, data.result);
+      }
+    } catch (err) {
+      console.error("Single drawing analysis failed:", err);
+      setError("Failed to analyze drawing. Please try again.");
+    } finally {
+      setLoadingResult(false);
+    }
+  };
 
   const saveToDatabase = async (userId, drawData, apiResult) => {
     try {
@@ -83,9 +160,11 @@ export default function ResultPage() {
 
       if (drawError) throw drawError;
 
-      await supabase.from("api_results").insert([
-        { user_id: userId, drawing_id: drawing.id, result_data: apiResult },
-      ]);
+      await supabase
+        .from("api_results")
+        .insert([
+          { user_id: userId, drawing_id: drawing.id, result_data: apiResult },
+        ]);
 
       console.log("Data saved successfully in Supabase!");
     } catch (error) {
@@ -93,45 +172,119 @@ export default function ResultPage() {
     }
   };
 
+  const getDOSScore = () => {
+    if (!result) return "N/A";
+
+    // Prioritize average DOS for 5-drawing analysis
+    if (result.average_DOS) {
+      return result.average_DOS;
+    }
+
+    // Fallback to individual DOS score
+    if (result.DOS) {
+      return result.DOS;
+    }
+
+    return "N/A";
+  };
+
+  const getAnalysisType = () => {
+    if (analysisHistory && analysisHistory.individual_results) {
+      return `5-Drawing Analysis (${analysisHistory.individual_results.length}/5 completed)`;
+    }
+    return "Single Drawing Analysis";
+  };
+
   return (
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
-      <div style={{ backgroundColor: 'black', color: 'white', paddingTop: '80px' }}>
+      <div
+        style={{ backgroundColor: "black", color: "white", paddingTop: "80px" }}
+      >
         <div className={styles.title}>
           <h2>Analysis Result</h2>
-          <p>Your DOS result is: {loadingResult ? "Analyzing..." : (result?.DOS ?? "N/A")}</p>
+          {loadingResult ? (
+            <p>Analyzing...</p>
+          ) : (
+            <p>DOS Score: {getDOSScore() ?? "N/A"}</p>
+          )}
           {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
+
+        {analysisHistory && analysisHistory.individual_results && (
+          <div className={styles.title}>
+            <h3>Individual Drawing Scores:</h3>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {analysisHistory.individual_results.map(
+                (individualResult, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      padding: "5px 10px",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    #{index + 1}: {individualResult.DOS || "N/A"}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        )}
 
         <div className={styles.chartGrid}>
           <div className={styles.graphCard}>
             <h3>Spiral XY Plot</h3>
-            <div className={styles.chartContainer}><LineGraph data={drawData} /></div>
+            <div className={styles.chartContainer}>
+              <LineGraph data={drawData} />
+            </div>
           </div>
           <div className={styles.graphCard}>
             <h3>Speed vs. Time</h3>
-            <div className={styles.chartContainer}><SpeedTimeChart speedData={speedData} /></div>
+            <div className={styles.chartContainer}>
+              <SpeedTimeChart speedData={speedData} />
+            </div>
           </div>
           <div className={styles.graphCard}>
             <h3>3D Spiral View</h3>
-            <div className={styles.chartContainer}><SpiralPlot data={drawData} /></div>
+            <div className={styles.chartContainer}>
+              <SpiralPlot data={drawData} />
+            </div>
           </div>
           <div className={styles.graphCard}>
             <h3>Pressure vs Time</h3>
-            <div className={styles.chartContainer}><PTChart data={drawData} /></div>
+            <div className={styles.chartContainer}>
+              <PTChart data={drawData} />
+            </div>
           </div>
           <div className={styles.graphCard}>
             <h3>Tremor Polar Plot</h3>
             <div className={styles.chartContainer}>
-              {loadingResult ? <p>Loading tremor data...</p> : <TremorPolarPlot result={result} />}
+              {loadingResult ? (
+                <p>Loading tremor data...</p>
+              ) : (
+                <TremorPolarPlot result={result} />
+              )}
             </div>
           </div>
           <div className={styles.graphCard}>
             <h3>Speed vs Angle</h3>
-            <div className={styles.chartContainer}><Line3DPlot data={angleData} /></div>
+            <div className={styles.chartContainer}>
+              <Line3DPlot data={angleData} />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
