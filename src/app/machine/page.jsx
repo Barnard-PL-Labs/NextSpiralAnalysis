@@ -16,6 +16,8 @@ export default function MachinePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isProcessingFinal, setIsProcessingFinal] = useState(false);
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -72,8 +74,7 @@ export default function MachinePage() {
     // Update saved drawings state immediately
     const newDrawings = [...savedDrawings, drawingToSave];
 
-
-    // Loading state check 
+    // Loading state check
     const isLastDrawing = newDrawings.length === 5;
 
     if (isLastDrawing) {
@@ -99,6 +100,8 @@ export default function MachinePage() {
       // Added in fuctional state update instead of direct
       setSavedResults((prevResults) => {
         const newResults = [...prevResults, result];
+        setAnalysisProgress((newResults.length / 5) * 100);
+
         console.log(`Saved/analyzed drawing ${newDrawings.length}/5`);
 
         console.log("🔍 DEBUGGING STATE TIMING:");
@@ -148,7 +151,7 @@ export default function MachinePage() {
 
       // Skips the failed analysis
       console.log(
-        "SKipping failed analysis. Current successful analyses: ${savedResults.length}"
+        "Skipping failed analysis. Current successful analyses: ${savedResults.length}"
       );
       if (isLastDrawing) {
         console.log(
@@ -268,6 +271,7 @@ export default function MachinePage() {
     );
     if (confirmed) {
       console.log("Clearing all data for new start...");
+      setAnalysisProgress(0);
       setCurrentDrawing([]);
       setSavedDrawings([]);
       setSavedResults([]);
@@ -286,9 +290,11 @@ export default function MachinePage() {
   };
 
   // Save drawings and navigate immediately
-  const sendDataToBackend = () => {
+  const sendDataToBackend = async () => {
+    setIsLoadingResults(true);
     console.log(`Analyzing ${savedDrawings.length} drawings...`);
-    router.push("/result");
+    await router.push("/result");
+    setIsLoadingResults(false);
   };
   console.log("🔍 RENDER DEBUG:");
   console.log("- isProcessingFinal:", isProcessingFinal);
@@ -300,27 +306,40 @@ export default function MachinePage() {
     <>
       <Header showVideo={true} />
 
-        <div
-          className={styles.drawingContainer}
-          style={{ position: "relative" }}
-        >
-
-          {isProcessingFinal ? (
-            <div className={styles.loadingContainer}>
-              {!isAnalysisComplete ? (
-                <h2> Preparing Your Final Results... </h2>
-              ) : (
-                <>
-                  <h2> Analysis Complete!</h2>
-                  <button className={styles.button} onClick={sendDataToBackend}>
-                    View Your Results
-                  </button>
-                </>
-              )}
-            </div>
-          ) : (
-            <>
-              <div className={styles.machineContainer}>
+      <div className={styles.drawingContainer} style={{ position: "relative" }}>
+        {isProcessingFinal ? (
+          <div className={styles.loadingContainer}>
+            {!isAnalysisComplete ? (
+              <>
+                <h2> Preparing Your Final Results </h2>
+                <div className={styles.progressContainer}>
+                  <div className={styles.loadingBar}>
+                    <div
+                      className={styles.loadingBarFill}
+                      style={{ width: `${analysisProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2> Analysis Complete!</h2>
+                <Button
+                  sendData={sendDataToBackend}
+                  clearDrawing={clearCurrentDrawing}
+                  savedDrawingsCount={savedDrawings.length}
+                  savedResultsCount={savedResults.length}
+                  isProcessingFinal={isProcessingFinal}
+                  onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
+                  isAnalyzing={isAnalyzing}
+                  isLoadingResults={isLoadingResults}
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className={styles.machineContainer}>
               <h1 className={styles.title}>Draw Here</h1>
 
               <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
@@ -329,21 +348,21 @@ export default function MachinePage() {
                 Clear All Drawings
               </button>
             </div>
+            {!isProcessingFinal && (
+              <Button
+                sendData={sendDataToBackend}
+                clearDrawing={clearCurrentDrawing}
+                savedDrawingsCount={savedDrawings.length}
+                savedResultsCount={savedResults.length}
+                isProcessingFinal={isProcessingFinal}
+                onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
+                isAnalyzing={isAnalyzing}
+                isLoadingResults={isLoadingResults}
+              />
+            )}
           </>
         )}
-
-          {!isProcessingFinal && (
-            <Button
-              sendData={sendDataToBackend}
-              clearDrawing={clearCurrentDrawing}
-              savedDrawingsCount={savedDrawings.length}
-              savedResultsCount={savedResults.length}
-              isProcessingFinal={isProcessingFinal}
-              onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
-              isAnalyzing={isAnalyzing}
-            />
-          )}
-        </div>
+      </div>
     </>
   );
 }

@@ -11,36 +11,34 @@
   justify-content: center;
   flex-direction: column;
 }
-  
-  .orbitSpinner {
-    position: relative;
-    width: 60px;
-    height: 60px;
-    animation: rotateOrbit 1.2s linear infinite;
+.orbitSpinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  animation: rotateOrbit 1.2s linear infinite;
+}
+
+.orbitDot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background-color: #4b9ce2;
+}
+
+@keyframes rotateOrbit {
+  100% {
+    transform: rotate(360deg);
   }
-  
-  .orbitDot {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    margin: -4px 0 0 -4px;
-    border-radius: 50%;
-    background-color: #4b9ce2;
-  }
-  
-  @keyframes rotateOrbit {
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .loadingText {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #555;
-    font-family: "Segoe UI", sans-serif;
-    letter-spacing: 0.5px;
-  }
-  
+}
+
+.loadingText {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+  font-family: "Segoe UI", sans-serif;
+  letter-spacing: 0.5px;
+}

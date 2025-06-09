@@ -9,6 +9,7 @@ export default function Buttons({
   savedResultsCount = 0,
   isProcessingFinal = false,
   onSaveAndAnalyze,
+  isLoadingResults = false,
 }) {
   const handleClear = () => {
     clearDrawing();
@@ -17,25 +18,27 @@ export default function Buttons({
 
   return (
     <div className={styles.buttonContainer}>
-      {!isProcessingFinal && (
+      {!isProcessingFinal && savedResultsCount < 5 && (
         <button className={styles.button} onClick={clearDrawing}>
           Clear
         </button>
       )}
 
-      {isProcessingFinal ? (
-        <button className={styles.button} disabled>
-          Processing DOS Score...
-        </button>
-      ) : savedResultsCount < 5 && savedDrawingsCount < 5 ? (
+      {savedResultsCount < 5 && savedDrawingsCount < 5 ? (
         <button className={styles.button} onClick={onSaveAndAnalyze}>
           Save ({savedDrawingsCount + 1}/5)
         </button>
-      ) : savedResultsCount >= 5 ? (
-        <button className={styles.button} onClick={sendData}>
-          View Results
+      ) : (
+        <button 
+          className={styles.button} 
+          onClick={sendData}
+          data-loading={isLoadingResults}
+          disabled={isLoadingResults}
+        >
+          <span className={styles.buttonText}>View Results</span>
+          {isLoadingResults && <span className={styles.buttonSpinner} />}
         </button>
-      ) : null}
+      )}
     </div>
   );
 }
