@@ -1,5 +1,11 @@
 .drawingContainer {
-  background: linear-gradient(135deg, #4ce6ff 0%, #006699 100%);
+  background: linear-gradient(
+    -45deg,
+    #c4e4f8 5%,
+    #7b8bc4 20%,
+    #6b5b9d 40%,
+    #2e2b7a 80%
+  );
   min-height: 100vh;
   min-width: 100vw;
   position: fixed;

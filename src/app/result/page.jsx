@@ -224,9 +224,7 @@ export default function ResultPage() {
   return (
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
-      <div
-        style={{ backgroundColor: "black", color: "white", paddingTop: "80px" }}
-      >
+      <div className={styles.container}>
         <div className={styles.title}>
           <h2>Analysis Result</h2>
           {loadingResult ? (

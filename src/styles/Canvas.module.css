@@ -144,11 +144,11 @@
 
 .button {
   padding: 10px 45px;
-  background-color: rgb(6, 159, 242);
+  background-color: #6fadebfa;
   border: none;
   color: rgb(255, 255, 255);
-  font-family: var(--font-inter);
-  font-weight: 500;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
@@ -158,7 +158,7 @@
 }
 
 .button:hover {
-  background-color: rgb(2, 66, 138);
+  background-color: #2b74b8;
 }
 
 .button:active {
@@ -179,9 +179,11 @@
 
 .saveButton {
   padding: 10px 35px;
-  background-color: rgb(6, 159, 242);
+  background-color: #6fadebfa;
   border: 2px solid rgba(0, 174, 239, 0.5);
   color: rgb(255, 255, 255);
+  font-family: Arial, sans-serif;
+  font-weight: normal;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
@@ -194,8 +196,8 @@
   background-color: rgb(159, 37, 18);
   border: none;
   color: rgb(255, 255, 255);
-  font-family: var(--font-inter);
-  font-weight: 500;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
   border-radius: 0px;
   cursor: pointer;
   font-size: 14px;
@@ -205,7 +207,7 @@
 }
 
 .saveButton:hover {
-  background-color: rgb(2, 66, 138);
+  background-color: #0081B3;
 }
 
 .clearButton:hover {
