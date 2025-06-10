@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import LoginModal from "@/components/LoginModal";
 import { useState, useEffect } from "react";
 
-export default function Header({ showVideo = true }) {
+export default function Header() {
   const { user } = useAuth();
   const router = useRouter();
   const [isLoginOpen, setLoginOpen] = useState(false);
@@ -24,24 +24,7 @@ export default function Header({ showVideo = true }) {
 
   return (
     <div>
-      {/* Background video rendered only on the client side */}
-      {showVideo && isClient && (
-        <div className="video">
-          <video
-            src="/Icons/indexBackgroundVid.mp4.mp4"
-            id="vid"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            loading='lazy'
-            style={{ objectFit: "cover", width: "100%", height: "100%" }}
-          ></video>
-        </div>
-      )}
-
-      <header className="heading" style={{ backgroundColor: "black" }}>
+      <header className="heading">
         <Link href="/">
           <h1 id="projectName">
             <Image
@@ -55,59 +38,61 @@ export default function Header({ showVideo = true }) {
           </h1>
         </Link>
 
-        <ul className="navItems">
-          <li>
-            <Link href="/">
-              <span>Home</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/machine">
-              <span>Spiral Analysis</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/instruction">
-              <span>Learn More</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/info">
-              <span>About Us</span>
-            </Link>
-          </li>
-          {user ? (
-            <>
-              <li>
-                <Link href="/dashBoard">
-                  <span>{user.email}</span>
-                </Link>
-              </li>
+        {isClient && (
+          <ul className="navItems">
+            <li>
+              <Link href="/">
+                <span>Home</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/machine">
+                <span>Spiral Analysis</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/instruction">
+                <span>Learn More</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/info">
+                <span>About Us</span>
+              </Link>
+            </li>
+            {user ? (
+              <>
+                <li>
+                  <Link href="/dashBoard">
+                    <span>{user.email}</span>
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="logoutBtn"
+                    style={{ background: "transparent", border: "none" }}
+                  >
+                    <span>Logout</span>
+                  </button>
+                </li>
+              </>
+            ) : (
               <li>
                 <button
-                  onClick={handleLogout}
-                  className="logoutBtn"
-                  style={{ background: "transparent", border: "none" }}
+                  onClick={() => setLoginOpen(true)}
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    fontSize: "16.5px",
+                  }}
                 >
-                  <span>Logout</span>
+                  <span>Login</span>
                 </button>
               </li>
-            </>
-          ) : (
-            <li>
-              <button
-                onClick={() => setLoginOpen(true)}
-                style={{
-                  backgroundColor: "black",
-                  border: "none",
-                  fontSize: "16.5px",
-                }}
-              >
-                <span style={{ backgroundColor: "black" }}>Login</span>
-              </button>
-            </li>
-          )}
-        </ul>
+            )}
+          </ul>
+        )}
       </header>
       <LoginModal isOpen={isLoginOpen} closeModal={() => setLoginOpen(false)} />
     </div>

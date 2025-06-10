@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { EB_Garamond, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authProvider";
+import backgroundStyles from "@/styles/Background.module.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,17 +38,18 @@ const cinzel = Cinzel({
 
 export const metadata: Metadata = {
   title: "Spiral Analysis",
-
 };
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
+        <div className={backgroundStyles.drawingContainer} />
         <AuthProvider>{children}</AuthProvider>
-        
       </body>
     </html>
   );

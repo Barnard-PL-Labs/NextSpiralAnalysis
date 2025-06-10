@@ -7,6 +7,7 @@ import MiniSpiralHistory from "@/components/MiniSpiralHistory";
 import Header from "@/components/Header";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
+import backgroundStyles from "@/styles/Background.module.css";
 
 export default function MachinePage() {
   const canvasRef = useRef();
@@ -55,7 +56,7 @@ export default function MachinePage() {
     }
 
     // Add minimum size validation
-    if (currentDrawing.length < 100) {
+    if (currentDrawing.length < 150) {
       alert(
         "Your spiral is too small for accurate analysis. Please draw a larger spiral that:\n\n• Makes at least 3-4 complete revolutions\n• Fills most of the drawing area\n• Is drawn in a continuous motion"
       );
@@ -89,6 +90,10 @@ export default function MachinePage() {
 
     try {
       // Analyze the saved drawing
+      console.log(
+        "About to send to API:",
+        JSON.stringify(drawingToSave).substring(0, 200)
+      );
       const result = await backgroundAnalysis(drawingToSave);
 
       if (result === null || result === "error") {
@@ -103,11 +108,6 @@ export default function MachinePage() {
         setAnalysisProgress((newResults.length / 5) * 100);
 
         console.log(`Saved/analyzed drawing ${newDrawings.length}/5`);
-
-        console.log("🔍 DEBUGGING STATE TIMING:");
-        console.log("  - prevResults.length (old state):", prevResults.length);
-        console.log("  - newResults.length (new data):", newResults.length);
-        console.log("  - result.DOS:", result.DOS);
 
         // calculating and storing avg DOS if we have 5 drawings
         if (newResults.length === 5) {
@@ -147,17 +147,29 @@ export default function MachinePage() {
         return newResults;
       });
     } catch (error) {
-      console.warn("Error analyzing drawing:", error.message);
+      console.error(`Drawing ${newDrawings.length} analysis failed:`, error);
 
-      // Skips the failed analysis
-      console.log(
-        "Skipping failed analysis. Current successful analyses: ${savedResults.length}"
-      );
-      if (isLastDrawing) {
+      // Store error result with DOS as null/undefined
+      const errorResult = {
+        DOS: null,
+        error: true,
+        errorMessage: error.message,
+        timestamp: new Date().toISOString(),
+      };
+
+      setSavedResults((prevResults) => {
+        const newResults = [...prevResults, errorResult];
+        setAnalysisProgress((newResults.length / 5) * 100);
+
+        // Skips the failed analysis
         console.log(
-          "🎯 5th drawing attempted - calculating average with available data"
+          `Skipping failed analysis. Current successful analyses:`,
+          savedResults.length
         );
-        setSavedResults((prevResults) => {
+        if (isLastDrawing) {
+          console.log(
+            "🎯 5th drawing attempted - calculating average with available data"
+          );
           if (prevResults.length > 0) {
             const averageDOS = calculateAverageDOS(prevResults);
             console.log(
@@ -166,7 +178,7 @@ export default function MachinePage() {
             );
 
             const finalResults = {
-              individual_results: prevResults,
+              individual_results: newResults,
               average_DOS: averageDOS,
               successful_drawings: prevResults.length,
               total_attempts: 5,
@@ -189,16 +201,25 @@ export default function MachinePage() {
             console.log(
               "✅ Final average calculation completed with available data!"
             );
+            setIsAnalysisComplete(true);
           } else {
             console.log("❌ No successful analyses to average");
             alert("All analyses failed. Please try again.");
+            setIsAnalysisComplete(true);
           }
-          setIsAnalysisComplete(true);
-          return prevResults;
-        });
-      } else {
-        console.log("Analysis failed, but continuing w/ remaining drawings");
-      }
+        } else {
+          console.log("Analysis failed, but continuing w/ remaining drawings");
+          localStorage.setItem(
+            "analysisHistory",
+            JSON.stringify({ individual_results: newResults })
+          );
+          sessionStorage.setItem(
+            "analysisHistory",
+            JSON.stringify({ individual_results: newResults })
+          );
+        }
+        return newResults;
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -304,14 +325,15 @@ export default function MachinePage() {
 
   return (
     <>
-      <Header showVideo={true} />
-
-      <div className={styles.drawingContainer} style={{ position: "relative" }}>
+      <Header showVideo={false} />
+      <div style={{ position: "relative" }}>
         {isProcessingFinal ? (
           <div className={styles.loadingContainer}>
             {!isAnalysisComplete ? (
               <>
-                <h2> Preparing Your Final Results </h2>
+                <h2 className={styles.loadingText}>
+                  Preparing Your Final Results
+                </h2>
                 <div className={styles.progressContainer}>
                   <div className={styles.loadingBar}>
                     <div
@@ -323,7 +345,7 @@ export default function MachinePage() {
               </>
             ) : (
               <>
-                <h2> Analysis Complete!</h2>
+                <h2>Analysis Complete!</h2>
                 <Button
                   sendData={sendDataToBackend}
                   clearDrawing={clearCurrentDrawing}

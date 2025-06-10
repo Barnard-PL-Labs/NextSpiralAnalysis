@@ -111,7 +111,7 @@ const Dashboard = () => {
               e.target.src = "/default-avatar.png";
             }}
           />
-          <h1 className={styles.welcome}>Welcome back{username ? `, ${username}` : ''}!</h1>
+          <h1 className={styles.welcome} style={{ color: 'white' }}>Welcome back{username ? `, ${username}` : ''}!</h1>
         </div>
 
         {userEmail === SUPERUSER_EMAIL && (

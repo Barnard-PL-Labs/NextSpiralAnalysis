@@ -1,7 +1,7 @@
 .pageContainer {
   display: flex;
   min-height: 100vh;
-  color: black;
+  color: white;
 }
 
 .content {

@@ -20,6 +20,8 @@ export default function ResultPage() {
   const [loadingResult, setLoadingResult] = useState(true);
   const [error, setError] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState(null);
+  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState(null);
+  const [allDrawingData, setAllDrawingData] = useState([]);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -60,6 +62,9 @@ export default function ResultPage() {
           const storedDrawings = localStorage.getItem("drawData");
           if (storedDrawings) {
             const drawings = JSON.parse(storedDrawings);
+
+            // load all drawing data but use the most recent one by default
+            setAllDrawingData(drawings);
             const latestDrawing = Array.isArray(drawings[0])
               ? drawings[drawings.length - 1]
               : drawings;
@@ -116,6 +121,27 @@ export default function ResultPage() {
 
     loadAnalysisResults();
   }, [user]);
+
+  // handles showcasing of each individual result
+  const drawingClick = (index) => {
+    if (!allDrawingData || !analysisHistory?.individual_results) return;
+    setSelectedDrawingIndex(index);
+    const selectedResult = analysisHistory.individual_results[index];
+
+    if (allDrawingData[index] && !selectedResult.error) {
+      const selectedDrawing = allDrawingData[index];
+      setDrawData(selectedDrawing);
+      setSpeedData(calculateSpeed(selectedDrawing));
+      setAngleData(processData(selectedDrawing));
+      setPData(CanIAvoidBugByThis(selectedDrawing));
+    }
+    setResult({
+      ...selectedResult,
+      average_DOS: analysisHistory.average_DOS,
+      analysis_type: "5_drawing_average",
+      selected_drawing: index + 1,
+    });
+  };
 
   const performSingleDrawingAnalysis = async (drawingData) => {
     try {
@@ -181,7 +207,7 @@ export default function ResultPage() {
     }
 
     // Fallback to individual DOS score
-    if (result.DOS) {
+    if (result.DOS !== null && result.DOS !== undefined) {
       return result.DOS;
     }
 
@@ -226,18 +252,60 @@ export default function ResultPage() {
                 (individualResult, index) => (
                   <span
                     key={index}
+                    onClick={() => drawingClick(index)}
                     style={{
                       padding: "5px 10px",
-                      background: "rgba(255,255,255,0.1)",
+                      background:
+                        selectedDrawingIndex === index
+                          ? "rgba(255,255,255,0.3"
+                          : individualResult.error
+                          ? "rgba(255,100,100,0.2)"
+                          : "rgba(255,255,255,0.1)",
                       borderRadius: "4px",
                       fontSize: "14px",
+                      cursor: "pointer",
+                      border:
+                        selectedDrawingIndex === index
+                          ? "2px solid white"
+                          : "2px solid transparent",
+                      transition: "all 0.2s ease",
                     }}
+                    onMouseEnter={(e) => {
+                      if (selectedDrawingIndex !== index) {
+                        e.target.style.background = individualResult.error
+                          ? "rgba(255,100,100,0.3)"
+                          : "rgba(255,255,255,0.2)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedDrawingIndex !== index) {
+                        e.target.style.background = individualResult.error
+                          ? "rgba(255,100,100,0.2)"
+                          : "rgba(255,255,255,0.1)";
+                      }
+                    }}
+                    title={
+                      individualResult.error
+                        ? "Error: ${individualResult.errorMessage}"
+                        : ""
+                    }
                   >
-                    #{index + 1}: {individualResult.DOS || "N/A"}
+                    #{index + 1}: {individualResult.DOS ?? "N/A"}
                   </span>
                 )
               )}
             </div>
+            {selectedDrawingIndex !== null && (
+              <p style={{ marginTop: "10px", fontSize: "14px", opacity: 0.8 }}>
+                Viewing: Drawing #{selectedDrawingIndex + 1}
+                {analysisHistory.individual_results[selectedDrawingIndex]
+                  ?.error && (
+                  <span style={{ color: "#ff6b6b", marginLeft: "10px" }}>
+                    (Analysis Error)
+                  </span>
+                )}
+              </p>
+            )}
           </div>
         )}
 
@@ -287,4 +355,3 @@ export default function ResultPage() {
     </div>
   );
 }
-

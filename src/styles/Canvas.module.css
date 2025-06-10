@@ -36,12 +36,15 @@
   margin-top: 210px;
   margin-bottom: 2rem;
   color: rgb(255, 255, 255);
-  animation: fadeInOut 2s ease-in-out infinite;
   position: relative;
   display: inline-block;
 }
 
-.loadingContainer h2::after {
+.loadingText {
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+.loadingText::after {
   content: "";
   position: absolute;
   display: inline-block;

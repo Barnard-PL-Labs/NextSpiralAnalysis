@@ -30,8 +30,8 @@ export default function Buttons({
         </button>
       ) : (
         <button 
-          className={styles.button} 
-          onClick={sendData}
+        className={styles.button} 
+        onClick={sendData}
           data-loading={isLoadingResults}
           disabled={isLoadingResults}
         >

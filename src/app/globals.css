@@ -1,8 +1,7 @@
 /* globals.css */
 
-
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap");
 
 body {
   margin: 0;
@@ -16,19 +15,19 @@ body {
 }
 
 h1 {
-  font-family: 'Cinzel', serif;
+  font-family: "Cinzel", serif;
   /* color: #006699; */
-  color:#FFFFFF;
+  color: #ffffff;
 }
 
-#vid{
-  position:fixed;
+#vid {
+  position: fixed;
   right: 0;
   bottom: 0;
   height: 100vh;
   width: 100vw;
   object-fit: cover;
-  z-index:-1 ;
+  z-index: -1;
 }
 
 .heading {
@@ -36,10 +35,8 @@ h1 {
   width: 100%;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.5);
-  /* Two back up back-ground color
-  background-color: #000513; 
-  background: linear-gradient(180deg, #0D1B2F, #1B2432); */
+  background: rgba(245, 245, 245, 0.95);
+  border-radius: 0 0 10px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -47,20 +44,21 @@ h1 {
   z-index: 9998;
 }
 
-#logo{
+#logo {
   width: 1.3em;
   height: auto;
 }
-header a{
+header a {
   text-decoration: none;
 }
-#projectName{
-  font-family: 'Cinzel', serif;
+#projectName {
+  font-family: "Cinzel", serif;
   display: flex;
+  color: rgb(19, 77, 104);
 }
 .navItems {
-  display: flex; 
-  justify-content: flex-end; 
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
   list-style: none;
   padding-right: 40px;
@@ -71,20 +69,61 @@ header a{
 }
 
 .navItems li {
-  margin: 0 15px;
+  margin: 0 8px;
 }
 
 .navItems span {
-  color: #FFFFFF;
-  font-family: 'Cinzel', serif;
+  color: white;
+  font-family: "Cinzel", serif;
   font-weight: bold;
-  transition: color 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   cursor: pointer;
-  text-decoration: none; 
+  text-decoration: none;
+  background: #19729f;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 102, 153, 0.2);
+  display: inline-block;
 }
 
 .navItems span:hover {
-  color: #00AEEF;
+  color: #006699;
+  background: rgba(76, 230, 255, 0.2);
+  border-color: rgba(0, 102, 153, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 102, 153, 0.1);
+}
+
+.navItems button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.logoutBtn span,
+.navItems button span {
+  color: white;
+  font-family: "Cinzel", serif;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  text-decoration: none;
+  background: #006699;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 102, 153, 0.2);
+  display: inline-block;
+  font-size: 16.5px;
+}
+
+.logoutBtn span:hover,
+.navItems button span:hover {
+  color: #006699;
+  background: rgba(76, 230, 255, 0.2);
+  border-color: rgba(0, 102, 153, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 102, 153, 0.1);
 }
 
 .attractiveContent {
@@ -97,18 +136,19 @@ header a{
   width: 80%;
   max-width: 700px;
 }
-#contentTitle{
+#contentTitle {
   font-size: 2.5rem;
-  background: linear-gradient(120deg, #00AEEF, #68D2E8, #B9D9EB);    background-clip: text;
+  background: white;
+  background-clip: text;
   color: transparent;
   margin-bottom: 15px;
 }
-#diffPart{
-  background: linear-gradient(120deg, #00AEEF, #68D2E8, #FF4D4D, #FF6B6B);
+#diffPart {
+  background: white;
   background-clip: text;
 }
 .indexButton {
-  background: rgba(0, 174, 239, 0.2); 
+  background: rgba(0, 174, 239, 0.2);
   border: 2px solid rgba(0, 174, 239, 0.5);
   color: white;
   font-weight: bold;
@@ -125,24 +165,23 @@ header a{
   transform: translateY(-3px);
 }
 
-input{
+input {
   display: flex;
   flex-direction: column;
 }
 
-
 .modal-wrapper {
-  position: fixed; 
+  position: fixed;
   left: 0;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center; 
-  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
 }
-.closeButton{
+.closeButton {
   background: none;
   border: none;
   font-size: 40px;
@@ -150,13 +189,12 @@ input{
   top: 20px;
   right: 20px;
   cursor: pointer;
-  line-height: 1; 
-  color:white;
+  line-height: 1;
+  color: white;
 }
-.closeButton:hover{
-  color:#444;
+.closeButton:hover {
+  color: #444;
   transition: color 0.2s ease-in-out;
-
 }
 .login-modal {
   position: relative;
@@ -165,9 +203,9 @@ input{
   background-color: #222;
   border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   color: white;
-  height: auto;           
+  height: auto;
   overflow: visible;
 }
 
@@ -197,14 +235,14 @@ input{
   flex-direction: column;
   gap: 15px;
   width: 50%;
-  flex:1;
+  flex: 1;
 }
 
 .modal-form input,
 .btn-primary,
 .btn-secondary {
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
 }
 .modal-form input {
   padding: 17px;
@@ -213,11 +251,10 @@ input{
   outline: none;
   background: #333;
   color: white;
-
 }
 
 .btn-primary {
-  background-color: #007BFF;
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 10px;
@@ -250,7 +287,6 @@ input{
   margin: 10px;
 }
 
-
 .modal-form-right {
   flex: 1;
   display: flex;
@@ -265,7 +301,7 @@ input{
   max-height: 80%;
   border-radius: 12px;
   object-fit: cover;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   opacity: 0.9;
 }
 .modal-enter {
@@ -320,13 +356,3 @@ input{
   color: rgb(249, 208, 208);
   background-color: transparent;
 }
-
-
-
-
-
-
-
-
-
-
