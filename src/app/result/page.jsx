@@ -41,37 +41,35 @@ export default function ResultPage() {
           const analysisData = JSON.parse(storedAnalysis);
           setAnalysisHistory(analysisData);
 
-          // Use the average DOS and the latest individual result for display
-          if (analysisData.average_DOS) {
-            console.log("Found average DOS:", analysisData.average_DOS);
+          // Find first valid result (no error)
+          const firstValidIndex = analysisData.individual_results.findIndex(
+            (result) => !result.error
+          );
+          const validIndex = firstValidIndex >= 0 ? firstValidIndex : 0;
 
-            // Get the most recent individual result for tremor analysis
-            const latestResult =
-              analysisData.individual_results?.[
-                analysisData.individual_results.length - 1
-              ];
+          // Use the first valid result or latest if none are valid
+          const selectedResult = analysisData.individual_results[validIndex];
+          setSelectedDrawingIndex(validIndex);
 
-            setResult({
-              ...latestResult,
-              average_DOS: analysisData.average_DOS,
-              analysis_type: "5_drawing_average",
-            });
-          }
+          setResult({
+            ...selectedResult,
+            average_DOS: analysisData.average_DOS,
+            analysis_type: "5_drawing_average",
+            selected_drawing: validIndex + 1,
+          });
 
-          // Get the most recent drawing data for charts
+          // Get the drawing data for charts
           const storedDrawings = localStorage.getItem("drawData");
           if (storedDrawings) {
             const drawings = JSON.parse(storedDrawings);
-
-            // load all drawing data but use the most recent one by default
             setAllDrawingData(drawings);
-            const latestDrawing = Array.isArray(drawings[0])
-              ? drawings[drawings.length - 1]
-              : drawings;
-            setDrawData(latestDrawing);
-            setSpeedData(calculateSpeed(latestDrawing));
-            setAngleData(processData(latestDrawing));
-            setPData(CanIAvoidBugByThis(latestDrawing));
+
+            // Use the first valid drawing's data
+            const selectedDrawing = drawings[validIndex];
+            setDrawData(selectedDrawing);
+            setSpeedData(calculateSpeed(selectedDrawing));
+            setAngleData(processData(selectedDrawing));
+            setPData(CanIAvoidBugByThis(selectedDrawing));
           }
 
           setLoadingResult(false);
@@ -220,24 +218,26 @@ export default function ResultPage() {
     }
     return "Single Drawing Analysis";
   };
+  const currentResult =
+    analysisHistory?.individual_results?.[selectedDrawingIndex];
 
   return (
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
       <div className={styles.container}>
         <div className={styles.title}>
-          <h2>Analysis Result</h2>
+          <h2>Analysis Results</h2>
           {loadingResult ? (
             <p>Analyzing...</p>
           ) : (
-            <p>DOS Score: {getDOSScore() ?? "N/A"}</p>
+            <p>Average DOS Score: {getDOSScore() ?? "N/A"}</p>
           )}
           {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
 
         {analysisHistory && analysisHistory.individual_results && (
           <div className={styles.title}>
-            <h3>Individual Drawing Scores:</h3>
+            <h3>Individual Drawings:</h3>
             <div
               style={{
                 display: "flex",
@@ -250,7 +250,11 @@ export default function ResultPage() {
                 (individualResult, index) => (
                   <span
                     key={index}
-                    onClick={() => drawingClick(index)}
+                    onClick={
+                      !individualResult.error
+                        ? () => drawingClick(index)
+                        : undefined
+                    }
                     style={{
                       padding: "5px 10px",
                       background:
@@ -261,7 +265,9 @@ export default function ResultPage() {
                           : "rgba(255,255,255,0.1)",
                       borderRadius: "4px",
                       fontSize: "14px",
-                      cursor: "pointer",
+                      cursor: individualResult.error
+                        ? "not-allowed"
+                        : "pointer",
                       border:
                         selectedDrawingIndex === index
                           ? "2px solid white"
@@ -288,22 +294,13 @@ export default function ResultPage() {
                         : ""
                     }
                   >
-                    #{index + 1}: {individualResult.DOS ?? "N/A"}
+                    {individualResult.error
+                      ? `#${index + 1}: N/A`
+                      : `#${index + 1}`}
                   </span>
                 )
               )}
             </div>
-            {selectedDrawingIndex !== null && (
-              <p style={{ marginTop: "10px", fontSize: "14px", opacity: 0.8 }}>
-                Viewing: Drawing #{selectedDrawingIndex + 1}
-                {analysisHistory.individual_results[selectedDrawingIndex]
-                  ?.error && (
-                  <span style={{ color: "#ff6b6b", marginLeft: "10px" }}>
-                    (Analysis Error)
-                  </span>
-                )}
-              </p>
-            )}
           </div>
         )}
 
@@ -312,6 +309,11 @@ export default function ResultPage() {
             <h3>Spiral XY Plot</h3>
             <div className={styles.chartContainer}>
               <LineGraph data={drawData} />
+            </div>
+            <div
+              style={{ marginTop: "10px", textAlign: "center", color: "black" }}
+            >
+              DOS Score: {currentResult?.DOS ?? "N/A"}
             </div>
           </div>
           <div className={styles.graphCard}>
