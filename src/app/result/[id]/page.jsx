@@ -66,7 +66,7 @@ export default function ResultPage() {
   return (
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
-      <div style={{ backgroundColor: 'black', color: 'black', paddingTop: '80px' }}>
+      <div style={{ color: 'black', paddingTop: '80px' }}>
         <div className={styles.title}>
           <h2 style={{ color: 'white' }}>Analysis Result</h2>
           <p style={{ color: 'white' }}>Your DOS result is: {result.DOS}</p>

@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Sidebar from '../../components/SideBar';
+import BottomNav from '../../components/BottomNav';
 import XYChart from '../../components/Scatter';
+import Pagination from '../../components/Pagination';
 import styles from '../../styles/Dashboard.module.css';
 import Link from 'next/link';
 
@@ -18,6 +20,7 @@ const Dashboard = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
+  const [isMobile,setIsMobile] = useState(false);
   const entriesPerPage = 5;
 
   useEffect(() => {
@@ -34,7 +37,7 @@ const Dashboard = () => {
       setUsername(user.email.split('@')[0]);
       setUserEmail(user.email);
 
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('avatar_path')
         .eq('id', user.id)
@@ -88,6 +91,12 @@ const Dashboard = () => {
     };
 
     fetchData();
+    const handleResize = () => {
+    setIsMobile(window.innerWidth <= 640);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [viewAll]);
 
   const handleAccordionClick = (index) => {
@@ -95,20 +104,20 @@ const Dashboard = () => {
   };
 
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
-  const pageCount = Math.ceil((entries.length - 1) / entriesPerPage);
+  const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
 
   return (
     <div className={styles.pageContainer}>
-      <Sidebar />
+      {isMobile ? <BottomNav /> : <Sidebar />}
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
           <img
-            src={avatarUrl || "/default-avatar.png"}
+            src={avatarUrl || "/Icons/default-avatar.png"}
             alt="Avatar"
             className={styles.avatarImage}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/default-avatar.png";
+              e.target.src = "/Icons/default-avatar.png";
             }}
           />
           <h1 className={styles.welcome} style={{ color: 'white' }}>Welcome back{username ? `, ${username}` : ''}!</h1>
@@ -146,8 +155,8 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 style={{ color: 'white' }}>Past Results</h2>
-            <ul className={styles.entriesList}>
+            <h2 style={{ color: 'white' }} >Past Results</h2>
+            <ul className={styles.entriesList} >
               {paginatedEntries.map((entry, index) => (
                 <li key={entry.id} className={styles.accordionItem}>
                   <div
@@ -181,17 +190,7 @@ const Dashboard = () => {
                 </li>
               ))}
             </ul>
-            <div className={styles.pagination}>
-              {Array.from({ length: pageCount }, (_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={currentPage === i + 1 ? styles.activePage : ''}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} pageCount={pageCount} />
           </>
         ) : (
           <p className={styles.noEntry}>No entries found.</p>

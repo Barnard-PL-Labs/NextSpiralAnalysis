@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import styles from "../../styles/Settings.module.css";
 import Sidebar from "../../components/SideBar";
+import BottomNav from "../../components/BottomNav";
 
 export default function Settings() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function Settings() {
         if (profileError) {
           console.error("Error fetching profile:", profileError);
         } else if (profile?.avatar_path) {
-          const { data: signed, error: signedError } = await supabase.storage
+          const { data: signed } = await supabase.storage
             .from("avatars")
             .createSignedUrl(profile.avatar_path, 3600);
 
@@ -47,6 +49,14 @@ export default function Settings() {
     };
 
     fetchUser();
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [router]);
 
   useEffect(() => {
@@ -151,12 +161,11 @@ export default function Settings() {
 
   return (
     <div>
-      <Sidebar />
+      {isMobile ? <BottomNav /> : <Sidebar />}
       <div className={styles.settingsContainer}>
         <h2 className={styles.settingsHeader}>Account Settings</h2>
 
         <div style={{ marginBottom: "20px" }}>
-            
           {(previewUrl || avatarUrl) && (
             <img
               src={previewUrl || avatarUrl}
@@ -177,27 +186,27 @@ export default function Settings() {
             />
           )}
         </div>
-          <label className={styles.settingsLabel}>
-            Profile Picture:
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className={styles.settingsInput}
-              ref={fileInputRef}
-            />
-          </label>
 
-          {avatarFile && (
-            <button
-              onClick={handleAvatarUpload}
-              className={styles.settingsButton}
-              disabled={loading}
-            >
-              {loading ? "Uploading..." : "Upload Avatar"}
-            </button>
-          )}
+        <label className={styles.settingsLabel}>
+          Profile Picture:
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className={styles.settingsInput}
+            ref={fileInputRef}
+          />
+        </label>
 
+        {avatarFile && (
+          <button
+            onClick={handleAvatarUpload}
+            className={styles.settingsButton}
+            disabled={loading}
+          >
+            {loading ? "Uploading..." : "Upload Avatar"}
+          </button>
+        )}
 
         <form onSubmit={handlePasswordChange} className={styles.settingsForm}>
           <label className={styles.settingsLabel}>
@@ -241,11 +250,7 @@ export default function Settings() {
         </div>
 
         {message && (
-          <p
-            className={`${styles.settingsMessage} ${
-              message.includes("Error") ? styles.errorMessage : styles.successMessage
-            }`}
-          >
+          <p className={`${styles.settingsMessage} ${message.includes("Error") ? styles.errorMessage : styles.successMessage}`}>
             {message}
           </p>
         )}

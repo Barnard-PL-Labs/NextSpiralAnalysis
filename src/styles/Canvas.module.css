@@ -113,9 +113,11 @@
 }
 
 .canvasContainer {
-  text-align: center;
-  margin-top: 20px;
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin:20px auto;
+  width: 100%;
 }
 
 .canvasHelper {
