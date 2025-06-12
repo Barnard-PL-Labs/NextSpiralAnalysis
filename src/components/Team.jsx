@@ -1,22 +1,37 @@
-import Image from 'next/image';
-import styles from '../styles/Info.module.css'
-const TeamMember = ({ name, position, bio, uni, imageUrl, isDirector }) => (
-  <div className={`${styles.teamMember} ${isDirector ? styles.director : ''}`}>
-    <div className={styles.imageContainer}><Image src={imageUrl} alt={name} width={150} height={150} className={styles.teamMemberImage} />
-    {/*Below is to add the lighting bolt to the two directors, but will remove and replace with only text for the about us page*/}
-    {isDirector && <div className={styles.badge}><svg
-      className={styles.bolt}
-      viewBox="0 0 24 24"
-      fill="white"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M13 2L3 14H11L11 22L21 10H13L13 2Z" />
-    </svg></div>}</div>
+"use client";
+
+import styles from "../styles/Info.module.css";
+import Link from "next/link";
+import { useState } from "react";
+
+const TeamMember = ({ name, bio, position, uni, isDirector, websiteUrl }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+  <div className={`${styles.teamMember} ${isDirector ? styles.director : ""}`}>
+      {websiteUrl ? (
+        <div 
+          className={styles.linkContainer}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <Link href={websiteUrl} target="_blank" rel="noopener noreferrer">
+            <h3 style={{ cursor: 'pointer', textDecoration: 'underline' }}>{name}</h3>
+          </Link>
+          {showTooltip && (
+            <div className={styles.tooltip}>
+              {websiteUrl}
+            </div>
+          )}
+        </div>
+      ) : (
     <h3>{name}</h3>
-    <p>{position}</p>
+      )}
     <p>{bio}</p>
+    <p>{position}</p>
     <p>{uni}</p>
   </div>
 );
+};
 
 export default TeamMember;

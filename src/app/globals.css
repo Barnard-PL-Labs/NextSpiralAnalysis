@@ -5,7 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 body {
   margin: 0;
   font-family: var(--font-eb-garamond), serif;
@@ -21,6 +20,8 @@ h1 {
   font-family: "Cinzel", serif;
   /* color: #006699; */
   color: #ffffff;
+  font-size: 30px;
+  font-weight: bold;
 }
 
 #vid {
@@ -362,7 +363,6 @@ input {
   background-color: transparent;
 }
 
-
 html {
   font-size: 16px;
 }
@@ -387,7 +387,6 @@ html {
 
 @media (max-width: 360px) {
   html {
-    font-size: 12px; 
+    font-size: 12px;
   }
 }
-
