@@ -1,22 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600&display=swap");
 
-.teamPage,
-.teamSection {
+.teamPage{
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   background-color: transparent;
   font-family: "Linbre Franklin", sans-serif;
-  padding: 100px 50px 0;
-  margin-top: -30px;
-  margin-bottom: 150px;
+  padding: 50px 20px;
+  margin:0px auto 0;
   gap: 40px;
 }
 
+#title {
+  font-family: "Linbre Franklin", sans-serif;
+}
+
 .teamPage {
-  display: flex;
-  flex-direction: column;
-  padding-top: 100px;
   width: 100%;
 }
 
@@ -26,9 +25,10 @@
   border-radius: 25px;
   padding: 40px;
   margin: 20px 0;
-  width: 50%;
+  /* width: 50%; */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
+
 
 .teamMember {
   width: 200px;
@@ -53,6 +53,7 @@
   color: #333333;
   font-weight: 500;
 }
+
 
 .director {
   background: transparent;
@@ -87,25 +88,51 @@
 }
 
 .directorsRow {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 15px 80px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px 60px;
   width: 100%;
   background: transparent;
   padding: 10px 0;
   margin-bottom: -30px;
 }
 
+
+@media (max-width:1062px){
+  .teamPage{
+    font-size:10px;
+  }
+
+  .teamPage, .teamSection{
+    margin: auto;
+    padding:20px;
+
+  }
+  #title{
+    margin:auto;
+  }
+}
+@media (min-width:1200px){
+  .teamSection{
+    width:45%;
+  }
+}
 .membersRow {
   display: grid;
-  grid-template-columns: repeat(2, 200px);
-  gap: 15px 80px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px 60px;
+  width: 100%;
   background: transparent;
-  margin-top: 0px;
+  padding: 10px 0;
+  margin-bottom: -30px;
 }
+
+@media (max-width:678px){
+  .directorsRow, .membersRow {
+    gap:0px;
+  }
+}
+
 
 .membersRow > *:last-child {
   grid-column: 1;
@@ -129,13 +156,24 @@
   right: 50px;
   margin-top: -140px;
   top: 245px;
-  width: 520px;
+  width: 30%;
+  max-width: 520px;
+  min-width: 400px;
   height: 50px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  padding-bottom: 20px;
 }
-
+@media (max-width:1062px){
+  .gridSectionWrapper{
+    position:relative;
+    margin:0 auto;
+    right:0;
+    width:50%;
+    max-width: 600px;
+    top:0px;
+  }
+}
 /* Grid container styles */
 .gridContainer {
   display: grid;
@@ -154,7 +192,7 @@
   flex-direction: column;
   align-items: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 
 .gridItem:hover {
@@ -195,4 +233,8 @@
   font-size: 0.9em;
   color: #333333;
   line-height: 1.5;
+}
+
+@media (max-width:500px){
+
 }

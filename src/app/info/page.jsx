@@ -1,7 +1,11 @@
+'use client';
 import Header from "../../components/Header";
 import styles from "../../styles/Info.module.css";
 import TeamMember from "../../components/Team";
 import GridSection from "../../components/GridSection";
+import { useContext } from "react";
+import { ResponsiveContext } from "@/components/ClientLayout";
+
 
 const teamMembers = [
   {
@@ -48,16 +52,18 @@ const teamMembers = [
 ];
 
 export default function TeamPage() {
+  const { isMobile } = useContext(ResponsiveContext);
+
   return (
     <>
       <div className={styles.teamPage}>
         <Header showVideo={true} />
-        <h1
+        <h1 id={styles.title}
           style={{ fontSize: "40px", marginTop: "20px", marginBottom: "-35px" }}
         >
           About
         </h1>
-        <div className={styles.teamSection}>
+        <div className={`${styles.teamSection} `}        >
           <div className={styles.directorsRow}>
             {teamMembers
               .filter((member) => member.isDirector)
@@ -73,8 +79,8 @@ export default function TeamPage() {
               ))}
           </div>
         </div>
-        <div className={styles.gridSectionWrapper}>
-          <GridSection />
+        <div className={`${styles.gridSectionWrapper}`}>
+        <GridSection />
         </div>
       </div>
     </>

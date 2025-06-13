@@ -1,10 +1,10 @@
 //Most of this page is in its default condition except the last few lines 
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { EB_Garamond, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/authProvider";
 import backgroundStyles from "@/styles/Background.module.css";
+import { AuthProvider } from "@/lib/authProvider";
+import ClientLayout from "@/components/ClientLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,22 +36,19 @@ const cinzel = Cinzel({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Spiral Analysis",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}>
         <div className={backgroundStyles.drawingContainer} />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );
 }
-
