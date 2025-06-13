@@ -1,11 +1,10 @@
-'use client';
+"use client";
 import Header from "../../components/Header";
 import styles from "../../styles/Info.module.css";
 import TeamMember from "../../components/Team";
 import GridSection from "../../components/GridSection";
 import { useContext } from "react";
 import { ResponsiveContext } from "@/components/ClientLayout";
-
 
 const teamMembers = [
   {
@@ -28,26 +27,26 @@ const teamMembers = [
     name: "Alexandra Shanabrook",
     position: "",
     bio: "",
-    uni: "Columbia University",
+    uni: "",
   },
   {
     name: "Krystal Briggs",
     bio: "",
-    uni: "Columbia University",
+    uni: "",
   },
   {
     name: "Joseph Rebagliati",
     bio: "",
-    uni: "Columbia University",
+    uni: "",
   },
   {
     name: "Yuhao Dong",
-    uni: "Columbia University",
+    uni: "",
   },
   {
     name: "Whitney Deng",
     bio: "",
-    uni: "Barnard College",
+    uni: "",
   },
 ];
 
@@ -58,12 +57,17 @@ export default function TeamPage() {
     <>
       <div className={styles.teamPage}>
         <Header showVideo={true} />
-        <h1 id={styles.title}
-          style={{ fontSize: "40px", marginTop: "20px", marginBottom: "-35px" }}
+        <h1
+          id={styles.title}
+          style={{
+            fontSize: "55px",
+            marginTop: "20px",
+            marginBottom: "-10px",
+          }}
         >
-          About
+          About 
         </h1>
-        <div className={`${styles.teamSection} `}        >
+        <div className={`${styles.teamSection} `}>
           <div className={styles.directorsRow}>
             {teamMembers
               .filter((member) => member.isDirector)
@@ -71,6 +75,7 @@ export default function TeamPage() {
                 <TeamMember key={index} {...director} />
               ))}
           </div>
+          <h2 className={styles.alumniTitle}>Alumni</h2>
           <div className={styles.membersRow}>
             {teamMembers
               .filter((member) => !member.isDirector)
@@ -80,7 +85,7 @@ export default function TeamPage() {
           </div>
         </div>
         <div className={`${styles.gridSectionWrapper}`}>
-        <GridSection />
+          <GridSection />
         </div>
       </div>
     </>
