@@ -41,7 +41,7 @@ Add the following variables:
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
-Database setup:
+## Database setup:
 
 Create 2 tables in Supabase named api_results and drawings.
 To create drawings table
@@ -49,22 +49,28 @@ To create drawings table
 CREATE TABLE drawings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT,
+    username TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     drawing_data JSONB NOT NULL
 );
+
 ```
 To create api_results table
 ```
 CREATE TABLE api_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT,
+    username TEXT,
     drawing_id UUID REFERENCES drawings(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     result_data JSONB NOT NULL
 );
+
 ```
 
-Also add in these following Row-Level Security (RLS) Policies:
+### Row-Level Security (RLS) Policies:
 ```
 CREATE POLICY "Allow user to insert api_results"
 ON public.api_results
@@ -95,7 +101,7 @@ USING (
     auth.uid() = user_id
 );
 ```
-Also run the followings to add in the profiles:
+### Profiles:
 ```create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text,
@@ -137,23 +143,47 @@ Mannually key in these would be:
   Policy definition: ((bucket_id = 'avatars'::text) AND ((( SELECT auth.uid() AS uid))::text = split_part(name, '/'::text, 1)))
 5.Click Review and save policy
 
-If you want to add in the SuperUser function, then:
+### SuperUser function:
 ```
-CREATE POLICY "Superuser can read all api_results"
-ON public.api_results
-FOR SELECT
-USING (
-    auth.email() = 'xxx@xxx'::text
+CREATE TABLE IF NOT EXISTS app_superusers (
+  email TEXT PRIMARY KEY
 );
-CREATE POLICY "Superuser can read all drawings"
-ON public.drawomgs
-FOR SELECT
-USING (
-    auth.email() = 'xxx@xxx'::text
-);
-```
-Replace the auth.email() with the one you want to put as SuperUser
 
+CREATE OR REPLACE FUNCTION is_superuser() RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM superusers
+    WHERE email = auth.email()
+  );
+$$ LANGUAGE sql STABLE;
+
+```
+```
+CREATE POLICY "Allow superuser or owner read access"
+ON drawings
+FOR SELECT
+USING (
+  user_id = auth.uid()
+  OR is_superuser()
+);
+CREATE POLICY "Allow superuser or owner read access"
+ON api_results
+FOR SELECT
+USING (
+  user_id = auth.uid()
+  OR is_superuser()
+);
+
+```
+***Insert the email you want to set as superuser to app_superusers table***
+```
+INSERT INTO app_superusers (email)
+VALUES
+  ('admin@example.com'),
+  ('superuser2@example.com'),
+  ('superuser3@example.com');
+```
+***Set environment varible at vercel of NEXT_PUBLIC_SUPERUESERS with the email that you want to set as superuser if you deploy via vercel. If deployed locally, set it in .env.local file.***
 Or, to run without a db, just leave these blank or omit .env.local
 
 Use the values for the `spiral-db-dev` supabase instance.

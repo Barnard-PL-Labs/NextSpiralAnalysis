@@ -9,7 +9,10 @@ import Pagination from '../../components/Pagination';
 import styles from '../../styles/Dashboard.module.css';
 import Link from 'next/link';
 
-const SUPERUSER_EMAIL = process.env.NEXT_PUBLIC_SUPERUSER_EMAIL;
+const SUPERUSER_EMAILS = (process.env.NEXT_PUBLIC_SUPERUSER_EMAILS || process.env.NEXT_PUBLIC_SUPERUSER_EMAIL || '')
+  .split(',')
+  .map(email => email.trim().toLowerCase())
+  .filter(email => email !== '');
 
 const Dashboard = () => {
   const [entries, setEntries] = useState([]);
@@ -20,7 +23,7 @@ const Dashboard = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
-  const [isMobile,setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const entriesPerPage = 5;
 
   useEffect(() => {
@@ -58,6 +61,7 @@ const Dashboard = () => {
           created_at,
           result_data,
           user_id,
+          email,
           drawings (
             id,
             drawing_data
@@ -65,7 +69,9 @@ const Dashboard = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (user.email !== SUPERUSER_EMAIL || !viewAll) {
+      const isSuperuser = SUPERUSER_EMAILS.includes(user.email.toLowerCase());
+
+      if (!isSuperuser || !viewAll) {
         query = query.eq('user_id', user.id);
       }
 
@@ -91,8 +97,9 @@ const Dashboard = () => {
     };
 
     fetchData();
+
     const handleResize = () => {
-    setIsMobile(window.innerWidth <= 640);
+      setIsMobile(window.innerWidth <= 640);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -105,6 +112,8 @@ const Dashboard = () => {
 
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
+
+  const isSuperuser = SUPERUSER_EMAILS.includes(userEmail.toLowerCase());
 
   return (
     <div className={styles.pageContainer}>
@@ -120,10 +129,12 @@ const Dashboard = () => {
               e.target.src = "/Icons/default-avatar.png";
             }}
           />
-          <h1 className={styles.welcome} style={{ color: 'white' }}>Welcome back{username ? `, ${username}` : ''}!</h1>
+          <h1 className={styles.welcome} style={{ color: 'white' }}>
+            Welcome back{username ? `, ${username}` : ''}!
+          </h1>
         </div>
 
-        {userEmail === SUPERUSER_EMAIL && (
+        {isSuperuser && (
           <div style={{ margin: '1rem 0', color: 'white' }}>
             <label>
               <input
@@ -155,8 +166,8 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 style={{ color: 'white' }} >Past Results</h2>
-            <ul className={styles.entriesList} >
+            <h2 style={{ color: 'white' }}>Past Results</h2>
+            <ul className={styles.entriesList}>
               {paginatedEntries.map((entry, index) => (
                 <li key={entry.id} className={styles.accordionItem}>
                   <div
@@ -165,8 +176,8 @@ const Dashboard = () => {
                   >
                     <span>
                       {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} – {new Date(entry.created_at).toLocaleString()}
-                      {userEmail === SUPERUSER_EMAIL && (
-                        <> — <strong>User:</strong> {entry.user_id}</>
+                      {isSuperuser && (
+                        <> — <strong>User:</strong> {entry.email || 'N/A'}</>
                       )}
                     </span>
                     <span className={styles.arrow}>{activeIndex === index ? '▲' : '▼'}</span>
