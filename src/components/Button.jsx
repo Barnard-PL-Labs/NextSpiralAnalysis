@@ -21,15 +21,11 @@ export default function Buttons({
 
   return (
     <div className={styles.buttonContainer}>
-      {!isProcessingFinal && !userFinished && (
-        <button className={styles.button} onClick={clearDrawing}>
-          Clear
-        </button>
-      )}
 
       {!userFinished && !isProcessingFinal && savedDrawingsCount > 0 && (
         <button className={styles.button} onClick={onFinishEarly}>
-          Finish Analysis: {savedDrawingsCount} Drawings
+          Finish Analysis
+          <span className={styles.countBadge}>{savedDrawingsCount}</span>
         </button>
       )}
 

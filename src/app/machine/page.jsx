@@ -418,21 +418,25 @@ export default function MachinePage() {
 
               <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
               <MiniSpiralHistory savedDrawings={savedDrawings} />
-              <button onClick={clearAllDrawings} className={styles.clearButton}>
-                Clear All Drawings
-              </button>
+              <div className={styles.buttonContainer}>
+                <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
+                  Clear
+                </button>
+                <button onClick={clearAllDrawings} className={styles.clearButton}>
+                  Clear All
+                </button>
+              </div>
             </div>
             {!isProcessingFinal && (
               <Button
                 sendData={sendDataToBackend}
-                clearDrawing={clearCurrentDrawing}
                 savedDrawingsCount={savedDrawings.length}
                 savedResultsCount={savedResults.length}
                 isProcessingFinal={isProcessingFinal}
                 onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
                 isAnalyzing={isAnalyzing}
                 isLoadingResults={isLoadingResults}
-                onFinishEarly={handleFinishEarly} // ✅ ADD: Pass the handler
+                onFinishEarly={handleFinishEarly}
                 userFinished={userFinished}
               />
             )}

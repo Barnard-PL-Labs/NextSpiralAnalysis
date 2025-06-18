@@ -1,0 +1,55 @@
+.spiralSidebar {
+  position: fixed;
+  left: 20px;
+  top: 90px;
+  width: 150px;
+  height: calc(100vh - 110px);
+  background: transparent;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Custom scrollbar styles */
+.spiralSidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.spiralSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spiralSidebar::-webkit-scrollbar-thumb {
+  background: #7eafe5;
+  border-radius: 4px;
+}
+
+.spiralSidebar::-webkit-scrollbar-thumb:hover {
+  background: #5cbeff;
+}
+
+.spiralCard {
+  width: 100%;
+  height: 120px;
+  background-color: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.spiralTitle {
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.spiralChart {
+  width: 100%;
+  height: 90px;
+} 
