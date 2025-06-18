@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Canvas from "@/components/Canvas";
 import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css";
@@ -19,19 +19,10 @@ export default function MachinePage() {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
+
+  const [userFinished, setUserFinished] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
-
-  // DEBUGGING
-  useEffect(() => {
-    console.log("🏠 MachinePage component mounted/re-mounted");
-    console.log("🏠 Initial savedResults:", savedResults);
-    console.log("🏠 Initial savedDrawings:", savedDrawings);
-
-    return () => {
-      console.log("🏠 MachinePage component unmounting");
-    };
-  }, []);
 
   useEffect(() => {
     console.log(
@@ -41,21 +32,16 @@ export default function MachinePage() {
     );
   }, [savedResults]);
 
-  // Saves drawings to a collection
   const saveAndAnalyzeCurrentDrawing = async () => {
-    // DEBUGGING
     console.log("🚀 STARTING saveAndAnalyzeCurrentDrawing");
     console.log("  - Initial savedResults.length:", savedResults.length);
     console.log("  - Initial savedDrawings.length:", savedDrawings.length);
-    console.log("  - savedResults contents:", savedResults);
 
-    console.log("Saving/analyzing a drawing");
     if (currentDrawing.length == 0) {
-      alert("Please draw something before analyzing.");
+      alert("Please draw something before saving.");
       return;
     }
 
-    // Add minimum size validation
     if (currentDrawing.length < 150) {
       alert(
         "Your spiral is too small for accurate analysis. Please draw a larger spiral that:\n\n• Makes at least 3-4 complete revolutions\n• Fills most of the drawing area\n• Is drawn in a continuous motion"
@@ -63,22 +49,23 @@ export default function MachinePage() {
       return;
     }
 
-    // Store current drawing before clearing
     const drawingToSave = [...currentDrawing];
 
-    // Clear the canvas and current drawing state immediately for better UX
+    // Clear canvas immediately
     if (canvasRef.current?.clearCanvas) {
       canvasRef.current.clearCanvas();
     }
     setCurrentDrawing([]);
 
-    // Update saved drawings state immediately
     const newDrawings = [...savedDrawings, drawingToSave];
 
-    // Loading state check
-    const isLastDrawing = newDrawings.length === 5;
+    // Triggers loading state when user finishes OR reaches a threshold
+    const shouldEnterFinalMode = userFinished || newDrawings.length >= 15;
 
-    if (isLastDrawing) {
+    if (shouldEnterFinalMode) {
+      console.log(
+        `🎯 Entering final processing mode (${newDrawings.length} drawings)`
+      );
       setIsProcessingFinal(true);
     }
 
@@ -89,11 +76,11 @@ export default function MachinePage() {
     setIsAnalyzing(true);
 
     try {
-      // Analyze the saved drawing
       console.log(
         "About to send to API:",
         JSON.stringify(drawingToSave).substring(0, 200)
       );
+
       const result = await backgroundAnalysis(drawingToSave);
 
       if (result === null || result === "error") {
@@ -102,29 +89,30 @@ export default function MachinePage() {
 
       console.log("Individual analysis result:", result);
 
-      // Added in fuctional state update instead of direct
       setSavedResults((prevResults) => {
         const newResults = [...prevResults, result];
-        setAnalysisProgress((newResults.length / 5) * 100);
 
-        console.log(`Saved/analyzed drawing ${newDrawings.length}/5`);
+        const shouldEnterFinalMode = userFinished || newDrawings.length >= 15;
+        const currentTotal = userFinished ? savedDrawings.length : 15;
+        setAnalysisProgress((newResults.length / currentTotal) * 100);
 
-        // calculating and storing avg DOS if we have 5 drawings
-        if (newResults.length === 5) {
-          console.log("🎯 REACHED 5 DRAWINGS!");
+        const allCurrentDrawingsAnalyzed =
+          newResults.length >= newDrawings.length;
+
+        if (shouldEnterFinalMode && allCurrentDrawingsAnalyzed) {
+          console.log("🎯 All current drawings analyzed!");
           const averageDOS = calculateAverageDOS(newResults);
           console.log("Calculated average DOS:", averageDOS);
 
           const finalResults = {
             individual_results: newResults,
             average_DOS: averageDOS,
-            traxis_dir1: newResults[newResults.length - 1].traxis_dir1,
-            traxis_dir2: newResults[newResults.length - 1].traxis_dir2,
-            traxis_dir3: newResults[newResults.length - 1].traxis_dir3,
-            traxis_pw1: newResults[newResults.length - 1].traxis_pw1,
-            traxis_pw2: newResults[newResults.length - 1].traxis_pw2,
-            traxis_pw3: newResults[newResults.length - 1].traxis_pw3,
+            successful_drawings: newResults.filter((r) => !r.error).length,
+            total_drawings: newDrawings.length,
+
+            ...getTraxisData(newResults),
           };
+
           localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
           sessionStorage.setItem(
             "analysisHistory",
@@ -141,7 +129,6 @@ export default function MachinePage() {
             "analysisHistory",
             JSON.stringify({ individual_results: newResults })
           );
-          console.log(`📊 Still need ${5 - newResults.length} more drawings`);
         }
 
         return newResults;
@@ -149,7 +136,6 @@ export default function MachinePage() {
     } catch (error) {
       console.error(`Drawing ${newDrawings.length} analysis failed:`, error);
 
-      // Store error result with DOS as null/undefined
       const errorResult = {
         DOS: null,
         error: true,
@@ -159,35 +145,36 @@ export default function MachinePage() {
 
       setSavedResults((prevResults) => {
         const newResults = [...prevResults, errorResult];
-        setAnalysisProgress((newResults.length / 5) * 100);
+        const currentTotal = userFinished ? savedDrawings.length : 15;
+        setAnalysisProgress((newResults.length / currentTotal) * 100);
 
-        // Skips the failed analysis
         console.log(
           `Skipping failed analysis. Current successful analyses:`,
-          savedResults.length
+          prevResults.filter((r) => !r.error).length
         );
-        if (isLastDrawing) {
+
+        const allCurrentDrawingsProcessed =
+          newResults.length >= newDrawings.length;
+
+        if (shouldEnterFinalMode && allCurrentDrawingsProcessed) {
           console.log(
-            "🎯 5th drawing attempted - calculating average with available data"
+            "🎯 Final drawing attempted - calculating average with available data"
           );
-          if (prevResults.length > 0) {
-            const averageDOS = calculateAverageDOS(prevResults);
+          const successfulResults = prevResults.filter((r) => !r.error);
+
+          if (successfulResults.length > 0) {
+            const averageDOS = calculateAverageDOS(successfulResults);
             console.log(
-              `✅ Calculated average DOS from ${prevResults.length} successful drawings:`,
+              `✅ Calculated average DOS from ${successfulResults.length} successful drawings:`,
               averageDOS
             );
 
             const finalResults = {
               individual_results: newResults,
               average_DOS: averageDOS,
-              successful_drawings: prevResults.length,
-              total_attempts: 5,
-              traxis_dir1: prevResults[prevResults.length - 1].traxis_dir1,
-              traxis_dir2: prevResults[prevResults.length - 1].traxis_dir2,
-              traxis_dir3: prevResults[prevResults.length - 1].traxis_dir3,
-              traxis_pw1: prevResults[prevResults.length - 1].traxis_pw1,
-              traxis_pw2: prevResults[prevResults.length - 1].traxis_pw2,
-              traxis_pw3: prevResults[prevResults.length - 1].traxis_pw3,
+              successful_drawings: successfulResults.length,
+              total_attempts: newDrawings.length,
+              ...getTraxisData(successfulResults),
             };
 
             localStorage.setItem(
@@ -208,7 +195,9 @@ export default function MachinePage() {
             setIsAnalysisComplete(true);
           }
         } else {
-          console.log("Analysis failed, but continuing w/ remaining drawings");
+          console.log(
+            "Analysis failed, but continuing with remaining drawings"
+          );
           localStorage.setItem(
             "analysisHistory",
             JSON.stringify({ individual_results: newResults })
@@ -225,8 +214,21 @@ export default function MachinePage() {
     }
   };
 
-  // Calculate average DOS from individual results
-  const calculateAverageDOS = (results) => {
+  const getTraxisData = (results) => {
+    const lastSuccessful = results.filter((r) => !r.error).pop();
+    if (!lastSuccessful) return {};
+
+    return {
+      traxis_dir1: lastSuccessful.traxis_dir1,
+      traxis_dir2: lastSuccessful.traxis_dir2,
+      traxis_dir3: lastSuccessful.traxis_dir3,
+      traxis_pw1: lastSuccessful.traxis_pw1,
+      traxis_pw2: lastSuccessful.traxis_pw2,
+      traxis_pw3: lastSuccessful.traxis_pw3,
+    };
+  };
+
+  const calculateAverageDOS = useCallback((results) => {
     console.log("Raw results for DOS calculation:", results);
     const dosScores = results
       .map((r) => {
@@ -239,9 +241,8 @@ export default function MachinePage() {
     console.log("Filtered DOS scores:", dosScores);
     if (dosScores.length === 0) return 0;
     return (dosScores.reduce((a, b) => a + b, 0) / dosScores.length).toFixed(2);
-  };
+  }, []);
 
-  // Background drawing analysis function
   const backgroundAnalysis = async (drawingData) => {
     try {
       const response = await fetch("/api/analyze", {
@@ -258,7 +259,7 @@ export default function MachinePage() {
       if (!response.ok) {
         throw new Error(data.error || "Analysis failed");
       }
-      // DEBUGGING
+
       console.log("Full API result structure:", data.result);
       console.log("DOS value specifically:", data.result.DOS);
       console.log("DOS value type:", typeof data.result.DOS);
@@ -274,7 +275,60 @@ export default function MachinePage() {
     }
   };
 
-  // Clear only current drawing allowing for mistakes
+  const finalizeResultsNow = useCallback(() => {
+    if (savedResults.length > 0) {
+      const successfulResults = savedResults.filter((r) => !r.error);
+
+      if (successfulResults.length > 0) {
+        const averageDOS = calculateAverageDOS(successfulResults);
+        console.log(
+          "✅ Finalizing results immediately with average DOS:",
+          averageDOS
+        );
+
+        const finalResults = {
+          individual_results: savedResults,
+          average_DOS: averageDOS,
+          successful_drawings: successfulResults.length,
+          total_drawings: savedDrawings.length,
+          ...getTraxisData(successfulResults),
+        };
+
+        localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
+        sessionStorage.setItem("analysisHistory", JSON.stringify(finalResults));
+        console.log("✅ Results finalized and saved!");
+      }
+    }
+
+    setAnalysisProgress(100);
+    setIsAnalysisComplete(true);
+  }, [savedResults, savedDrawings.length, calculateAverageDOS]);
+
+  useEffect(() => {
+    if (userFinished && isProcessingFinal && !isAnalysisComplete) {
+      if (
+        savedResults.length >= savedDrawings.length &&
+        savedResults.length > 0
+      ) {
+        console.log("🎯 All analyses complete, finalizing results");
+        finalizeResultsNow();
+      }
+    }
+  }, [
+    userFinished,
+    isProcessingFinal,
+    isAnalysisComplete,
+    savedResults.length,
+    savedDrawings.length,
+    finalizeResultsNow,
+  ]);
+
+  const handleFinishEarly = useCallback(async () => {
+    console.log(`🏁 User finished early with ${savedDrawings.length} drawings`);
+    setUserFinished(true);
+    setIsProcessingFinal(true);
+  }, [savedDrawings.length]);
+
   const clearCurrentDrawing = () => {
     console.log("Clearing data for new drawing...");
     setCurrentDrawing([]);
@@ -285,7 +339,6 @@ export default function MachinePage() {
     setIsAnalysisComplete(false);
   };
 
-  // Clears all drawings after results
   const clearAllDrawings = () => {
     const confirmed = window.confirm(
       "Are you sure you want to clear all your drawings?"
@@ -296,11 +349,13 @@ export default function MachinePage() {
       setCurrentDrawing([]);
       setSavedDrawings([]);
       setSavedResults([]);
+      setUserFinished(false); // ✅ ADD: Reset userFinished
 
       localStorage.removeItem("drawingHistory");
       sessionStorage.removeItem("drawingHistory");
       localStorage.removeItem("analysisHistory");
       sessionStorage.removeItem("analysisHistory");
+      localStorage.removeItem("drawData"); // ✅ ADD: Clear drawData too
 
       if (canvasRef.current?.clearCanvas) {
         canvasRef.current.clearCanvas();
@@ -310,18 +365,12 @@ export default function MachinePage() {
     setIsAnalysisComplete(false);
   };
 
-  // Save drawings and navigate immediately
   const sendDataToBackend = async () => {
     setIsLoadingResults(true);
     console.log(`Analyzing ${savedDrawings.length} drawings...`);
     await router.push("/result");
     setIsLoadingResults(false);
   };
-  console.log("🔍 RENDER DEBUG:");
-  console.log("- isProcessingFinal:", isProcessingFinal);
-  console.log("- isAnalysisComplete:", isAnalysisComplete);
-  console.log("- savedDrawings.length:", savedDrawings.length);
-  console.log("- savedResults.length:", savedResults.length);
 
   return (
     <>
@@ -352,9 +401,12 @@ export default function MachinePage() {
                   savedDrawingsCount={savedDrawings.length}
                   savedResultsCount={savedResults.length}
                   isProcessingFinal={isProcessingFinal}
+                  isAnalysisComplete={isAnalysisComplete}
                   onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
                   isAnalyzing={isAnalyzing}
                   isLoadingResults={isLoadingResults}
+                  onFinishEarly={handleFinishEarly} // ✅ ADD: Pass the handler
+                  userFinished={userFinished}
                 />
               </>
             )}
@@ -380,6 +432,8 @@ export default function MachinePage() {
                 onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
                 isAnalyzing={isAnalyzing}
                 isLoadingResults={isLoadingResults}
+                onFinishEarly={handleFinishEarly} // ✅ ADD: Pass the handler
+                userFinished={userFinished}
               />
             )}
           </>

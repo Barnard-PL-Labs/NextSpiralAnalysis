@@ -8,8 +8,11 @@ export default function Buttons({
   savedDrawingsCount = 0,
   savedResultsCount = 0,
   isProcessingFinal = false,
+  isAnalysisComplete = false,
   onSaveAndAnalyze,
   isLoadingResults = false,
+  onFinishEarly,
+  userFinished = false,
 }) {
   const handleClear = () => {
     clearDrawing();
@@ -18,28 +21,37 @@ export default function Buttons({
 
   return (
     <div className={styles.buttonContainer}>
-      {!isProcessingFinal && savedResultsCount < 5 && (
+      {!isProcessingFinal && !userFinished && (
         <button className={styles.button} onClick={clearDrawing}>
           Clear
         </button>
       )}
 
-      {savedResultsCount < 5 && savedDrawingsCount < 5 ? (
+      {!userFinished && !isProcessingFinal && savedDrawingsCount > 0 && (
+        <button className={styles.button} onClick={onFinishEarly}>
+          Finish Analysis: {savedDrawingsCount} Drawings
+        </button>
+      )}
+
+      {!userFinished && !isProcessingFinal && savedDrawingsCount < 15 ? (
         <button className={styles.button} onClick={onSaveAndAnalyze}>
-          Save ({savedDrawingsCount + 1}/5)
+          Save
         </button>
       ) : (
-        <button 
-        className={styles.button} 
-        onClick={sendData}
-          data-loading={isLoadingResults}
-          disabled={isLoadingResults}
-        >
-          <span className={styles.buttonText}>View Results</span>
-          {isLoadingResults && <span className={styles.buttonSpinner} />}
-        </button>
+        (isAnalysisComplete ||
+          (!isProcessingFinal &&
+            (userFinished || savedDrawingsCount >= 15))) && (
+          <button
+            className={styles.button}
+            onClick={sendData}
+            data-loading={isLoadingResults}
+            disabled={isLoadingResults}
+          >
+            <span className={styles.buttonText}>View Results</span>
+            {isLoadingResults && <span className={styles.buttonSpinner} />}
+          </button>
+        )
       )}
     </div>
   );
 }
-

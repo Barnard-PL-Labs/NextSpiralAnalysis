@@ -116,7 +116,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin:20px auto;
+  margin: 20px auto;
   width: 100%;
 }
 
@@ -142,6 +142,7 @@
   justify-content: center;
   gap: 85px;
   margin-top: 15px;
+  margin-bottom: 20px;
 }
 
 .button {
@@ -209,7 +210,7 @@
 }
 
 .saveButton:hover {
-  background-color: #0081B3;
+  background-color: #0081b3;
 }
 
 .clearButton:hover {

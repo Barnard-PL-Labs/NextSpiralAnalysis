@@ -34,10 +34,9 @@ export default function ResultPage() {
       setLoadingResult(true);
 
       try {
-        // FIRST: Check for completed 5-drawing analysis
         const storedAnalysis = localStorage.getItem("analysisHistory");
         if (storedAnalysis) {
-          console.log("Loading completed 5-drawing analysis...");
+          console.log("Loading completed multi-drawing analysis...");
           const analysisData = JSON.parse(storedAnalysis);
           setAnalysisHistory(analysisData);
 
@@ -54,8 +53,12 @@ export default function ResultPage() {
           setResult({
             ...selectedResult,
             average_DOS: analysisData.average_DOS,
-            analysis_type: "5_drawing_average",
+            analysis_type: "multi_drawing_average",
             selected_drawing: validIndex + 1,
+            total_drawings:
+              analysisData.total_drawings ||
+              analysisData.individual_results.length,
+            successful_drawings: analysisData.successful_drawings,
           });
 
           // Get the drawing data for charts
@@ -78,7 +81,7 @@ export default function ResultPage() {
 
         // Single drawing analysis
         console.log(
-          "No 5-drawing analysis found, checking for single drawing..."
+          "No multi-drawing analysis found, checking for single drawing..."
         );
         const storedDrawData = localStorage.getItem("drawData");
         if (!storedDrawData) {
@@ -136,8 +139,12 @@ export default function ResultPage() {
     setResult({
       ...selectedResult,
       average_DOS: analysisHistory.average_DOS,
-      analysis_type: "5_drawing_average",
+      analysis_type: "multi_drawing_average",
       selected_drawing: index + 1,
+      total_drawings:
+        analysisHistory.total_drawings ||
+        analysisHistory.individual_results.length,
+      successful_drawings: analysisHistory.successful_drawings,
     });
   };
 
@@ -199,7 +206,7 @@ export default function ResultPage() {
   const getDOSScore = () => {
     if (!result) return "N/A";
 
-    // Prioritize average DOS for 5-drawing analysis
+    // Prioritize average DOS for multi-drawing analysis
     if (result.average_DOS) {
       return result.average_DOS;
     }
@@ -214,10 +221,19 @@ export default function ResultPage() {
 
   const getAnalysisType = () => {
     if (analysisHistory && analysisHistory.individual_results) {
-      return `5-Drawing Analysis (${analysisHistory.individual_results.length}/5 completed)`;
+      const totalDrawings =
+        analysisHistory.total_drawings ||
+        analysisHistory.individual_results.length;
+      const completedAnalyses = analysisHistory.individual_results.length;
+      const successfulAnalyses =
+        analysisHistory.successful_drawings ||
+        analysisHistory.individual_results.filter((r) => !r.error).length;
+
+      return `${totalDrawings}-Drawing Analysis (${successfulAnalyses}/${completedAnalyses} successful)`;
     }
     return "Single Drawing Analysis";
   };
+
   const currentResult =
     analysisHistory?.individual_results?.[selectedDrawingIndex];
 
@@ -259,7 +275,7 @@ export default function ResultPage() {
                       padding: "5px 10px",
                       background:
                         selectedDrawingIndex === index
-                          ? "rgba(255,255,255,0.3"
+                          ? "rgba(255,255,255,0.3)"
                           : individualResult.error
                           ? "rgba(255,100,100,0.2)"
                           : "rgba(255,255,255,0.1)",
@@ -290,8 +306,8 @@ export default function ResultPage() {
                     }}
                     title={
                       individualResult.error
-                        ? "Error: ${individualResult.errorMessage}"
-                        : ""
+                        ? `Error: ${individualResult.errorMessage}`
+                        : `DOS: ${individualResult.DOS || "N/A"}`
                     }
                   >
                     {individualResult.error
