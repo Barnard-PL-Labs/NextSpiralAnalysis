@@ -7,6 +7,7 @@ import MiniSpiralHistory from "@/components/MiniSpiralHistory";
 import Header from "@/components/Header";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
+import { supabase } from "@/lib/supabaseClient";
 import backgroundStyles from "@/styles/Background.module.css";
 
 export default function MachinePage() {
@@ -275,7 +276,7 @@ export default function MachinePage() {
     }
   };
 
-  const finalizeResultsNow = useCallback(() => {
+  const finalizeResultsNow =  useCallback(async() => {
     if (savedResults.length > 0) {
       const successfulResults = savedResults.filter((r) => !r.error);
 
@@ -296,6 +297,13 @@ export default function MachinePage() {
 
         localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
         sessionStorage.setItem("analysisHistory", JSON.stringify(finalResults));
+      if (user && user.id) {
+      try {
+      await saveToSupabase(savedDrawings, finalResults);
+      } catch (err) {
+      console.error("Failed to save to Supabase:", err);
+      }
+    }
         console.log("✅ Results finalized and saved!");
       }
     }
@@ -371,6 +379,35 @@ export default function MachinePage() {
     await router.push("/result");
     setIsLoadingResults(false);
   };
+
+  const saveToSupabase = async (drawData, apiResult) => {
+  if (!user || !user.id) return;
+  const email = user.email || "anonymous@example.com";
+  const username = email.split("@")[0];
+  try {
+    const { data: drawing, error: drawError } = await supabase
+      .from("drawings")
+      .insert([{ user_id: user.id, email, username, drawing_data: drawData }])
+      .select("id")
+      .single();
+
+    if (drawError) throw drawError;
+
+    await supabase.from("api_results").insert([
+      {
+        user_id: user.id,
+        email,
+        username,
+        drawing_id: drawing.id,
+        result_data: apiResult,
+      },
+    ]);
+
+    console.log(" Multi-drawing data saved to Supabase.");
+  } catch (err) {
+    console.error(" Error saving to Supabase:", err);
+  }
+};
 
   return (
     <>
