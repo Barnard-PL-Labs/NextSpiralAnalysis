@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [averageDOS, setAverageDOS] = useState(null);
   const entriesPerPage = 5;
 
   useEffect(() => {
@@ -91,6 +92,14 @@ const Dashboard = () => {
           };
         });
         setEntries(parsed);
+
+        const dosValues = parsed
+          .map(e => parseFloat(e.result_data?.average_DOS))
+          .filter(n => !isNaN(n));
+        if (dosValues.length > 0) {
+          const sum = dosValues.reduce((a, b) => a + b, 0);
+          setAverageDOS((sum / dosValues.length).toFixed(2));
+        }
       }
 
       setLoading(false);
@@ -154,11 +163,17 @@ const Dashboard = () => {
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
                 <h2>Latest Result</h2>
-                <p><strong>DOS Score:</strong> {entries[0].result_data?.DOS || 'N/A'}</p>
+                <p><strong>DOS Score:</strong> {entries[0].result_data?.average_DOS || 'N/A'}</p>
                 <p><strong>Analyzed on:</strong> {new Date(entries[0].created_at).toLocaleString()}</p>
                 <div className={styles.scatterPlot}>
                   {entries[0]?.drawings?.drawing_data.length > 0 ? (
-                    <XYChart data={entries[0].drawings.drawing_data} />
+                    Array.isArray(entries[0].drawings.drawing_data[0]) ? (
+                      entries[0].drawings.drawing_data.slice(0, 3).map((d, i) => (
+                        <XYChart key={i} data={d} />
+                      ))
+                    ) : (
+                      <XYChart data={entries[0].drawings.drawing_data} />
+                    )
                   ) : (
                     <p>No drawing data available.</p>
                   )}
@@ -175,7 +190,7 @@ const Dashboard = () => {
                     onClick={() => handleAccordionClick(index)}
                   >
                     <span>
-                      {index + 1 + (currentPage - 1) * entriesPerPage}. DOS Score: {entry.result_data?.DOS || 'N/A'} – {new Date(entry.created_at).toLocaleString()}
+                      {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS: {entry.result_data?.average_DOS || entry.result_data?.DOS || 'N/A'} – {new Date(entry.created_at).toLocaleString()}
                       {isSuperuser && (
                         <> — <strong>User:</strong> {entry.email || 'N/A'}</>
                       )}
@@ -186,13 +201,25 @@ const Dashboard = () => {
                     <div className={styles.accordionContent}>
                       <div className={styles.scatterPlot}>
                         {entry.drawings?.drawing_data.length > 0 ? (
-                          <XYChart data={entry.drawings.drawing_data} />
+                          Array.isArray(entry.drawings.drawing_data[0]) ? (
+                            entry.drawings.drawing_data.slice(0, 3).map((d, i) => (
+                              <XYChart key={i} data={d} />
+                            )).concat(
+                              entry.drawings.drawing_data.length > 3 ? (
+                                <div key="more" style={{ color: 'white', marginTop: '0.5rem' }}>
+                                  +{entry.drawings.drawing_data.length - 3} more drawing(s)
+                                </div>
+                              ) : []
+                            )
+                          ) : (
+                            <XYChart data={entry.drawings.drawing_data} />
+                          )
                         ) : (
                           <p>No drawing data available.</p>
                         )}
                       </div>
                       <div className={styles.resultLink}>
-                        <Link href={`/result/${entry.drawing_id}`} style={{ textDecoration: 'none' }}>
+                        <Link href={`/result/${entry.drawing_id}`} className ='hover:underline'>
                           View Full Analysis
                         </Link>
                       </div>
