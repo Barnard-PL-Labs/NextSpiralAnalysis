@@ -127,8 +127,14 @@
   width: 300px;
   height: 300px;
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: row;
+
 }
+.scatterPlot > div {
+  min-width: 300px;
+}
+
 
 .noEntry {
   color: white;

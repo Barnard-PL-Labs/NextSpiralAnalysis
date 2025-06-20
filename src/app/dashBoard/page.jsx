@@ -192,7 +192,7 @@ const Dashboard = () => {
                         : "Drawings"}
                     </strong>
                     <br />
-                    <strong> Avg DOS Score:</strong>{" "}
+                    <strong> Avg DOS Score:</strong>
                     {entries[0].result_data?.average_DOS || "N/A"}
                   </p>
                 )}
@@ -227,22 +227,14 @@ const Dashboard = () => {
                       }
                     />
                   )}
-
-                {entries[0]?.result_data?.average_DOS && (
-                  <div
-                    style={{
-                      color: "black",
-                      marginTop: 10,
-                      textAlign: "left",
-                    }}
+                <div className={styles.resultLink}>
+                  <Link
+                    href={`/result/${entries[0].drawing_id}`}
+                    style={{ textDecoration: "none" }}
                   >
-                    <strong>Batch Average DOS:</strong>{" "}
-                    {entries[0].result_data.average_DOS}
-                    <br />
-                    <strong>Drawings in Batch:</strong>{" "}
-                    {entries[0].drawings.drawing_data.length}
-                  </div>
-                )}
+                    View Full Analysis
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -258,7 +250,7 @@ const Dashboard = () => {
                     onClick={() => handleAccordionClick(index)}
                   >
                     <span>
-                      {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS:{" "}
+                      {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS:
                       {entry.result_data?.average_DOS ||
                         entry.result_data?.DOS ||
                         "N/A"}{" "}
