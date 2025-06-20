@@ -88,13 +88,13 @@ export default function Settings() {
       {isMobile ? <BottomNav /> : <Sidebar />}
       <div className={styles.settingsContainer}>
         <h2 className={styles.settingsHeader}>Account Settings</h2>
-        
+
         <div className={styles.accountContainer}>
           <div className={styles.accountTitleRow}>
             <span>Your Account</span>
             <span className={styles.arrow}>{'>'}</span>
-          </div>
-          <button 
+        </div>
+          <button
             className={styles.signOutText} 
             onClick={handleSignOut}
           >

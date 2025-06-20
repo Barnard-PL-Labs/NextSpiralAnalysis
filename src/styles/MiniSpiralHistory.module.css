@@ -54,95 +54,58 @@
   height: 90px;
 }
 
-/* Dashboard-specific styles */
-.spiralGrid {
+/* Medium-sized horizontal cards for dashboard */
+.dashboardHorizontalSidebar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 30px;
-  background: transparent;
-  width: 100%;
-  height: auto;
-  margin-top: 20px;
+  gap: 40px;
+  padding: 20px 20px 20px 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-top: 5px;
+  overflow-x: auto;
+  overflow-y: hidden; /* Prevent vertical scrolling */
+  width: 100px;
+  max-width: 100%;
+  min-height: 280px; /* Ensure container is tall enough for larger cards */
 }
 
-.dashboardSpiralCard {
-  width: 220px;
-  height: 220px;
+.dashboardHorizontalCard {
+  width: 270px; /* Increased from 250px */
+  height: 240px; /* Increased from 220px */
   background-color: white;
-  border: 2px solid #ddd;
+  border: 2px solid #adb8ed;
   border-radius: 8px;
   padding: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
 }
 
-.dashboardSpiralTitle {
-  font-size: 14px;
+.dashboardHorizontalTitle {
+  font-size: 12px;
   font-weight: bold;
   color: #666;
   margin-bottom: 6px;
   text-align: center;
 }
 
-.dashboardSpiralChart {
+.dashboardHorizontalChart {
   width: 100%;
-  height: 180px;
+  height: 190px; /* Increased from 170px to accommodate larger card */
+}
+/* Scrollbar styles for medium horizontal cards */
+.dashboardHorizontalSidebar::-webkit-scrollbar {
+  height: 8px; /* Horizontal scrollbar height */
 }
 
-/* Horizontal sidebar styles for dashboard */
-.horizontalSpiralSidebar {
-  display: flex;
-  gap: 15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  margin-top: 15px;
-  overflow-x: auto;
-  max-width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Custom scrollbar styles for horizontal sidebar */
-.horizontalSpiralSidebar::-webkit-scrollbar {
-  height: 8px;
-}
-
-.horizontalSpiralSidebar::-webkit-scrollbar-track {
+.dashboardHorizontalSidebar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.horizontalSpiralSidebar::-webkit-scrollbar-thumb {
+.dashboardHorizontalSidebar::-webkit-scrollbar-thumb {
   background: #7eafe5;
   border-radius: 4px;
 }
 
-.horizontalSpiralSidebar::-webkit-scrollbar-thumb:hover {
+.dashboardHorizontalSidebar::-webkit-scrollbar-thumb:hover {
   background: #5cbeff;
 }
-
-.horizontalSpiralCard {
-  width: 120px;
-  height: 100px;
-  background-color: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-}
-
-.horizontalSpiralTitle {
-  font-size: 10px;
-  font-weight: bold;
-  color: #666;
-  margin-bottom: 4px;
-  text-align: center;
-}
-
-.horizontalSpiralChart {
-  width: 100%;
-  height: 70px;
-} 

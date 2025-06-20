@@ -8,7 +8,6 @@ import XYChart from "../../components/Scatter";
 import Pagination from "../../components/Pagination";
 import styles from "../../styles/Dashboard.module.css";
 import Link from "next/link";
-import MiniSpiralHistory from "../../components/MiniSpiralHistory";
 import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
 
 const SUPERUSER_EMAILS = (
@@ -31,7 +30,7 @@ const Dashboard = () => {
   const [viewAll, setViewAll] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
-  const entriesPerPage = 5;
+  const entriesPerPage = 7;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -180,57 +179,48 @@ const Dashboard = () => {
           <>
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
-                <h2 style={{ textDecoration: "underline", fontWeight: "bold" }}>
+                <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
                   Latest Result
                 </h2>
                 {entries[0]?.result_data?.average_DOS && (
-                  <p>
-                    <strong>
-                      {entries[0].drawings.drawing_data.length}
-                      {entries[0].drawings.drawing_data.length == 1
-                        ? "Drawing"
-                        : "Drawings"}
-                    </strong>
-                    <br />
-                    <strong> Avg DOS Score:</strong>
-                    {entries[0].result_data?.average_DOS || "N/A"}
-                  </p>
+                  <>
+                    <div className={styles.drawingCountBadge}>
+                      {Array.isArray(entries[0].drawings.drawing_data[0]) 
+                        ? entries[0].drawings.drawing_data.length 
+                        : 1}
+                      {Array.isArray(entries[0].drawings.drawing_data[0]) 
+                        ? (entries[0].drawings.drawing_data.length == 1 ? " Drawing" : " Drawings")
+                        : " Drawing"}
+                    </div>
+                    <p className={styles.dosScoreText}>
+                      <strong> <u> Average DOS Score</u>:  </strong>
+                      {entries[0].result_data?.average_DOS || "N/A"}
+                    </p>
+                  </>
                 )}
                 <p>
-                  <strong>Analyzed on:</strong>{" "}
+                  <strong><u>Analyzed on</u>:</strong>{" "}
                   {new Date(entries[0].created_at).toLocaleString()}
                 </p>
                 <div className={styles.scatterPlot}>
                   {entries[0]?.drawings?.drawing_data &&
                   entries[0].drawings.drawing_data.length > 0 ? (
-                    <MiniSpiralHistory
+                    <HorizontalSpiralHistory
                       savedDrawings={
                         Array.isArray(entries[0].drawings.drawing_data[0])
                           ? entries[0].drawings.drawing_data
                           : [entries[0].drawings.drawing_data]
                       }
-                      sidebar={false}
                     />
                   ) : (
                     <p>No drawing data available.</p>
                   )}
                 </div>
 
-                {/* Horizontal sidebar for additional spiral previews */}
-                {entries[0]?.drawings?.drawing_data &&
-                  entries[0].drawings.drawing_data.length > 4 && (
-                    <HorizontalSpiralHistory
-                      savedDrawings={
-                        Array.isArray(entries[0].drawings.drawing_data[0])
-                          ? entries[0].drawings.drawing_data.slice(4) // Show spirals after the first 4
-                          : []
-                      }
-                    />
-                  )}
                 <div className={styles.resultLink}>
                   <Link
                     href={`/result/${entries[0].drawing_id}`}
-                    style={{ textDecoration: "none" }}
+                    className={styles.viewFullAnalysisLink}
                   >
                     View Full Analysis
                   </Link>
@@ -238,7 +228,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 style={{ color: "white", fontWeight: "bold" }}>
+            <h2 className={styles.pastResultsHeading} style={{ color: "white", fontWeight: "bold" }}>
               Past Results
               {averageDOS && ` - Your Overall Average: ${averageDOS}`}
             </h2>
@@ -268,38 +258,37 @@ const Dashboard = () => {
                   </div>
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
+                      {entry?.drawings?.drawing_data && (
+                        <>
+                          <div className={styles.drawingCountBadge}>
+                            {Array.isArray(entry.drawings.drawing_data[0]) 
+                              ? entry.drawings.drawing_data.length 
+                              : 1}
+                            {Array.isArray(entry.drawings.drawing_data[0]) 
+                              ? (entry.drawings.drawing_data.length == 1 ? " Drawing" : " Drawings")
+                              : " Drawing"}
+                          </div>
+                        </>
+                      )}
                       <div className={styles.scatterPlot}>
                         {entry?.drawings?.drawing_data &&
                         entry.drawings.drawing_data.length > 0 ? (
-                          <MiniSpiralHistory
+                          <HorizontalSpiralHistory
                             savedDrawings={
                               Array.isArray(entry.drawings.drawing_data[0])
                                 ? entry.drawings.drawing_data
                                 : [entry.drawings.drawing_data]
                             }
-                            sidebar={false}
                           />
                         ) : (
                           <p>No drawing data available.</p>
                         )}
                       </div>
 
-                      {/* Horizontal sidebar for additional spiral previews */}
-                      {entry?.drawings?.drawing_data &&
-                        entry.drawings.drawing_data.length > 4 && (
-                          <HorizontalSpiralHistory
-                            savedDrawings={
-                              Array.isArray(entry.drawings.drawing_data[0])
-                                ? entry.drawings.drawing_data.slice(4) // Show spirals after the first 4
-                                : []
-                            }
-                          />
-                        )}
-
                       <div className={styles.resultLink}>
                         <Link
                           href={`/result/${entry.drawing_id}`}
-                          style={{ textDecoration: "none" }}
+                          className={styles.viewFullAnalysisLink}
                         >
                           View Full Analysis
                         </Link>

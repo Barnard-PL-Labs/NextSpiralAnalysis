@@ -2,7 +2,7 @@
   display: flex;
   min-height: 100vh;
   color: white;
-  padding-bottom:100px;
+  padding-bottom: 25px;
 }
 
 .content {
@@ -61,7 +61,8 @@
 
 .entriesList li {
   padding: 12px 16px;
-  margin-bottom: 8px;
+  margin-top: 16px;
+  margin-bottom: 16px;
   background-color: #f1f5f9;
   border-radius: 8px;
   border-left: 4px solid #94a3b8;
@@ -91,54 +92,7 @@
 }
 
 .resultLink {
-  margin-top: 10px;
-  font-weight: 500;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 30px;
-}
-
-.pagination button {
-  padding: 8px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background-color: white;
-  color: #1e293b;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pagination button:hover {
-  background-color: #e2e8f0;
-}
-
-.pagination button.activePage {
-  color: white;
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-}
-
-.scatterPlot {
-  width: 300px;
-  height: 300px;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-
-}
-.scatterPlot > div {
-  min-width: 300px;
-}
-
-
-.noEntry {
-  color: white;
-  font-size: 2rem;
+  margin-top: -15px;
   font-weight: 500;
 }
 
@@ -146,7 +100,59 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 20px;
+  margin-top: 50px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2px 20px;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination button:hover {
+  background-color: #f1f5f9;
+}
+
+.pagination button.activePage {
+  color: white;
+  background-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.scatterPlot {
+  width: 95%;
+  height: 310px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+}
+.scatterPlot > div {
+  min-width: 300px;
+  width: 100%;
+}
+
+.noEntry {
+  color: white;
+  font-size: 2rem;
+  font-weight: 500;
 }
 
 .ellipsis {
@@ -168,13 +174,68 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: 1rem;
+  margin-left: 0.3rem;
+  padding-left: .5rem;
+  border-left: 1px solid #dadee3;
 }
 
 .gotoInput {
   width: 60px;
-  padding: 3px 5px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  color:black;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #d2d5d9;
+  color: #333;
+  text-align: center;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+
+.gotoInput::-webkit-outer-spin-button,
+.gotoInput::-webkit-inner-spin-button {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  margin-right: 2px;
+}
+
+.gotoInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.viewFullAnalysisLink {
+  text-decoration: none;
+  color: black;
+  transition: text-decoration 0.2s ease;
+}
+
+.viewFullAnalysisLink:hover {
+  text-decoration: underline;
+}
+
+.drawingCountBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  margin-top: 15px;
+  margin-bottom: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.dosScoreText {
+  margin-bottom: 10px;
+}
+
+.pastResultsHeading {
+  font-size: 1.65rem;
+  margin-top: 50px;
+  margin-bottom: 20px;
 }

@@ -55,7 +55,6 @@ const Pagination = ({ currentPage, setCurrentPage, pageCount }) => {
         </>
       )}
       <div className={styles.gotoContainer}>
-        <span>Go to:</span>
         <input
           type="number"
           min={1}
