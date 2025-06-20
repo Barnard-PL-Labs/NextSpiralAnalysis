@@ -32,6 +32,13 @@ export default function Header() {
     await supabase.auth.signOut();
   };
 
+  // Extract first name from email (assuming format: firstname.lastname@domain.com or firstname@domain.com)
+  const getFirstName = (email) => {
+    if (!email) return '';
+    const emailPart = email.split('@')[0];
+    return emailPart.split('.')[0].charAt(0).toUpperCase() + emailPart.split('.')[0].slice(1);
+  };
+
   return (
     <div >
       {/* HEADER */}
@@ -62,7 +69,7 @@ export default function Header() {
 
             {user ? (
               <>
-                <li><Link href="/dashBoard"><span>{user.email}</span></Link></li>
+                <li><Link href="/dashBoard"><span>{getFirstName(user.email)}</span></Link></li>
                 <li>
                   <button onClick={handleLogout} className="logoutBtn">
                     <span>Logout</span>
@@ -111,7 +118,7 @@ export default function Header() {
               <>
                 <Link href="/dashBoard" onClick={() => setDropdownOpen(false)} className="w-full no-underline">
                   <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
-                    {user.email}
+                    {getFirstName(user.email)}
                   </div>
                 </Link>
                 <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="w-full no-underline">

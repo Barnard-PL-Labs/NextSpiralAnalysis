@@ -1,28 +1,93 @@
 /* Settings.module.css */
 
 .settingsContainer {
-    background: linear-gradient(to bottom, #0d1117, #141b25, #0d1117) !important;
-    max-width: 500px;
+    background: rgba(255, 255, 255, 0.8);
+    max-width: 1200px;
     margin: 40px auto;
-    padding: 30px;
-    margin-top:10%;
-    background: #1c1f26;
+    padding: 80px;
+    margin-top: 10%;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    color: #ccc;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    color: #333;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-.settingsContainer {
-    background: linear-gradient(160deg, #1c1f26, #2c3e50);
+    min-height: 600px;
 }
 
 .settingsHeader {
-    font-size: 2em;
+    font-size: 1.6em;
     font-weight: 600;
-    color: #ffffff;
+    color: #333;
     margin-bottom: 20px;
-    text-align: center;
+    text-align: left;
+    margin-top: 5px;
+    margin-left: 0;
+}
+
+.accountContainer {
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 20px 0px 80px 20px;
+    margin-bottom: 5px;
+    margin-top: 80px;
+    max-width: 500px;
+}
+
+.accountTitleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: left;
+    margin-top: 30px;
+    margin-left: 0;
+}
+
+.arrow {
+    font-size: 1.2em;
+    color: #666;
+    font-weight: 400;
+    margin-right: 15px;
+}
+
+.accountTitle {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: left;
+    margin-top: 30px;
+    margin-left: 0;
+}
+
+.signOutText {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+    margin: 0;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.signOutText:hover {
+    color: #0366d6;
+}
+
+.settingsSubHeader {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: left;
+    margin-top: 55px;
+    margin-left: 0;
 }
 
 .settingsButton, .settingsDeleteBtn {
@@ -36,7 +101,7 @@
     cursor: pointer;
     transition: background-color 0.2s;
     margin-bottom: 10px;
-    width: 100%;
+    width: 150px;
 }
 
 .settingsButton:hover:not(:disabled) {
@@ -60,17 +125,18 @@
     font-size: 1em;
     margin-bottom: 20px;
     border-radius: 8px;
-    border: 1px solid #444;
-    background-color: #2c3e50;
-    color: #fff;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    color: #333;
     transition: border-color 0.2s;
     box-sizing: border-box; 
 }
 
 .settingsInput:focus {
     border-color: #0366d6;
-    background-color: #333;
+    background-color: white;
     outline: none;
+    box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
 }
 
 /* Message Styling */
@@ -97,4 +163,12 @@
 .settingsContainer > * {
     width: 100%;
     box-sizing: border-box;
+}
+
+.settingsLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9em;
 }

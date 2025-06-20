@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import styles from '../styles/SideBar.module.css';
-import { FaTachometerAlt, FaCog, FaPhoenixSquadron } from 'react-icons/fa';
+import { FaTachometerAlt, FaCog, FaPhoenixSquadron, FaChartBar, FaPencilAlt, FaUserCog, FaHome } from 'react-icons/fa';
 import { Squash as Hamburger } from 'hamburger-react';
 
 const Sidebar = () => {
@@ -38,26 +38,18 @@ const Sidebar = () => {
                     <nav>
                         <ul className={styles.navItems}>
                             <li>
-                                <Link href="/dashBoard">
+                                <Link href="/">
                                     <div className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}>
-                                        <FaTachometerAlt className={styles.icon} />
-                                        {isOpen && <span>Dashboard</span>}
-                                    </div>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/machine">
-                                    <div className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}>
-                                        <FaPhoenixSquadron className={styles.icon} />
-                                        {isOpen && <span>Spiral Analysis</span>}
+                                        <FaHome className={styles.icon} />
+                                        {isOpen && <span>Home</span>}
                                     </div>
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/setting">
                                     <div className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}>
-                                        <FaCog className={styles.icon} />
-                                        {isOpen && <span>Setting</span>}
+                                        <FaUserCog className={styles.icon} />
+                                        {isOpen && <span>Settings</span>}
                                     </div>
                                 </Link>
                             </li>

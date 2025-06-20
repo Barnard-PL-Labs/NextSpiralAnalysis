@@ -10,7 +10,7 @@
   
 
 .toggleButton {
-  color:rgb(9, 239, 255);
+  color:rgb(150, 183, 244);
   position: absolute;
   top: 20px;
   z-index: 1000;
@@ -21,8 +21,8 @@
   /* background: #000000; */
   border: yellow;
   color: #ffffff;
-  height: calc(100vh - 92px); 
-  top: 102px; 
+  height: 100vh; 
+  top: 65px; 
   left: 0;
   overflow-y: auto;
   position: fixed;
