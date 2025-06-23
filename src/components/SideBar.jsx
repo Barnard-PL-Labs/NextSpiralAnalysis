@@ -7,7 +7,7 @@ import styles from '../styles/SideBar.module.css';
 import { FaTachometerAlt, FaCog, FaPhoenixSquadron, FaChartBar, FaPencilAlt, FaUserCog, FaHome } from 'react-icons/fa';
 import { Squash as Hamburger } from 'hamburger-react';
 
-const Sidebar = () => {
+const Sidebar = ({ onSettingsClick }) => {
     const [isOpen, setIsOpen] = useState(false);  
 
     return (
@@ -46,12 +46,14 @@ const Sidebar = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/setting">
-                                    <div className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}>
-                                        <FaUserCog className={styles.icon} />
-                                        {isOpen && <span>Settings</span>}
-                                    </div>
-                                </Link>
+                                <button 
+                                    onClick={onSettingsClick}
+                                    className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                                >
+                                    <FaUserCog className={styles.icon} />
+                                    {isOpen && <span>Settings</span>}
+                                </button>
                             </li>
                         </ul>
                     </nav>

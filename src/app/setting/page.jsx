@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { IoPerson } from "react-icons/io5";
 import styles from "../../styles/Settings.module.css";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
@@ -91,7 +92,10 @@ export default function Settings() {
 
         <div className={styles.accountContainer}>
           <div className={styles.accountTitleRow}>
-            <span>Your Account</span>
+            <div className={styles.accountTitleContent}>
+              <IoPerson className={styles.personIcon} />
+              <span>Your Account</span>
+            </div>
             <span className={styles.arrow}>{'>'}</span>
         </div>
           <button

@@ -9,6 +9,7 @@ import Pagination from "../../components/Pagination";
 import styles from "../../styles/Dashboard.module.css";
 import Link from "next/link";
 import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
+import SettingsPopup from "../../components/SettingsPopup";
 
 const SUPERUSER_EMAILS = (
   process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [viewAll, setViewAll] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -104,8 +106,8 @@ const Dashboard = () => {
           try {
             drawingData =
               typeof entry.drawings?.drawing_data === "string"
-                ? JSON.parse(entry.drawings.drawing_data)
-                : entry.drawings?.drawing_data || [];
+              ? JSON.parse(entry.drawings.drawing_data)
+              : entry.drawings?.drawing_data || [];
           } catch (e) {}
           return {
             ...entry,
@@ -152,7 +154,8 @@ const Dashboard = () => {
 
   return (
     <div className={styles.pageContainer}>
-      {isMobile ? <BottomNav /> : <Sidebar />}
+      {isMobile ? <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} /> : <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />}
+      <SettingsPopup isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
           <h1 className={styles.welcome} style={{ color: "white" }}>

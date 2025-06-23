@@ -4,7 +4,7 @@ import { FaTachometerAlt, FaCog, FaPhoenixSquadron } from 'react-icons/fa';
 import styles from '../styles/BottomNav.module.css';
 import Image from 'next/image';
 
-const BottomNav = () => {
+const BottomNav = ({ onSettingsClick }) => {
   return (
     <>
 <header className="fixed top-0 left-0 w-full z-50 bg-white flex justify-center items-center py-3 shadow-md">
@@ -40,9 +40,13 @@ const BottomNav = () => {
           </div>
         </Link>
 
-        <Link href="/setting">
-          <div className={styles.navItem}><FaCog /><span>Setting</span></div>
-        </Link>
+        <button 
+          onClick={onSettingsClick}
+          className={styles.navItem}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+        >
+          <FaCog /><span>Setting</span>
+        </button>
       </div>
     </>
   );
