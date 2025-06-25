@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css";
 import MiniSpiralHistory from "@/components/MiniSpiralHistory";
 import Header from "@/components/Header";
+import Tutorial from "@/components/Tutorial";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
@@ -20,6 +21,7 @@ export default function MachinePage() {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [userFinished, setUserFinished] = useState(false);
   const { user } = useAuth();
@@ -442,7 +444,7 @@ export default function MachinePage() {
                   onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
                   isAnalyzing={isAnalyzing}
                   isLoadingResults={isLoadingResults}
-                  onFinishEarly={handleFinishEarly} // ✅ ADD: Pass the handler
+                  onFinishEarly={handleFinishEarly} 
                   userFinished={userFinished}
                 />
               </>
@@ -452,6 +454,14 @@ export default function MachinePage() {
           <>
             <div className={styles.machineContainer}>
               <h1 className={styles.title}>Draw Here</h1>
+              
+              <button 
+                className={styles.helpButton}
+                onClick={() => setShowTutorial(true)}
+                aria-label="Help"
+              >
+                ?
+              </button>
 
               <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
               <MiniSpiralHistory savedDrawings={savedDrawings} />
@@ -486,6 +496,7 @@ export default function MachinePage() {
           </>
         )}
       </div>
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} forceShow={true} />}
     </>
   );
 }
