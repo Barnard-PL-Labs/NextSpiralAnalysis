@@ -69,6 +69,28 @@ export async function POST(req) {
         }
 
         const externalApiData = JSON.parse(responseText);
+        console.log("=== EXTERNAL API RESPONSE ANALYSIS ===");
+        console.log("Response type:", typeof externalApiData);
+        console.log("Is array:", Array.isArray(externalApiData));
+        console.log("Response keys:", Object.keys(externalApiData));
+        console.log(
+          "Response structure:",
+          JSON.stringify(externalApiData, null, 2)
+        );
+
+        // Check if it has nested objects/arrays
+        Object.keys(externalApiData).forEach((key) => {
+          const value = externalApiData[key];
+          console.log(`Property "${key}":`, {
+            type: typeof value,
+            isArray: Array.isArray(value),
+            length: value?.length || "N/A",
+            keys:
+              typeof value === "object" && value !== null
+                ? Object.keys(value)
+                : "N/A",
+          });
+        });
         console.log("Parsed External API Response:", externalApiData);
 
         if (!externalApiData || typeof externalApiData !== "object") {
@@ -112,8 +134,3 @@ export async function POST(req) {
     );
   }
 }
-
-
-
-
-

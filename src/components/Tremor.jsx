@@ -1,4 +1,6 @@
+import { sum } from "d3";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
@@ -7,33 +9,111 @@ const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 const processTremorData = (result) => {
   const axes = [];
   const powers = [];
+  const polarities = [];
+  const frequencies = [];
 
   // Extract tremor direction and power data
   if (result) {
     for (let i = 1; i <= 3; i++) {
       const direction = result[`traxis_dir${i}`];
       const power = result[`traxis_pw${i}`];
+      const polarity = result[`traxis_pol${i}`];
+      const frequency = result[`traxis_fr${i}`];
 
       // Only add if the axis is detected
-      if (direction !== "No Axis" && power !== "No Axis") {
+      if (
+        direction !== "No Axis" &&
+        power !== "No Axis" &&
+        !isNaN(parseFloat(direction)) &&
+        !isNaN(parseFloat(power))
+      ) {
         axes.push(parseFloat(direction));
         powers.push(parseFloat(power));
+        polarities.push(parseFloat(polarity));
+        frequencies.push(parseFloat(frequency));
       }
     }
   }
 
-  console.log("Processed Tremor Data:", { axes, powers });
-  return { axes, powers };
+  // Extract amplitude data
+  const maxAmplitude = parseFloat(result["max amp. (cm)"]) || 0;
+  const meanAmplitude = parseFloat(result["mean amp. (cm)"]) || 0;
+  const stdAmplitude = parseFloat(result["std of amp."]) || 0;
+
+  // Convert amplitude to mm for clinical readability
+  const amplitudeData = {
+    max: maxAmplitude * 10000,
+    mean: meanAmplitude * 10000,
+    std: stdAmplitude * 10000,
+  };
+  console.log("=== TREMOR DATA DEBUG ===");
+  console.log("Raw result keys:", Object.keys(result || {}));
+  console.log("traxis_dir values:", {
+    dir1: result[`traxis_dir1`],
+    dir2: result[`traxis_dir2`],
+    dir3: result[`traxis_dir3`],
+  });
+  console.log("traxis_pw values:", {
+    pw1: result[`traxis_pw1`],
+    pw2: result[`traxis_pw2`],
+    pw3: result[`traxis_pw3`],
+  });
+  console.log("Processed arrays:", {
+    axes,
+    powers,
+    polarities,
+    frequencies,
+    amplitudeData,
+  });
+  console.log("hasAxes will be:", axes.length > 0);
+
+  console.log("Comprehensive Tremor Data:", {
+    axes,
+    powers,
+    polarities,
+    frequencies,
+    amplitudeData,
+  });
+  return { axes, powers, polarities, frequencies, amplitudeData };
 };
 
 const TremorPolarPlot = ({ result }) => {
+  const [currentSection, setCurrentSection] = useState(0);
+  
   if (!result) {
     return <div>Loading tremor data...</div>; // or return null
   }
-  const { axes, powers } = processTremorData(result);
+  const { axes, powers, polarities, frequencies, amplitudeData } =
+    processTremorData(result);
 
   // Check if any axes are detected
   const hasAxes = axes.length > 0;
+
+  // Calculate marker sizes based on amplitude (scaling for visibility)
+
+  const baseMarkerSize = 8;
+  const maxMarkerSize = 20;
+
+  const maxPower = hasAxes ? Math.max(...powers) : 0;
+  const minPower = hasAxes ? Math.min(...powers) : 0;
+  const powerRange = maxPower - minPower;
+
+  const markerSizes = hasAxes
+    ? axes.map((_, index) => {
+        if (powerRange === 0) return baseMarkerSize;
+
+        const normalizedPower = (powers[index] - minPower) / powerRange;
+        return (
+          baseMarkerSize + normalizedPower * (maxMarkerSize - baseMarkerSize)
+        );
+      })
+    : [];
+
+  // Color scale for polarity (higher polarity = better tremor quality)
+  const polarityColors = polarities.map(
+    (pol) =>
+      `rgba(${Math.round(255 * (1 - pol))}, ${Math.round(255 * pol)}, 100, 0.8)`
+  );
 
   const plotData = hasAxes
     ? [
@@ -43,74 +123,353 @@ const TremorPolarPlot = ({ result }) => {
           r: powers,
           theta: axes,
           fill: "toself",
-          marker: { color: "#00ff00", size: 6 },
-          line: { color: "#00ff00", width: 2 },
+          fillcolor: "rgba(0,255,0,0.1)",
+          marker: {
+            size: markerSizes,
+            color: "#16a34a",
+            line: { color: "#ffffff", width: 2 },
+            symbol: "circle",
+          },
+          line: { color: "#16a34a", width: 2 },
+          name: "",
+          hoverTemplate:
+            "<b>Direction</b>: %{theta}°<br>" +
+            "<b>Power</b>: %{r:.3f}<br>" +
+            "<b>Polarity</b>: %{customdata[0]:.3f}<br>" +
+            "<b>Frequency</b>: %{customdata[1]:.2f} Hz<br>" +
+            "<extra></extra>",
+          customdata: polarities.map((pol, i) => [pol, frequencies[i]]),
         },
+        // Amplitude reference circle
+        {
+          type: "scatterpolar",
+          mode: "lines",
+          r: Array(360).fill(amplitudeData.max * 2),
+          theta: Array.from({ length: 360 }, (_, i) => i),
+          line: {
+            color: "rgba(255, 165, 0, 0.3)",
+            width: 1,
+            dash: "dot",
+          },
+          showlegend: false,
+          hoverinfo: "skip",
+        },
+        // Center point
         {
           type: "scatterpolar",
           mode: "markers",
           r: [0],
           theta: [0],
-          marker: { color: "red", size: 5 },
+          marker: {
+            color: "#dc2626",
+            size: 6,
+          },
+          showlegend: false,
+          hoverinfo: "skip",
         },
       ]
     : [];
 
-  const maxPower = Math.max(...powers, 0);
-  const maxDirection = axes[powers.indexOf(maxPower)] || 0;
-  const frequency = result["X Freq"] || 0;
+  // Clinical metrics
+  const maxPowerValue = hasAxes ? Math.max(...powers) : 0;
+  const maxPowerIndex = hasAxes ? powers.indexOf(maxPowerValue) : -1;
+  const dominantDirection = maxPowerIndex >= 0 ? axes[maxPowerIndex] : 0;
+  const dominantPolarity = maxPowerIndex >= 0 ? polarities[maxPowerIndex] : 0;
+  const dominantFrequency = maxPowerIndex >= 0 ? frequencies[maxPowerIndex] : 0;
+
+  // Power distribution
+  const powerMean = hasAxes
+    ? powers.reduce((a, b) => a + b) / powers.length
+    : 0;
+  const powerCV = hasAxes
+    ? Math.sqrt(
+        powers.reduce((sum, p) => sum + Math.pow(p - powerMean, 2), 0) /
+          powers.length
+      ) / powerMean
+    : 0;
+  const isDirectional = powerCV > 0.3;
+
+  // Calculate anisotropy
+  const rawAnisotropy = result["R-L hemi-pr"];
   const anisotropy =
-    result["R-L hemi-pr"] === "Inf"
-      ? 1
-      : parseFloat(result["R-L hemi-pr"]) || 0;
+    rawAnisotropy === "-Inf" ||
+    rawAnisotropy === "Inf" ||
+    rawAnisotropy === "NaN"
+      ? "N/A"
+      : parseFloat(rawAnisotropy) || 0;
 
   const layout = {
     polar: {
-      radialaxis: { visible: true, range: [0, maxPower * 1.2] },
-      angularaxis: { direction: "clockwise", tickmode: "array", rotation: 0 },
+      radialaxis: {
+        visible: true,
+        range: [0, maxPower * 1.2],
+        tickfont: { color: "#1e3a8a", weight: "bold", size: 12 },
+        gridcolor: "#444444",
+      },
+      angularaxis: {
+        direction: "clockwise",
+        tickmode: "linear",
+        dtick: 30,
+        rotation: 90,
+        tickfont: { color: "#000000", size: 11, weight: "bold" },
+        gridcolor: "#444444",
+      },
+      bgcolor: "rgba(0,0,0,0.1)",
     },
-    margin: { l: 0, r: 0, b: 0, t: 0 },
+    margin: { l: 2, r: 20, b: 20, t: 30 },
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
+    annotations: [
+      {
+        text: "PWR",
+        font: { color: "#1e3a8a", size: 12, weight: "bold" },
+        x: 1.0,
+        y: 0.44,
+        xref: "paper",
+        yref: "paper",
+        showarrow: false,
+        textangle: 0,
+      }
+    ],
+  };
+
+  // Clinical sections for carousel
+  const clinicalSections = [
+    {
+      title: "Primary Axis",
+      color: "#16a34a",
+      bgColor: "rgba(0,100,0,0.2)",
+      borderColor: "#16a34a",
+      data: [
+        { label: "Direction", value: `${dominantDirection}°`, color: "#cc6600" },
+        { label: "Power", value: maxPower.toFixed(2), color: "#cc6600" },
+        { label: "Quality", value: `${(dominantPolarity * 100).toFixed(0)}%`, 
+          color: dominantPolarity > 0.95 ? "#00aa00" : "#cc6600" },
+      ]
+    },
+    {
+      title: "Amplitude",
+      color: "#ff8800",
+      bgColor: "rgba(100,50,0,0.2)",
+      borderColor: "#ff8800",
+      data: [
+        { label: "Max", value: amplitudeData.max.toFixed(1), color: "#cc6600" },
+        { label: "Mean", value: amplitudeData.mean.toFixed(1), color: "#cc6600" },
+        { label: "Variation", value: `${amplitudeData.mean > 0 ? ((amplitudeData.std / amplitudeData.mean) * 100).toFixed(0) : "0"}%`, 
+          color: amplitudeData.std / amplitudeData.mean > 0.5 ? "#cc0000" : "#00aa00" },
+      ]
+    },
+    {
+      title: "Assessment",
+      color: "#4488ff",
+      bgColor: "rgba(0,0,100,0.2)",
+      borderColor: "#4488ff",
+      data: [
+        { label: "Type", value: isDirectional ? "Directional" : "Symmetric", 
+          color: isDirectional ? "#cc6600" : "#00aa00" },
+        { label: "Frequency", value: `${dominantFrequency.toFixed(1)}Hz`, color: "#cc3300" },
+        { label: "Category", value: result["Cal Tremor"], color: "#0066cc" },
+      ]
+    }
+  ];
+
+  const nextSection = () => {
+    setCurrentSection((prev) => (prev + 1) % clinicalSections.length);
+  };
+
+  const prevSection = () => {
+    setCurrentSection((prev) => (prev - 1 + clinicalSections.length) % clinicalSections.length);
   };
 
   return (
     <div
       style={{
-        width: "300px",
-        height: "300px",
+        width: "100%",
+        height: "100%",
         textAlign: "center",
-        color: "white",
+        color: "#333",
+        fontFamily: "monospace",
+        display: "flex",
+        flexDirection: "row",
+        gap: "12px",
       }}
     >
       {hasAxes ? (
-        <Plot
-          data={plotData}
-          layout={layout}
-          config={{ displayModeBar: false, responsive: true }}
-          style={{ width: "100%", height: "100%" }}
-        />
+        <>
+          {/* Left Side - Bigger Polar Plot */}
+          <div style={{ flex: "2", minHeight: "320px" }}>
+            <Plot
+              data={plotData}
+              layout={layout}
+              config={{ displayModeBar: false, responsive: true }}
+              style={{ width: "100%", height: "320px" }}
+            />
+          </div>
+
+          {/* Right Side - Clinical Information Carousel */}
+          <div
+            style={{
+              flex: "1",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              minWidth: "200px",
+            }}
+          >
+            {/* Clinical Information Carousel */}
+            <div
+              style={{
+                padding: "12px",
+                backgroundColor: "rgba(0,0,0,0.05)",
+                borderRadius: "8px",
+                height: "fit-content",
+              }}
+            >
+              {/* Carousel Navigation */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "12px",
+                }}
+              >
+                <button
+                  onClick={prevSection}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#666",
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = "#fff"}
+                  onMouseLeave={(e) => e.target.style.color = "#666"}
+                >
+                  ‹
+                </button>
+                
+                <h4
+                  style={{
+                    margin: "0",
+                    color: clinicalSections[currentSection].color,
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {clinicalSections[currentSection].title}
+                </h4>
+                
+                <button
+                  onClick={nextSection}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#666",
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = "#fff"}
+                  onMouseLeave={(e) => e.target.style.color = "#666"}
+                >
+                  ›
+                </button>
+              </div>
+
+              {/* Current Section Content */}
+              <div
+                style={{
+                  backgroundColor: clinicalSections[currentSection].bgColor,
+                  padding: "12px",
+                  borderRadius: "6px",
+                  border: `2px solid ${clinicalSections[currentSection].borderColor}`,
+                  minHeight: "120px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
+                {clinicalSections[currentSection].data.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: index < clinicalSections[currentSection].data.length - 1 ? "8px" : "0",
+                    }}
+                  >
+                    <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
+                      {item.label}:
+                    </span>
+                    <span style={{ color: item.color, fontSize: "12px", fontWeight: "bold" }}>
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Section Indicators */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "6px",
+                  marginTop: "10px",
+                }}
+              >
+                {clinicalSections.map((_, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: index === currentSection ? clinicalSections[currentSection].color : "#444",
+                      transition: "all 0.2s",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Compact Legend */}
+            <div
+              style={{
+                fontSize: "10px",
+                marginTop: "10px",
+                color: "#666666",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ margin: "4px 0" }}>
+                <strong>Radial:</strong> Power | <strong>Size:</strong> Axis Power
+                | <strong>Color:</strong> Quality
+              </p>
+            </div>
+          </div>
+        </>
       ) : (
-        <div style={{ color: "lime", fontSize: "18px", fontWeight: "bold" }}>
-          No axes detected
-        </div>
-      )}
-      {hasAxes && (
         <div
           style={{
-            color: "cyan",
-            fontSize: "12px",
-            textAlign: "left",
-            marginTop: "10px",
+            color: "#333",
+            fontSize: "16px",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
           }}
         >
-          <p style={{ margin: 0 }}>Rel. Power. Max = {maxPower.toFixed(6)}</p>
-          <p style={{ color: "red", margin: 0 }}>Frequency: {frequency}</p>
-          <p style={{ color: "red", margin: 0 }}>Direction: {maxDirection}</p>
-          <p style={{ color: "red", margin: 0 }}>
-            Anisotropy: {anisotropy.toFixed(3)}
-          </p>
+          No tremor axes detected
         </div>
       )}
     </div>
@@ -118,4 +477,3 @@ const TremorPolarPlot = ({ result }) => {
 };
 
 export default TremorPolarPlot;
-
