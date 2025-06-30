@@ -14,6 +14,8 @@ import SpiralPlot from '@/components/NewTimeTrace';
 import { supabase } from '@/lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import LineGraph from '../../../components/LineGraph';
+import TremorPolarPlot from '../../../components/Tremor';
+import { FaDownload } from "react-icons/fa";
 
 export default function ResultPage() {
   const params = useParams();
@@ -100,6 +102,38 @@ export default function ResultPage() {
 
   const currentResult = analysisHistory?.individual_results?.[selectedDrawingIndex];
 
+  const downloadResults = () => {
+    if (!result && !analysisHistory) {
+      alert('No results available to download');
+      return;
+    }
+
+    const downloadData = {
+      timestamp: new Date().toISOString(),
+      analysis_type: analysisHistory ? 'multi_drawing_average' : 'single_drawing',
+      average_DOS: getDOSScore(),
+      current_drawing_index: selectedDrawingIndex,
+      current_drawing_DOS: currentResult?.DOS || 'N/A',
+      all_drawings: analysisHistory?.individual_results || [result],
+      drawing_data: allDrawingData,
+      speed_data: speedData,
+      angle_data: angleData,
+      pressure_data: pData,
+      ...result
+    };
+
+    const dataStr = JSON.stringify(downloadData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `spiral_analysis_results_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
@@ -131,6 +165,36 @@ export default function ResultPage() {
                   #{index + 1}
                 </span>
               ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button
+                onClick={downloadResults}
+                style={{
+                  backgroundColor: '#4a90e2',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  margin: '0 auto'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#357abd';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#4a90e2';
+                }}
+              >
+                <FaDownload size={16} />
+                Download Results
+              </button>
             </div>
           </div>
         )}
@@ -166,7 +230,7 @@ export default function ResultPage() {
           <div className={styles.graphCard}>
             <h3>Tremor Polar Plot</h3>
             <div className={styles.chartContainer}>
-              <p>Coming soon</p>
+              <TremorPolarPlot result={result} />
             </div>
           </div>
           <div className={styles.graphCard}>

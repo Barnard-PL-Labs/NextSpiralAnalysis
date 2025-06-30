@@ -413,7 +413,7 @@ export default function MachinePage() {
 
   return (
     <>
-      <Header showVideo={false} />
+      {!showTutorial && <Header showVideo={false} />}
       <div style={{ position: "relative" }}>
         {isProcessingFinal ? (
           <div className={styles.loadingContainer}>

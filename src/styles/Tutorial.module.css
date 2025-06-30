@@ -18,8 +18,8 @@
   background: rgba(34, 78, 102, 0.956);
   max-width: 650px;
   width: 90%;
-  height: 700px;
-  max-height: 80vh;
+  height: 900px;
+  max-height: 95vh;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -90,9 +90,9 @@
 .tutorialContent {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 60px 40px 80px 40px;
+  padding: 60px 40px 100px 40px;
   text-align: center;
 }
 

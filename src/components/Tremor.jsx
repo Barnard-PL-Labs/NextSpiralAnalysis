@@ -203,15 +203,16 @@ const TremorPolarPlot = ({ result }) => {
       radialaxis: {
         visible: true,
         range: [0, maxPower * 1.2],
-        tickfont: { color: "#1e3a8a", weight: "bold", size: 12 },
+        tickfont: { color: "#1e3a8a", weight: "bold", size: 8 },
         gridcolor: "#444444",
+        tickangle: 0,
       },
       angularaxis: {
         direction: "clockwise",
         tickmode: "linear",
         dtick: 30,
         rotation: 90,
-        tickfont: { color: "#000000", size: 11, weight: "bold" },
+        tickfont: { color: "#000000", size: 7, weight: "bold" },
         gridcolor: "#444444",
       },
       bgcolor: "rgba(0,0,0,0.1)",
@@ -220,18 +221,6 @@ const TremorPolarPlot = ({ result }) => {
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
-    annotations: [
-      {
-        text: "PWR",
-        font: { color: "#1e3a8a", size: 12, weight: "bold" },
-        x: 1.0,
-        y: 0.44,
-        xref: "paper",
-        yref: "paper",
-        showarrow: false,
-        textangle: 0,
-      }
-    ],
   };
 
   // Clinical sections for carousel
@@ -244,7 +233,7 @@ const TremorPolarPlot = ({ result }) => {
       data: [
         { label: "Direction", value: `${dominantDirection}°`, color: "#cc6600" },
         { label: "Power", value: maxPower.toFixed(2), color: "#cc6600" },
-        { label: "Quality", value: `${(dominantPolarity * 100).toFixed(0)}%`, 
+        { label: "Quality", value: isNaN(dominantPolarity) ? "N/A" : `${(dominantPolarity * 100).toFixed(0)}%`, 
           color: dominantPolarity > 0.95 ? "#00aa00" : "#cc6600" },
       ]
     },
@@ -268,8 +257,8 @@ const TremorPolarPlot = ({ result }) => {
       data: [
         { label: "Type", value: isDirectional ? "Directional" : "Symmetric", 
           color: isDirectional ? "#cc6600" : "#00aa00" },
-        { label: "Frequency", value: `${dominantFrequency.toFixed(1)}Hz`, color: "#cc3300" },
-        { label: "Category", value: result["Cal Tremor"], color: "#0066cc" },
+        { label: "Frequency", value: isNaN(dominantFrequency) ? "N/A" : `${dominantFrequency.toFixed(1)}Hz`, color: "#cc3300" },
+        { label: "Category", value: result["Cal Tremor"] || "N/A", color: "#0066cc" },
       ]
     }
   ];
@@ -292,29 +281,32 @@ const TremorPolarPlot = ({ result }) => {
         fontFamily: "monospace",
         display: "flex",
         flexDirection: "row",
-        gap: "12px",
+        gap: "8px",
+        minHeight: "140px",
+        maxHeight: "400px",
       }}
     >
       {hasAxes ? (
         <>
           {/* Left Side - Bigger Polar Plot */}
-          <div style={{ flex: "2", minHeight: "320px" }}>
+          <div style={{ flex: "0.6", minHeight: "140px", height: "100%" }}>
             <Plot
               data={plotData}
               layout={layout}
               config={{ displayModeBar: false, responsive: true }}
-              style={{ width: "100%", height: "320px" }}
+              style={{ width: "100%", height: "100%", minHeight: "140px" }}
             />
           </div>
 
           {/* Right Side - Clinical Information Carousel */}
           <div
             style={{
-              flex: "1",
+              flex: "0.6",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              minWidth: "200px",
+              minWidth: "100px",
+              maxWidth: "180px",
             }}
           >
             {/* Clinical Information Carousel */}
@@ -332,7 +324,7 @@ const TremorPolarPlot = ({ result }) => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "12px",
+                  marginBottom: "8px",
                 }}
               >
                 <button
@@ -341,10 +333,10 @@ const TremorPolarPlot = ({ result }) => {
                     background: "none",
                     border: "none",
                     color: "#666",
-                    fontSize: "20px",
+                    fontSize: "16px",
                     cursor: "pointer",
-                    padding: "6px 10px",
-                    borderRadius: "6px",
+                    padding: "4px 6px",
+                    borderRadius: "4px",
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => e.target.style.color = "#fff"}
@@ -357,8 +349,10 @@ const TremorPolarPlot = ({ result }) => {
                   style={{
                     margin: "0",
                     color: clinicalSections[currentSection].color,
-                    fontSize: "14px",
+                    fontSize: "11px",
                     fontWeight: "bold",
+                    textAlign: "center",
+                    flex: "1",
                   }}
                 >
                   {clinicalSections[currentSection].title}
@@ -370,10 +364,10 @@ const TremorPolarPlot = ({ result }) => {
                     background: "none",
                     border: "none",
                     color: "#666",
-                    fontSize: "20px",
+                    fontSize: "16px",
                     cursor: "pointer",
-                    padding: "6px 10px",
-                    borderRadius: "6px",
+                    padding: "4px 6px",
+                    borderRadius: "4px",
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => e.target.style.color = "#fff"}
@@ -450,7 +444,7 @@ const TremorPolarPlot = ({ result }) => {
               }}
             >
               <p style={{ margin: "4px 0" }}>
-                <strong>Radial:</strong> Power | <strong>Size:</strong> Axis Power
+                <strong>Radial #:</strong> Power | <strong>Size:</strong> Axis Power
                 | <strong>Color:</strong> Quality
               </p>
             </div>

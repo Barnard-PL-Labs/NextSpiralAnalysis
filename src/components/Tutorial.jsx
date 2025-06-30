@@ -83,7 +83,13 @@ const Tutorial = ({ onClose, forceShow = false }) => {
 
   return (
     <div className={styles.tutorialOverlay}>
-      <div className={styles.tutorialContainer}>
+      <div 
+        className={styles.tutorialContainer}
+        style={{ 
+          height: currentPage === 2 ? '950px' : '800px',
+          maxHeight: currentPage === 2 ? '97vh' : '90vh'
+        }}
+      >
         <button
           className={styles.skipButton}
           onClick={handleSkip}
