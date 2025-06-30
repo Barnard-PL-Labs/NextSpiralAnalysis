@@ -22,8 +22,11 @@ export default function MachinePage() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-
   const [userFinished, setUserFinished] = useState(false);
+  const [simulatedProgress, setSimulatedProgress] = useState(0);
+  const [progressTimer, setProgressTimer] = useState(null);
+  const [useSimulation, setUseSimulation] = useState(false);
+  const simulationActiveRef = useRef(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -34,6 +37,67 @@ export default function MachinePage() {
       savedResults
     );
   }, [savedResults]);
+
+  const displayProgress = useSimulation ? simulatedProgress : analysisProgress;
+
+  // Debug logging
+  useEffect(() => {
+    console.log("🔄 Progress Debug:", {
+      useSimulation,
+      simulatedProgress,
+      analysisProgress,
+      displayProgress,
+    });
+  }, [useSimulation, simulatedProgress, analysisProgress, displayProgress]);
+
+  // Start simulated progress when analysis begins
+  const startSimulatedProgress = useCallback(() => {
+    console.log("🎬 Starting simulated progress");
+    setSimulatedProgress(0);
+    setAnalysisProgress(0);
+    setUseSimulation(true);
+    simulationActiveRef.current = true;
+
+    const timer = setInterval(() => {
+      setSimulatedProgress((prev) => {
+        const newValue =
+          prev < 85 ? prev + 85 / 140 : prev < 90 ? prev + 0.1 : prev;
+        console.log("🎬 Simulated Progress Update:", { prev, newValue });
+        return newValue;
+      });
+    }, 50);
+    setProgressTimer(timer);
+  }, []);
+
+  // Stop simulated progress and switch to real progress
+  const completeProgress = useCallback(() => {
+    console.log("✅ Completing progress to 100%");
+
+    // Clear the simulation timer
+    if (progressTimer) {
+      clearInterval(progressTimer);
+      setProgressTimer(null);
+    }
+
+    // Switch to actual progress and smoothly animate to 100%
+    setUseSimulation(false);
+    simulationActiveRef.current = false;
+    setAnalysisProgress(100);
+    
+    // Add a delay so users can see the progress bar reach 100%
+    setTimeout(() => {
+      setIsAnalysisComplete(true);
+    }, 1000);
+  }, [progressTimer]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (progressTimer) {
+        clearInterval(progressTimer);
+      }
+    };
+  }, [progressTimer]);
 
   const saveAndAnalyzeCurrentDrawing = async () => {
     console.log("🚀 STARTING saveAndAnalyzeCurrentDrawing");
@@ -70,6 +134,7 @@ export default function MachinePage() {
         `🎯 Entering final processing mode (${newDrawings.length} drawings)`
       );
       setIsProcessingFinal(true);
+      startSimulatedProgress();
     }
 
     setSavedDrawings(newDrawings);
@@ -95,34 +160,44 @@ export default function MachinePage() {
       setSavedResults((prevResults) => {
         const newResults = [...prevResults, result];
 
-        const shouldEnterFinalMode = userFinished || newDrawings.length >= 15;
-        const currentTotal = userFinished ? savedDrawings.length : 15;
-        setAnalysisProgress((newResults.length / currentTotal) * 100);
+        const correctTotal = newDrawings.length;
+        const actualProgress = (newResults.length / correctTotal) * 100;
+
+        // Only update actual progress if we're not in simulation mode
+        if (!simulationActiveRef.current) {
+          setAnalysisProgress(actualProgress);
+        }
 
         const allCurrentDrawingsAnalyzed =
           newResults.length >= newDrawings.length;
 
         if (shouldEnterFinalMode && allCurrentDrawingsAnalyzed) {
           console.log("🎯 All current drawings analyzed!");
-          const averageDOS = calculateAverageDOS(newResults);
-          console.log("Calculated average DOS:", averageDOS);
+          completeProgress();
 
-          const finalResults = {
-            individual_results: newResults,
-            average_DOS: averageDOS,
-            successful_drawings: newResults.filter((r) => !r.error).length,
-            total_drawings: newDrawings.length,
+          setTimeout(() => {
+            const averageDOS = calculateAverageDOS(newResults);
+            console.log("Calculated average DOS:", averageDOS);
 
-            ...getTraxisData(newResults),
-          };
+            const finalResults = {
+              individual_results: newResults,
+              average_DOS: averageDOS,
+              successful_drawings: newResults.filter((r) => !r.error).length,
+              total_drawings: newDrawings.length,
 
-          localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
-          sessionStorage.setItem(
-            "analysisHistory",
-            JSON.stringify(finalResults)
-          );
-          console.log("✅ Average calculation completed and saved!");
-          setIsAnalysisComplete(true);
+              ...getTraxisData(newResults),
+            };
+            localStorage.setItem(
+              "analysisHistory",
+              JSON.stringify(finalResults)
+            );
+            sessionStorage.setItem(
+              "analysisHistory",
+              JSON.stringify(finalResults)
+            );
+            console.log("✅ Average calculation completed and saved!");
+            setIsAnalysisComplete(true);
+          }, 800);
         } else {
           localStorage.setItem(
             "analysisHistory",
@@ -148,8 +223,6 @@ export default function MachinePage() {
 
       setSavedResults((prevResults) => {
         const newResults = [...prevResults, errorResult];
-        const currentTotal = userFinished ? savedDrawings.length : 15;
-        setAnalysisProgress((newResults.length / currentTotal) * 100);
 
         console.log(
           `Skipping failed analysis. Current successful analyses:`,
@@ -163,39 +236,51 @@ export default function MachinePage() {
           console.log(
             "🎯 Final drawing attempted - calculating average with available data"
           );
+
+          completeProgress();
+
           const successfulResults = prevResults.filter((r) => !r.error);
 
           if (successfulResults.length > 0) {
-            const averageDOS = calculateAverageDOS(successfulResults);
-            console.log(
-              `✅ Calculated average DOS from ${successfulResults.length} successful drawings:`,
-              averageDOS
-            );
+            setTimeout(async () => {
+              const averageDOS = calculateAverageDOS(successfulResults);
+              console.log(
+                "✅ Finalizing results immediately with average DOS:",
+                averageDOS
+              );
 
-            const finalResults = {
-              individual_results: newResults,
-              average_DOS: averageDOS,
-              successful_drawings: successfulResults.length,
-              total_attempts: newDrawings.length,
-              ...getTraxisData(successfulResults),
-            };
+              const finalResults = {
+                individual_results: newResults,
+                average_DOS: averageDOS,
+                successful_drawings: successfulResults.length,
+                total_drawings: newDrawings.length,
+                ...getTraxisData(successfulResults),
+              };
 
-            localStorage.setItem(
-              "analysisHistory",
-              JSON.stringify(finalResults)
-            );
-            sessionStorage.setItem(
-              "analysisHistory",
-              JSON.stringify(finalResults)
-            );
-            console.log(
-              "✅ Final average calculation completed with available data!"
-            );
-            setIsAnalysisComplete(true);
+              localStorage.setItem(
+                "analysisHistory",
+                JSON.stringify(finalResults)
+              );
+              sessionStorage.setItem(
+                "analysisHistory",
+                JSON.stringify(finalResults)
+              );
+              if (user && user.id) {
+                try {
+                  await saveToSupabase(savedDrawings, finalResults);
+                } catch (err) {
+                  console.error("Failed to save to Supabase:", err);
+                }
+              }
+              console.log("✅ Results finalized and saved!");
+              setIsAnalysisComplete(true);
+            }, 800);
           } else {
-            console.log("❌ No successful analyses to average");
-            alert("All analyses failed. Please try again.");
-            setIsAnalysisComplete(true);
+            setTimeout(() => {
+              console.log("❌ No successful analyses to average");
+              alert("All analyses failed. Please try again.");
+              setIsAnalysisComplete(true);
+            }, 800);
           }
         } else {
           console.log(
@@ -283,36 +368,42 @@ export default function MachinePage() {
       const successfulResults = savedResults.filter((r) => !r.error);
 
       if (successfulResults.length > 0) {
-        const averageDOS = calculateAverageDOS(successfulResults);
-        console.log(
-          "✅ Finalizing results immediately with average DOS:",
-          averageDOS
-        );
+        completeProgress();
 
-        const finalResults = {
-          individual_results: savedResults,
-          average_DOS: averageDOS,
-          successful_drawings: successfulResults.length,
-          total_drawings: savedDrawings.length,
-          ...getTraxisData(successfulResults),
-        };
+        setTimeout(async () => {
+          const averageDOS = calculateAverageDOS(successfulResults);
+          console.log(
+            "✅ Finalizing results immediately with average DOS:",
+            averageDOS
+          );
 
-        localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
-        sessionStorage.setItem("analysisHistory", JSON.stringify(finalResults));
-        if (user && user.id) {
-          try {
-            await saveToSupabase(savedDrawings, finalResults);
-          } catch (err) {
-            console.error("Failed to save to Supabase:", err);
+          const finalResults = {
+            individual_results: savedResults,
+            average_DOS: averageDOS,
+            successful_drawings: successfulResults.length,
+            total_drawings: savedDrawings.length,
+            ...getTraxisData(successfulResults),
+          };
+
+          localStorage.setItem("analysisHistory", JSON.stringify(finalResults));
+          sessionStorage.setItem(
+            "analysisHistory",
+            JSON.stringify(finalResults)
+          );
+          if (user && user.id) {
+            try {
+              await saveToSupabase(savedDrawings, finalResults);
+            } catch (err) {
+              console.error("Failed to save to Supabase:", err);
+            }
           }
-        }
-        console.log("✅ Results finalized and saved!");
+          console.log("✅ Results finalized and saved!");
+        }, 300);
       }
+    } else {
+      completeProgress();
     }
-
-    setAnalysisProgress(100);
-    setIsAnalysisComplete(true);
-  }, [savedResults, savedDrawings.length, calculateAverageDOS]);
+  }, [savedResults, savedDrawings.length, calculateAverageDOS, user, completeProgress]);
 
   useEffect(() => {
     if (userFinished && isProcessingFinal && !isAnalysisComplete) {
@@ -337,7 +428,8 @@ export default function MachinePage() {
     console.log(`🏁 User finished early with ${savedDrawings.length} drawings`);
     setUserFinished(true);
     setIsProcessingFinal(true);
-  }, [savedDrawings.length]);
+    startSimulatedProgress();
+  }, [savedDrawings.length, startSimulatedProgress]);
 
   const clearCurrentDrawing = () => {
     console.log("Clearing data for new drawing...");
@@ -347,6 +439,8 @@ export default function MachinePage() {
     }
     setIsProcessingFinal(false);
     setIsAnalysisComplete(false);
+    setUseSimulation(false);
+    simulationActiveRef.current = false;
   };
 
   const clearAllDrawings = () => {
@@ -356,6 +450,13 @@ export default function MachinePage() {
     if (confirmed) {
       console.log("Clearing all data for new start...");
       setAnalysisProgress(0);
+      setSimulatedProgress(0);
+      setUseSimulation(false);
+      simulationActiveRef.current = false;
+      if (progressTimer) {
+        clearInterval(progressTimer);
+        setProgressTimer(null);
+      }
       setCurrentDrawing([]);
       setSavedDrawings([]);
       setSavedResults([]);
@@ -419,21 +520,24 @@ export default function MachinePage() {
           <div className={styles.loadingContainer}>
             {!isAnalysisComplete ? (
               <>
-                <h2 className={styles.loadingText}>
+                <h2 className={styles.loadingText} style={{ fontSize: '1.4rem'}}>
                   Preparing Your Final Results
                 </h2>
                 <div className={styles.progressContainer}>
                   <div className={styles.loadingBar}>
                     <div
                       className={styles.loadingBarFill}
-                      style={{ width: `${analysisProgress}%` }}
+                      style={{
+                        width: `${displayProgress}%`,
+                        transition: "width 0.1s ease-out",
+                      }}
                     />
                   </div>
                 </div>
               </>
             ) : (
               <>
-                <h2>Analysis Complete!</h2>
+                <h2 style={{ fontSize: '1.4rem'}}>Analysis Complete!</h2>
                 <Button
                   sendData={sendDataToBackend}
                   clearDrawing={clearCurrentDrawing}
@@ -444,7 +548,7 @@ export default function MachinePage() {
                   onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
                   isAnalyzing={isAnalyzing}
                   isLoadingResults={isLoadingResults}
-                  onFinishEarly={handleFinishEarly} 
+                  onFinishEarly={handleFinishEarly}
                   userFinished={userFinished}
                 />
               </>
@@ -454,8 +558,8 @@ export default function MachinePage() {
           <>
             <div className={styles.machineContainer}>
               <h1 className={styles.title}>Draw Here</h1>
-              
-              <button 
+
+              <button
                 className={styles.helpButton}
                 onClick={() => setShowTutorial(true)}
                 aria-label="Help"
@@ -496,7 +600,9 @@ export default function MachinePage() {
           </>
         )}
       </div>
-      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} forceShow={true} />}
+      {showTutorial && (
+        <Tutorial onClose={() => setShowTutorial(false)} forceShow={true} />
+      )}
     </>
   );
 }

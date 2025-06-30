@@ -290,12 +290,12 @@ const TremorPolarPlot = ({ result }) => {
         <>
           {/* Left Side - Bigger Polar Plot */}
           <div style={{ flex: "0.6", minHeight: "140px", height: "100%" }}>
-            <Plot
-              data={plotData}
-              layout={layout}
-              config={{ displayModeBar: false, responsive: true }}
+          <Plot
+            data={plotData}
+            layout={layout}
+            config={{ displayModeBar: false, responsive: true }}
               style={{ width: "100%", height: "100%", minHeight: "140px" }}
-            />
+          />
           </div>
 
           {/* Right Side - Clinical Information Carousel */}
@@ -341,22 +341,22 @@ const TremorPolarPlot = ({ result }) => {
                   }}
                   onMouseEnter={(e) => e.target.style.color = "#fff"}
                   onMouseLeave={(e) => e.target.style.color = "#666"}
-                >
+            >
                   ‹
                 </button>
                 
-                <h4
-                  style={{
+              <h4
+                style={{
                     margin: "0",
                     color: clinicalSections[currentSection].color,
                     fontSize: "11px",
                     fontWeight: "bold",
                     textAlign: "center",
                     flex: "1",
-                  }}
-                >
+                }}
+              >
                   {clinicalSections[currentSection].title}
-                </h4>
+              </h4>
                 
                 <button
                   onClick={nextSection}
@@ -375,11 +375,11 @@ const TremorPolarPlot = ({ result }) => {
                 >
                   ›
                 </button>
-              </div>
+            </div>
 
               {/* Current Section Content */}
-              <div
-                style={{
+            <div
+              style={{
                   backgroundColor: clinicalSections[currentSection].bgColor,
                   padding: "12px",
                   borderRadius: "6px",
@@ -398,8 +398,8 @@ const TremorPolarPlot = ({ result }) => {
                       justifyContent: "space-between",
                       alignItems: "center",
                       marginBottom: index < clinicalSections[currentSection].data.length - 1 ? "8px" : "0",
-                    }}
-                  >
+              }}
+            >
                     <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
                       {item.label}:
                     </span>
@@ -431,22 +431,22 @@ const TremorPolarPlot = ({ result }) => {
                     }}
                   />
                 ))}
-              </div>
             </div>
+          </div>
 
-            {/* Compact Legend */}
-            <div
-              style={{
+          {/* Compact Legend */}
+          <div
+            style={{
                 fontSize: "10px",
                 marginTop: "10px",
-                color: "#666666",
-                textAlign: "center",
-              }}
-            >
+              color: "#666666",
+              textAlign: "center",
+            }}
+          >
               <p style={{ margin: "4px 0" }}>
                 <strong>Radial #:</strong> Power | <strong>Size:</strong> Axis Power
-                | <strong>Color:</strong> Quality
-              </p>
+              | <strong>Color:</strong> Quality
+            </p>
             </div>
           </div>
         </>
