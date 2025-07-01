@@ -20,17 +20,28 @@ const processTremorData = (result) => {
       const polarity = result[`traxis_pol${i}`];
       const frequency = result[`traxis_fr${i}`];
 
-      // Only add if the axis is detected
-      if (
-        direction !== "No Axis" &&
-        power !== "No Axis" &&
-        !isNaN(parseFloat(direction)) &&
-        !isNaN(parseFloat(power))
-      ) {
-        axes.push(parseFloat(direction));
-        powers.push(parseFloat(power));
-        polarities.push(parseFloat(polarity));
-        frequencies.push(parseFloat(frequency));
+      console.log(`Axis ${i} data:`, { direction, power, polarity, frequency });
+
+      // More permissive filtering - check if we have valid numeric data
+      const hasValidDirection = direction !== "No Axis" && direction !== null && direction !== undefined && !isNaN(parseFloat(direction));
+      const hasValidPower = power !== "No Axis" && power !== null && power !== undefined && !isNaN(parseFloat(power));
+      
+      // If we have at least one valid value, try to use it
+      if (hasValidDirection || hasValidPower) {
+        // Use default values if one is missing
+        const dirValue = hasValidDirection ? parseFloat(direction) : 0;
+        const powerValue = hasValidPower ? parseFloat(power) : 0.1; // Small default power
+        const polValue = polarity !== "No Axis" && !isNaN(parseFloat(polarity)) ? parseFloat(polarity) : 0.5; // Default polarity
+        const freqValue = frequency !== "No Axis" && !isNaN(parseFloat(frequency)) ? parseFloat(frequency) : 1.0; // Default frequency
+        
+        axes.push(dirValue);
+        powers.push(powerValue);
+        polarities.push(polValue);
+        frequencies.push(freqValue);
+        
+        console.log(`Added axis ${i}:`, { dirValue, powerValue, polValue, freqValue });
+      } else {
+        console.log(`Skipping axis ${i} - no valid data`);
       }
     }
   }
@@ -66,6 +77,12 @@ const processTremorData = (result) => {
     amplitudeData,
   });
   console.log("hasAxes will be:", axes.length > 0);
+  console.log("=== DETAILED AXES DEBUG ===");
+  console.log("Axes array:", axes);
+  console.log("Powers array:", powers);
+  console.log("Polarities array:", polarities);
+  console.log("Frequencies array:", frequencies);
+  console.log("Array lengths - axes:", axes.length, "powers:", powers.length, "polarities:", polarities.length, "frequencies:", frequencies.length);
 
   console.log("Comprehensive Tremor Data:", {
     axes,
@@ -115,31 +132,11 @@ const TremorPolarPlot = ({ result }) => {
       `rgba(${Math.round(255 * (1 - pol))}, ${Math.round(255 * pol)}, 100, 0.8)`
   );
 
+  // Define colors for each axis (not too bright)
+  const axisColors = ["#4a90e2", "#7ed321", "#f5a623", "#d0021b", "#9013fe", "#50e3c2"];
+  
   const plotData = hasAxes
     ? [
-        {
-          type: "scatterpolar",
-          mode: "lines+markers",
-          r: powers,
-          theta: axes,
-          fill: "toself",
-          fillcolor: "rgba(0,255,0,0.1)",
-          marker: {
-            size: markerSizes,
-            color: "#16a34a",
-            line: { color: "#ffffff", width: 2 },
-            symbol: "circle",
-          },
-          line: { color: "#16a34a", width: 2 },
-          name: "",
-          hoverTemplate:
-            "<b>Direction</b>: %{theta}°<br>" +
-            "<b>Power</b>: %{r:.3f}<br>" +
-            "<b>Polarity</b>: %{customdata[0]:.3f}<br>" +
-            "<b>Frequency</b>: %{customdata[1]:.2f} Hz<br>" +
-            "<extra></extra>",
-          customdata: polarities.map((pol, i) => [pol, frequencies[i]]),
-        },
         // Amplitude reference circle
         {
           type: "scatterpolar",
@@ -167,8 +164,90 @@ const TremorPolarPlot = ({ result }) => {
           showlegend: false,
           hoverinfo: "skip",
         },
+        // Add bidirectional arrows for each axis (two traces per axis)
+        ...axes.flatMap((axis, index) => {
+          console.log(`=== PROCESSING AXIS ${index + 1} ===`);
+          console.log(`Original axis direction: ${axis}°`);
+          console.log(`Original axis power: ${powers[index]}`);
+          console.log(`Original axis polarity: ${polarities[index]}`);
+          console.log(`Original axis frequency: ${frequencies[index]}`);
+          
+          // Check for overlapping directions with previous axes
+          const overlappingAxes = axes.slice(0, index).filter(prevAxis => 
+            Math.abs(prevAxis - axis) < 2 || Math.abs(prevAxis - (axis + 180)) < 2
+          );
+          
+          if (overlappingAxes.length > 0) {
+            console.log(`Axis ${index + 1} overlaps with previous axes:`, overlappingAxes);
+          }
+          
+          // Slightly offset overlapping arrows for better visibility
+          const offset = overlappingAxes.length * 5; // 5 degree offset per overlap
+          const adjustedAxis = axis + offset;
+          
+          console.log(`Adjusted axis direction: ${adjustedAxis}°`);
+          console.log(`Offset applied: ${offset}°`);
+          console.log(`Final power value: ${powers[index]}`);
+          console.log(`Axis color: ${axisColors[index % axisColors.length]}`);
+          console.log(`=== END AXIS ${index + 1} ===`);
+          
+          // Create multiple points along the line for proper rendering
+          const numPoints = 10;
+          const linePoints = Array.from({length: numPoints}, (_, i) => (maxPower * 1.4 * i) / (numPoints - 1));
+          
+          return [
+            // Positive direction arrow - multiple points
+            {
+              type: "scatterpolar",
+              mode: "lines",
+              r: linePoints,
+              theta: Array(numPoints).fill(adjustedAxis),
+              line: {
+                color: axisColors[index % axisColors.length],
+                width: 3,
+              },
+              showlegend: false,
+              customdata: Array(numPoints).fill([powers[index], index + 1]),
+              hovertemplate:
+                "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
+                "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
+                "<b>Axis</b> " + (index + 1) + "<br>" +
+                "<extra></extra>",
+              hoverlabel: {
+                bgcolor: axisColors[index % axisColors.length],
+                font: { color: "white" }
+              },
+            },
+            // Negative direction arrow - multiple points
+            {
+              type: "scatterpolar",
+              mode: "lines",
+              r: linePoints,
+              theta: Array(numPoints).fill(adjustedAxis + 180),
+              line: {
+                color: axisColors[index % axisColors.length],
+                width: 3,
+              },
+              showlegend: false,
+              customdata: Array(numPoints).fill([powers[index], index + 1]),
+              hovertemplate:
+                "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
+                "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
+                "<b>Axis</b> " + (index + 1) + "<br>" +
+                "<extra></extra>",
+              hoverlabel: {
+                bgcolor: axisColors[index % axisColors.length],
+                font: { color: "white" }
+              },
+            }
+          ];
+        }),
       ]
     : [];
+
+  console.log(`Total plot data traces: ${plotData.length}`);
+  console.log(`Number of axes: ${axes.length}`);
+  console.log(`Expected arrows: ${axes.length * 4} (2 lines + 2 arrowheads per axis)`);
 
   // Clinical metrics
   const maxPowerValue = hasAxes ? Math.max(...powers) : 0;
@@ -203,6 +282,7 @@ const TremorPolarPlot = ({ result }) => {
       radialaxis: {
         visible: true,
         range: [0, maxPower * 1.2],
+        showticklabels: false,
         tickfont: { color: "#1e3a8a", weight: "bold", size: 8 },
         gridcolor: "#444444",
         tickangle: 0,
@@ -443,10 +523,6 @@ const TremorPolarPlot = ({ result }) => {
               textAlign: "center",
             }}
           >
-              <p style={{ margin: "4px 0" }}>
-                <strong>Radial #:</strong> Power | <strong>Size:</strong> Axis Power
-              | <strong>Color:</strong> Quality
-            </p>
             </div>
           </div>
         </>

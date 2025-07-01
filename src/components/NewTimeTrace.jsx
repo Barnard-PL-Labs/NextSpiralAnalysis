@@ -1,6 +1,13 @@
 import dynamic from 'next/dynamic';
 
-const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
+const Plot = dynamic(() => import('react-plotly.js'), { 
+  ssr: false,
+  loading: () => <div>Loading plot...</div>,
+  onError: (error) => {
+    console.error('Failed to load Plotly:', error);
+    return <div>Failed to load plot</div>;
+  }
+});
 
 const SpiralPlot = ({ data }) => {
   const plotData = [
