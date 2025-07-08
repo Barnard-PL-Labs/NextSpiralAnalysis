@@ -197,49 +197,49 @@ const TremorPolarPlot = ({ result }) => {
           
           return [
             // Positive direction arrow - multiple points
-            {
-              type: "scatterpolar",
-              mode: "lines",
+          {
+            type: "scatterpolar",
+            mode: "lines",
               r: linePoints,
               theta: Array(numPoints).fill(adjustedAxis),
-              line: {
-                color: axisColors[index % axisColors.length],
-                width: 3,
-              },
-              showlegend: false,
+            line: {
+              color: axisColors[index % axisColors.length],
+              width: 3,
+            },
+            showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
                 "<b>Axis</b> " + (index + 1) + "<br>" +
-                "<extra></extra>",
-              hoverlabel: {
-                bgcolor: axisColors[index % axisColors.length],
-                font: { color: "white" }
-              },
+              "<extra></extra>",
+            hoverlabel: {
+              bgcolor: axisColors[index % axisColors.length],
+              font: { color: "white" }
             },
+          },
             // Negative direction arrow - multiple points
-            {
-              type: "scatterpolar",
-              mode: "lines",
+          {
+            type: "scatterpolar",
+            mode: "lines",
               r: linePoints,
               theta: Array(numPoints).fill(adjustedAxis + 180),
-              line: {
-                color: axisColors[index % axisColors.length],
-                width: 3,
-              },
-              showlegend: false,
+            line: {
+              color: axisColors[index % axisColors.length],
+              width: 3,
+            },
+            showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
                 "<b>Axis</b> " + (index + 1) + "<br>" +
-                "<extra></extra>",
-              hoverlabel: {
-                bgcolor: axisColors[index % axisColors.length],
-                font: { color: "white" }
-              },
-            }
+              "<extra></extra>",
+            hoverlabel: {
+              bgcolor: axisColors[index % axisColors.length],
+              font: { color: "white" }
+            },
+          }
           ];
         }),
       ]

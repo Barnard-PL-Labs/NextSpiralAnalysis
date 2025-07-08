@@ -52,7 +52,6 @@ export default function LoginModal({ isOpen, closeModal }) {
         setMessage("An unexpected error occurred. Please try again later.");
       }
     } else {
-      alert("Logged in successfully!");
       closeModal();
       router.push("/machine");
     }

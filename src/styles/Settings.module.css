@@ -240,14 +240,24 @@
     font-size: 1.2em;
     font-weight: 600;
     color: #333;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     text-align: left;
     margin-top: 30px;
     margin-left: -20px;
-    background-color: rgba(128, 128, 128, 0.1);
+    background-color: transparent;
     border-radius: 5px;
     margin-right: 0px;
     padding: 8px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.accountTitleRow:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.accountTitleRow.active {
+    background-color: rgba(128, 128, 128, 0.1);
 }
 
 .accountTitleContent {
@@ -267,8 +277,8 @@
 .arrow {
     font-size: 1.2em;
     color: #666;
-    font-weight: 450;
-    margin-right: -5px;
+    margin-left: auto;
+    transition: color 0.2s ease;
 }
 
 .accountTitle {
@@ -553,4 +563,70 @@
 .deleteConfirmButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Website Mode Styles */
+.websiteModeOptions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modeButton {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.modeButton:hover {
+    border-color: #3b82f6;
+    background-color: #f0f8ff;
+}
+
+.modeButton.activeMode {
+    border-color: #3b82f6;
+    background-color: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.modeButton.activeMode:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.accountSubsection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: left;
+    margin-top: 5px;
+    margin-left: -20px;
+    background-color: transparent;
+    border-radius: 5px;
+    margin-right: 0px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.accountSubsection:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.accountSubsection.active {
+    background-color: rgba(128, 128, 128, 0.1);
 }

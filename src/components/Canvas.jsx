@@ -190,6 +190,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     setLocalDrawData([]);
     pointBufferRef.current = []; // !!! clear buffer
     setDrawData([]);
+    setStartTime(null);
     drawCenterCross(ctx);
     if (backgroundImage) {
       drawBackgroundImage(ctx, backgroundImage);

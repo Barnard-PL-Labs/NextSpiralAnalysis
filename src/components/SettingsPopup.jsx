@@ -28,6 +28,8 @@ export default function SettingsPopup({ isOpen, onClose }) {
   const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
   const [isConfirmNewPasswordFocused, setIsConfirmNewPasswordFocused] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showWebsiteMode, setShowWebsiteMode] = useState(false);
+  const [websiteMode, setWebsiteMode] = useState("light"); // or "dark"
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -243,6 +245,7 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setShowEmailChange(false);
     setShowPasswordChange(false);
     setShowDeleteConfirm(false);
+    setShowWebsiteMode(false);
     setConfirmPassword("");
     setNewEmail("");
     setConfirmEmail("");
@@ -250,6 +253,18 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setConfirmNewPassword("");
     setCurrentAction("");
     setMessage("");
+  };
+
+  const handleWebsiteModeChange = (mode) => {
+    setWebsiteMode(mode);
+    // Here you can add logic to actually change the website theme
+    // For example, updating localStorage, CSS variables, etc.
+    localStorage.setItem('websiteMode', mode);
+    setMessage(`Website mode changed to ${mode} mode`);
+    setTimeout(() => {
+      setShowWebsiteMode(false);
+      setMessage("");
+    }, 2000);
   };
 
   if (!isOpen) return null;
@@ -265,11 +280,15 @@ export default function SettingsPopup({ isOpen, onClose }) {
 
         <div className={styles.containersWrapper}>
           <div className={styles.accountContainer}>
-            <div className={styles.accountTitleRow}>
+            <div className={`${styles.accountTitleRow} ${!showWebsiteMode ? styles.active : ''}`} onClick={() => setShowWebsiteMode(false)}>
               <div className={styles.accountTitleContent}>
                 <FaUser className={styles.personIcon} />
                 <span>Your Account</span>
               </div>
+              <span className={styles.arrow}>{'>'}</span>
+            </div>
+            <div className={`${styles.accountSubsection} ${showWebsiteMode ? styles.active : ''}`} onClick={() => setShowWebsiteMode(true)}>
+              <span>Website Mode</span>
               <span className={styles.arrow}>{'>'}</span>
             </div>
             <button
@@ -281,11 +300,38 @@ export default function SettingsPopup({ isOpen, onClose }) {
           </div>
 
           <div className={styles.secondaryContainer}>
-            {!showPasswordConfirm && !showEmailChange && !showPasswordChange && !showDeleteConfirm ? (
+            {!showPasswordConfirm && !showEmailChange && !showPasswordChange && !showDeleteConfirm && !showWebsiteMode ? (
               <div className={styles.secondaryContent}>
                 <p onClick={() => handleActionClick("Change Email")}>Change Email</p>
                 <p onClick={() => handleActionClick("Change Password")}>Change Password</p>
                 <p onClick={() => handleActionClick("Delete Account")} className={styles.deleteAccountText}>Delete Account</p>
+              </div>
+            ) : showWebsiteMode ? (
+              <div className={styles.emailChangeContent}>
+                <button className={styles.backArrow} onClick={handleBackToOptions}>
+                  ←
+                </button>
+                <h3 className={styles.confirmPasswordTitle}>Website Mode</h3>
+                <p className={styles.actionDescription}>Choose your preferred website appearance</p>
+                <div className={styles.websiteModeOptions}>
+                  <button
+                    className={`${styles.modeButton} ${websiteMode === 'light' ? styles.activeMode : ''}`}
+                    onClick={() => handleWebsiteModeChange('light')}
+                  >
+                    Light Mode
+                  </button>
+                  <button
+                    className={`${styles.modeButton} ${websiteMode === 'dark' ? styles.activeMode : ''}`}
+                    onClick={() => handleWebsiteModeChange('dark')}
+                  >
+                    Dark Mode
+                  </button>
+                </div>
+                {message && (
+                  <div className={`${styles.settingsMessage} ${styles.successMessage}`}>
+                    {message}
+                  </div>
+                )}
               </div>
             ) : showDeleteConfirm ? (
               <div className={styles.deleteConfirmContent}>
