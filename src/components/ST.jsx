@@ -52,8 +52,12 @@ const SpeedTimeChart = ({ speedData }) => {
                   fill: "black",
                 }}
               />
-              <Tooltip />
-              <Legend />
+          <Tooltip
+            labelFormatter={(label) => `Time: ${label} ms`}
+            // This formatter now safely handles string inputs
+            formatter={(value) => [`${parseFloat(value).toFixed(2)} px/s`, "Speed"]}
+          />
+
               <Line
                 type="monotone"
                 dataKey="speed"

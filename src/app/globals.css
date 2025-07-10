@@ -368,7 +368,9 @@ input {
 html {
   font-size: 16px;
 }
-
+.recharts-tooltip-label {
+  color: #8884d8 !important;
+}
 @media (max-width: 1199px) {
   html {
     font-size: 15px;
