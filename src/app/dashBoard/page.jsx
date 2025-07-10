@@ -80,14 +80,11 @@ const Dashboard = () => {
           `
           id,
           drawing_id,
+          session_id,
           created_at,
           result_data,
           user_id,
-          email,
-          drawings (
-            id,
-            drawing_data
-          )
+          email
         `
         )
         .order("created_at", { ascending: false });
@@ -106,8 +103,8 @@ const Dashboard = () => {
           try {
             drawingData =
               typeof entry.drawings?.drawing_data === "string"
-              ? JSON.parse(entry.drawings.drawing_data)
-              : entry.drawings?.drawing_data || [];
+                ? JSON.parse(entry.drawings.drawing_data)
+                : entry.drawings?.drawing_data || [];
           } catch (e) {}
           return {
             ...entry,
@@ -154,8 +151,15 @@ const Dashboard = () => {
 
   return (
     <div className={styles.pageContainer}>
-      {isMobile ? <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} /> : <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />}
-      <SettingsPopup isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      {isMobile ? (
+        <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} />
+      ) : (
+        <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />
+      )}
+      <SettingsPopup
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
           <h1 className={styles.welcome} style={{ color: "white" }}>
@@ -182,27 +186,34 @@ const Dashboard = () => {
           <>
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
-                <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
+                <h2 style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
                   Latest Result
                 </h2>
                 {entries[0]?.result_data?.average_DOS && (
                   <>
                     <div className={styles.drawingCountBadge}>
-                      {Array.isArray(entries[0].drawings.drawing_data[0]) 
-                        ? entries[0].drawings.drawing_data.length 
+                      {Array.isArray(entries[0].drawings.drawing_data[0])
+                        ? entries[0].drawings.drawing_data.length
                         : 1}
-                      {Array.isArray(entries[0].drawings.drawing_data[0]) 
-                        ? (entries[0].drawings.drawing_data.length == 1 ? " Drawing" : " Drawings")
+                      {Array.isArray(entries[0].drawings.drawing_data[0])
+                        ? entries[0].drawings.drawing_data.length == 1
+                          ? " Drawing"
+                          : " Drawings"
                         : " Drawing"}
                     </div>
                     <p className={styles.dosScoreText}>
-                      <strong> <u> Average DOS Score</u>:  </strong>
+                      <strong>
+                        {" "}
+                        <u> Average DOS Score</u>:{" "}
+                      </strong>
                       {entries[0].result_data?.average_DOS || "N/A"}
                     </p>
                   </>
                 )}
                 <p>
-                  <strong><u>Analyzed on</u>:</strong>{" "}
+                  <strong>
+                    <u>Analyzed on</u>:
+                  </strong>{" "}
                   {new Date(entries[0].created_at).toLocaleString()}
                 </p>
                 <div className={styles.scatterPlot}>
@@ -222,7 +233,7 @@ const Dashboard = () => {
 
                 <div className={styles.resultLink}>
                   <Link
-                    href={`/result/${entries[0].drawing_id}`}
+                    href={`/result/${entries[0].session_id}`}
                     className={styles.viewFullAnalysisLink}
                   >
                     View Full Analysis
@@ -231,7 +242,10 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 className={styles.pastResultsHeading} style={{ color: "white", fontWeight: "bold" }}>
+            <h2
+              className={styles.pastResultsHeading}
+              style={{ color: "white", fontWeight: "bold" }}
+            >
               Past Results
               {averageDOS && ` - Your Overall Average: ${averageDOS}`}
             </h2>
@@ -264,11 +278,13 @@ const Dashboard = () => {
                       {entry?.drawings?.drawing_data && (
                         <>
                           <div className={styles.drawingCountBadge}>
-                            {Array.isArray(entry.drawings.drawing_data[0]) 
-                              ? entry.drawings.drawing_data.length 
+                            {Array.isArray(entry.drawings.drawing_data[0])
+                              ? entry.drawings.drawing_data.length
                               : 1}
-                            {Array.isArray(entry.drawings.drawing_data[0]) 
-                              ? (entry.drawings.drawing_data.length == 1 ? " Drawing" : " Drawings")
+                            {Array.isArray(entry.drawings.drawing_data[0])
+                              ? entry.drawings.drawing_data.length == 1
+                                ? " Drawing"
+                                : " Drawings"
                               : " Drawing"}
                           </div>
                         </>

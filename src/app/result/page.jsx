@@ -11,8 +11,9 @@ import { CanIAvoidBugByThis, PTChart } from "../../components/PressureTime";
 import TremorPolarPlot from "../../components/Tremor";
 import { Line3DPlot, processData } from "../../components/Angle";
 import { FaDownload } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useRef } from "react";
+import { CgChevronDoubleLeft } from "react-icons/cg";
 
 // Animated Ellipsis component
 function AnimatedEllipsis() {
@@ -24,862 +25,311 @@ function AnimatedEllipsis() {
   return <span>{".".repeat(dots)}</span>;
 }
 
-export default function ResultPage() {
+export default function ResultPage({ params }) {
+  const { sessionId } = params;
+  const searchParams = useSearchParams();
+  const session = searchParams.get("session");
+  const isAnonymous = searchParams.get("anon") === "true";
   const router = useRouter();
-  const [channel] = useState(() => new BroadcastChannel("spiral-analysis"));
+  const { user } = useAuth();
+
+  const [drawings, setDrawings] = useState([]);
+  const [results, setResults] = useState([]);
+  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState(0);
+  const [loadingResult, setLoadingResult] = useState(true);
+  const [error, setError] = useState(null);
 
   const [drawData, setDrawData] = useState([]);
   const [result, setResult] = useState(null);
   const [speedData, setSpeedData] = useState([]);
   const [angleData, setAngleData] = useState([]);
   const [pData, setPData] = useState([]);
-  const [loadingResult, setLoadingResult] = useState(true);
-  const [error, setError] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState(null);
-  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState(null);
   const [allDrawingData, setAllDrawingData] = useState([]);
-  const [resultsStable, setResultsStable] = useState(false);
-  const { user } = useAuth();
 
-  const [liveAnalysisState, setLiveAnalysisState] = useState({
-    sessionActive: false,
-    totalDrawings: 0,
-    results: [],
-    timings: [],
-    completed: 0,
-    isSessionComplete: false,
-  });
-
-  // Check for completed results first, then active session
-  const checkForCompletedResults = () => {
-    console.log("🔍 [RESULTS] Checking for completed results first");
-
-    const storedAnalysis = localStorage.getItem("analysisHistory");
-    if (storedAnalysis) {
-      try {
-        const analysisData = JSON.parse(storedAnalysis);
-        console.log("🔍 [RESULTS] Found completed analysis:", {
-          totalDrawings: analysisData.total_drawings,
-          successfulDrawings: analysisData.successful_drawings,
-          individualResultsCount: analysisData.individual_results?.length,
-        });
-
-        // Set up UI immediately for completed results
-        setAnalysisHistory(analysisData);
-
-        // Find first valid result (no error)
-        const firstValidIndex = analysisData.individual_results.findIndex(
-          (result) => result && !result.error
-        );
-        const validIndex = firstValidIndex >= 0 ? firstValidIndex : 0;
-
-        console.log("🔍 [RESULTS] Selected valid index:", validIndex);
-
-        // Use the first valid result or latest if none are valid
-        const selectedResult = analysisData.individual_results[validIndex];
-        console.log("🔍 [RESULTS] Selected result:", selectedResult);
-
-        setSelectedDrawingIndex(validIndex);
-
-        const resultWithMetadata = {
-          ...selectedResult,
-          average_DOS: analysisData.average_DOS,
-          analysis_type: "multi_drawing_average",
-          selected_drawing: validIndex + 1,
-          total_drawings:
-            analysisData.total_drawings ||
-            analysisData.individual_results.length,
-          successful_drawings: analysisData.successful_drawings,
-        };
-
-        setResult(resultWithMetadata);
-
-        // Get the drawing data for charts
-        const storedDrawings = localStorage.getItem("drawData");
-
-        if (storedDrawings) {
-          const drawings = JSON.parse(storedDrawings);
-          console.log(
-            "🔍 [RESULTS] Setting all drawing data:",
-            drawings.length
-          );
-          setAllDrawingData(drawings);
-
-          // Use the first valid drawing's data
-          const selectedDrawing = drawings[validIndex];
-
-          setDrawData(selectedDrawing);
-          setSpeedData(calculateSpeed(selectedDrawing));
-          setAngleData(processData(selectedDrawing));
-          setPData(CanIAvoidBugByThis(selectedDrawing));
-        }
-
-        console.log(
-          "🔍 [RESULTS] Setting loadingResult to false and results stable"
-        );
-        setLoadingResult(false);
-        setResultsStable(true);
-        return true;
-      } catch (err) {
-        console.error("🔍 [RESULTS] Error parsing completed analysis:", err);
-        localStorage.removeItem("analysisHistory");
-      }
-    }
-
-    console.log("🔍 [RESULTS] No completed results found");
-    return false;
-  };
-
-  // Check for active analysis session on page load
-  const checkForActiveSession = () => {
-    const activeSession = localStorage.getItem("activeAnalysisSession");
-    if (activeSession) {
-      try {
-        const sessionData = JSON.parse(activeSession);
-
-        // Set up UI immediately for active session
-        setLiveAnalysisState({
-          sessionActive: true,
-          totalDrawings: sessionData.totalDrawings,
-          results: new Array(sessionData.totalDrawings).fill(null),
-          timings: [],
-          completed: 0,
-          isSessionComplete: false,
-        });
-        setResultsStable(false); // Reset stability flag for active session
-
-        // Initialize analysis history with placeholder data
-        setAnalysisHistory({
-          individual_results: new Array(sessionData.totalDrawings).fill(null),
-          total_drawings: sessionData.totalDrawings,
-          successful_drawings: 0,
-          average_DOS: null,
-        });
-
-        // Load drawing data immediately if available
-        const storedDrawings = localStorage.getItem("drawData");
-        if (storedDrawings) {
-          try {
-            const drawings = JSON.parse(storedDrawings);
-            setAllDrawingData(drawings);
-
-            // Set up charts with the first drawing's data
-            if (drawings[0]) {
-              setDrawData(drawings[0]);
-              setSpeedData(calculateSpeed(drawings[0]));
-              setAngleData(processData(drawings[0]));
-              setPData(CanIAvoidBugByThis(drawings[0]));
-              setSelectedDrawingIndex(0);
-            }
-          } catch (err) {
-            console.error("🔍 [SESSION] Error loading drawing data:", err);
-          }
-        }
-
-        setLoadingResult(false);
-        return true;
-      } catch (err) {
-        console.error("🔍 [SESSION] Error parsing active session:", err);
-        localStorage.removeItem("activeAnalysisSession");
-      }
-    }
-
-    console.log("🔍 [SESSION] No active session found");
-    return false;
-  };
-
-  // Listen for live analysis updates
-  useEffect(() => {
-    const handleBroadcast = (event) => {
-      const { type, data } = event.data;
-
-      switch (type) {
-        case "ANALYSIS_SESSION_STARTED":
-          console.log("🚀 [BROADCAST] Analysis session started");
-
-          const newLiveState = {
-            sessionActive: true,
-            totalDrawings: data.totalDrawings,
-            results: new Array(data.totalDrawings).fill(null),
-            timings: [],
-            completed: 0,
-            isSessionComplete: false,
-          };
-
-          setLiveAnalysisState(newLiveState);
-          setResultsStable(false);
-
-          // Initialize analysis history immediately with placeholder data
-          const newAnalysisHistory = {
-            individual_results: new Array(data.totalDrawings).fill(null),
-            total_drawings: data.totalDrawings,
-            successful_drawings: 0,
-            average_DOS: null,
-          };
-
-          setAnalysisHistory(newAnalysisHistory);
-
-          // Load drawing data immediately if available
-          const storedDrawings = localStorage.getItem("drawData");
-
-          if (storedDrawings) {
-            try {
-              const drawings = JSON.parse(storedDrawings);
-
-              setAllDrawingData(drawings);
-
-              // Set up charts with the first drawing's data
-              if (drawings[0]) {
-                setDrawData(drawings[0]);
-                setSpeedData(calculateSpeed(drawings[0]));
-                setAngleData(processData(drawings[0]));
-                setPData(CanIAvoidBugByThis(drawings[0]));
-                setSelectedDrawingIndex(0);
-              }
-            } catch (err) {
-              console.error("🚀 [BROADCAST] Error loading drawing data:", err);
-            }
-          }
-
-          console.log("🚀 [BROADCAST] Setting loadingResult to false");
-          setLoadingResult(false);
-          break;
-
-        case "DRAWING_ANALYSIS_COMPLETED":
-          console.log("✅ [BROADCAST] Drawing analysis completed");
-
-          setLiveAnalysisState((prev) => {
-            const newResults = [...prev.results];
-            newResults[data.drawingIndex] = data.result;
-
-            const newState = {
-              ...prev,
-              results: newResults,
-              timings: [...prev.timings, data.timing],
-              completed: data.progress.completed,
-            };
-
-            return newState;
-          });
-
-          // Update analysis history in real-time
-          setAnalysisHistory((prev) => {
-            if (!prev) {
-              const newHistory = {
-                individual_results: [data.result],
-                total_drawings: liveAnalysisState.totalDrawings,
-              };
-
-              return newHistory;
-            }
-
-            const newResults = [...prev.individual_results];
-            newResults[data.drawingIndex] = data.result;
-
-            const updatedHistory = {
-              ...prev,
-              individual_results: newResults,
-            };
-
-            return updatedHistory;
-          });
-          break;
-
-        case "DRAWING_ANALYSIS_FAILED":
-          console.log("❌ [BROADCAST] Drawing analysis failed");
-
-          setLiveAnalysisState((prev) => {
-            const newResults = [...prev.results];
-            newResults[data.drawingIndex] = data.error;
-
-            const newState = {
-              ...prev,
-              results: newResults,
-              timings: [...prev.timings, data.timing],
-              completed: data.progress.completed,
-            };
-
-            return newState;
-          });
-
-          // Update analysis history with error
-          setAnalysisHistory((prev) => {
-            if (!prev) return prev;
-
-            const newResults = [...prev.individual_results];
-            newResults[data.drawingIndex] = data.error;
-
-            const updatedHistory = {
-              ...prev,
-              individual_results: newResults,
-            };
-
-            return updatedHistory;
-          });
-          break;
-
-        case "ANALYSIS_SESSION_COMPLETED":
-          console.log("🎉 [BROADCAST] Analysis session completed");
-
-          setLiveAnalysisState((prev) => {
-            const newState = {
-              ...prev,
-              isSessionComplete: true,
-            };
-            console.log(
-              "🎉 [BROADCAST] Updated live state to completed:",
-              newState
-            );
-            return newState;
-          });
-
-          // Clear active session (liveProgress will be cleaned up by MachinePage after 5 seconds)
-          localStorage.removeItem("activeAnalysisSession");
-
-          // Reload the final analysisHistory from localStorage
-          console.log("🎉 [BROADCAST] Scheduling analysisHistory reload");
-          setResultsStable(true); // Mark results as stable
-          setTimeout(() => {
-            console.log(
-              "🎉 [BROADCAST] Reloading analysisHistory from localStorage"
-            );
-            const storedAnalysis = localStorage.getItem("analysisHistory");
-            if (storedAnalysis) {
-              try {
-                const analysisData = JSON.parse(storedAnalysis);
-                console.log("🎉 [BROADCAST] Reloaded analysisHistory:", {
-                  average_DOS: analysisData.average_DOS,
-                  total_drawings: analysisData.total_drawings,
-                  successful_drawings: analysisData.successful_drawings,
-                });
-                setAnalysisHistory(analysisData);
-              } catch (err) {
-                console.error(
-                  "🎉 [BROADCAST] Error reloading analysisHistory:",
-                  err
-                );
-              }
-            }
-          }, 1000);
-          break;
-      }
-    };
-
-    console.log("📡 [BROADCAST] Setting up broadcast listener");
-    channel.addEventListener("message", handleBroadcast);
-
-    return () => {
-      console.log("📡 [BROADCAST] Cleaning up broadcast listener");
-      channel.removeEventListener("message", handleBroadcast);
-    };
-  }, [channel, liveAnalysisState.totalDrawings]);
-
-  const loadAnalysisResults = async () => {
-    console.log("📂 [LOAD] Starting loadAnalysisResults");
-    console.log("📂 [LOAD] Current state:", {
-      loadingResult,
-      analysisHistory: !!analysisHistory,
-      liveAnalysisState,
-    });
-
-    setLoadingResult(true);
-
+  const loadInitialData = async () => {
     try {
-      // Single drawing analysis fallback (keep your existing logic)
-      console.log(
-        "📂 [LOAD] No multi-drawing analysis found, checking for single drawing..."
-      );
-      const storedDrawData = localStorage.getItem("drawData");
-      console.log("📂 [LOAD] Stored draw data:", !!storedDrawData);
+      console.log("Loading initial data for session:", sessionId);
 
-      if (!storedDrawData) {
-        console.log("📂 [LOAD] No draw data found, setting error");
-        setError(
-          "No analysis results found. Please complete the spiral analysis first."
+      // Load drawings first
+      const { data: drawingsData, error: drawingsError } = await supabase
+        .from("drawings")
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: true });
+
+      if (drawingsError) {
+        console.error("Error loading drawings:", drawingsError);
+        throw drawingsError;
+      }
+
+      console.log(`Loaded ${drawingsData?.length || 0} drawings`);
+
+      // Load existing results by session id
+      const { data: resultsData, error: resultsError } = await supabase
+        .from("api_results")
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: true });
+
+      if (resultsError) {
+        console.error("Error loading results:", resultsError);
+      }
+      console.log(`Loaded ${resultsData?.length || 0} results`);
+
+      // Set state after both are loaded
+      setDrawings(drawingsData || []);
+      setResults(resultsData || []);
+
+      // Extract drawing data for charts
+      const drawingDataArray = (drawingsData || []).map((d) => d.drawing_data);
+      setAllDrawingData(drawingDataArray);
+
+      // Set up charts with the first drawing's data
+      if (drawingDataArray.length > 0) {
+        updateChartsForDrawingWithData(
+          0,
+          drawingDataArray,
+          resultsData || [],
+          drawingsData || []
         );
-        setLoadingResult(false);
-        return;
       }
-
-      const parsedDrawData = JSON.parse(storedDrawData);
-      const singleDrawing = Array.isArray(parsedDrawData[0])
-        ? parsedDrawData[0]
-        : parsedDrawData;
-
-      console.log(
-        "📂 [LOAD] Setting single drawing data:",
-        singleDrawing.length
-      );
-      setDrawData(singleDrawing);
-      setSpeedData(calculateSpeed(singleDrawing));
-      setAngleData(processData(singleDrawing));
-      setPData(CanIAvoidBugByThis(singleDrawing));
-
-      const storedResult = localStorage.getItem("resultFromApi");
-      console.log("📂 [LOAD] Stored API result:", !!storedResult);
-
-      if (storedResult) {
-        console.log("📂 [LOAD] Using stored single-drawing result");
-        setResult(JSON.parse(storedResult));
-        setLoadingResult(false);
-        setResultsStable(true);
-        return;
-      }
-
-      // Last resort: Make API call for single drawing
-      console.log("📂 [LOAD] Making API call for single drawing analysis...");
-      await performSingleDrawingAnalysis(singleDrawing);
-    } catch (err) {
-      console.error("📂 [LOAD] Error loading analysis results:", err);
+      updateAnalysisHistory(drawingsData || [], resultsData || []);
+    } catch (error) {
+      console.error("Error loading initial data:", error);
       setError("Failed to load analysis results. Please try again.");
-      setLoadingResult(false);
-    }
-  };
-
-  useEffect(() => {
-    console.log("🔄 [EFFECT] User/auth effect triggered:", {
-      user: !!user,
-      liveAnalysisState: liveAnalysisState.sessionActive,
-    });
-
-    if (user === undefined) {
-      console.log("🔄 [EFFECT] Waiting for user to be initialized...");
-      return;
-    }
-
-    // First check for completed results, then active session
-    const hasCompletedResults = checkForCompletedResults();
-
-    if (!hasCompletedResults) {
-      // Only check for active session if no completed results were found
-      const hasActiveSession = checkForActiveSession();
-
-      // Only load results if no active session was found
-      if (!hasActiveSession && !liveAnalysisState.sessionActive) {
-        loadAnalysisResults();
-      }
-    }
-  }, [user, liveAnalysisState.sessionActive]);
-
-  // Cleanup channel on unmount
-  useEffect(() => {
-    return () => {
-      console.log("🧹 [CLEANUP] Closing broadcast channel");
-      channel.close();
-      // Clean up live progress if component unmounts during active session
-      // Only remove if session is not complete to avoid interfering with delayed cleanup
-      if (
-        liveAnalysisState.sessionActive &&
-        !liveAnalysisState.isSessionComplete
-      ) {
-        localStorage.removeItem("liveProgress");
-      }
-    };
-  }, [channel, liveAnalysisState.sessionActive]);
-
-  // Polling mechanism for live progress updates
-  useEffect(() => {
-    if (
-      !liveAnalysisState.sessionActive ||
-      liveAnalysisState.isSessionComplete
-    ) {
-      return;
-    }
-
-    // Add a timeout to prevent infinite polling (5 minutes max)
-    const timeout = setTimeout(() => {
-      console.log(
-        "⏰ [POLLING] Timeout reached (5 minutes), forcing completion"
-      );
-      setLiveAnalysisState((prev) => ({
-        ...prev,
-        isSessionComplete: true,
-        completed: prev.totalDrawings,
-      }));
-      setTimeout(() => {
-        console.log("🎉 [POLLING] Reloading analysisHistory from timeout");
-        const storedAnalysis = localStorage.getItem("analysisHistory");
-        if (storedAnalysis) {
-          try {
-            const analysisData = JSON.parse(storedAnalysis);
-            console.log("🎉 [POLLING] Reloaded analysisHistory from timeout:", {
-              average_DOS: analysisData.average_DOS,
-              total_drawings: analysisData.total_drawings,
-              successful_drawings: analysisData.successful_drawings,
-            });
-            setAnalysisHistory(analysisData);
-            setResultsStable(true);
-          } catch (err) {
-            console.error(
-              "🎉 [POLLING] Error reloading analysisHistory from timeout:",
-              err
-            );
-          }
-        }
-      }, 1000);
-    }, 5 * 60 * 1000); // 5 minutes
-
-    const poll = setInterval(() => {
-      const progress = localStorage.getItem("liveProgress");
-      if (progress) {
-        try {
-          const data = JSON.parse(progress);
-          console.log("📊 [POLLING] Found progress data:", {
-            completed: data.completed,
-            total: data.total,
-            resultsCount: data.results?.length,
-            isComplete: data.isComplete,
-          });
-
-          // Update live analysis state with new progress
-          setLiveAnalysisState((prev) => {
-            const newResults = [...prev.results];
-
-            // Update results array with new data
-            if (data.results && data.results.length > 0) {
-              data.results.forEach((result, index) => {
-                if (result && index < newResults.length) {
-                  newResults[index] = result;
-                }
-              });
-            }
-
-            const newState = {
-              ...prev,
-              results: newResults,
-              completed: data.completed,
-              isSessionComplete: data.isComplete || false,
-            };
-
-            console.log("📊 [POLLING] Updated live analysis state:", {
-              completed: newState.completed,
-              total: newState.totalDrawings,
-              resultsCount: newResults.filter((r) => r !== null).length,
-              isSessionComplete: newState.isSessionComplete,
-            });
-
-            return newState;
-          });
-
-          // Update analysis history with new results
-          setAnalysisHistory((prev) => {
-            if (!prev) return prev;
-
-            const newIndividualResults = [...prev.individual_results];
-
-            if (data.results && data.results.length > 0) {
-              data.results.forEach((result, index) => {
-                if (result && index < newIndividualResults.length) {
-                  newIndividualResults[index] = result;
-                }
-              });
-            }
-
-            const newHistory = {
-              ...prev,
-              individual_results: newIndividualResults,
-            };
-
-            console.log("📊 [POLLING] Updated analysis history:", {
-              totalDrawings: newHistory.total_drawings,
-              individualResultsCount: newIndividualResults.filter(
-                (r) => r !== null
-              ).length,
-            });
-
-            // If analysis is complete, reload the final analysisHistory from localStorage
-            if (data.isComplete) {
-              console.log(
-                "🎉 [POLLING] Detected final completion via polling, reloading analysisHistory"
-              );
-              setResultsStable(true); // Mark results as stable
-              setTimeout(() => {
-                console.log(
-                  "🎉 [POLLING] Reloading analysisHistory from localStorage"
-                );
-                const storedAnalysis = localStorage.getItem("analysisHistory");
-                if (storedAnalysis) {
-                  try {
-                    const analysisData = JSON.parse(storedAnalysis);
-                    console.log("🎉 [POLLING] Reloaded analysisHistory:", {
-                      average_DOS: analysisData.average_DOS,
-                      total_drawings: analysisData.total_drawings,
-                      successful_drawings: analysisData.successful_drawings,
-                    });
-                    setAnalysisHistory(analysisData);
-                  } catch (err) {
-                    console.error(
-                      "🎉 [POLLING] Error reloading analysisHistory:",
-                      err
-                    );
-                  }
-                }
-              }, 1000);
-            } else if (data.completed >= data.total) {
-              // Safety check: if completed >= total but isComplete is false, force completion
-              console.log(
-                "⚠️ [POLLING] Safety check: completed >= total but isComplete is false, forcing completion"
-              );
-              setLiveAnalysisState((prev) => ({
-                ...prev,
-                isSessionComplete: true,
-                completed: data.total,
-              }));
-              setResultsStable(true); // Mark results as stable
-              setTimeout(() => {
-                console.log(
-                  "🎉 [POLLING] Reloading analysisHistory from safety check"
-                );
-                const storedAnalysis = localStorage.getItem("analysisHistory");
-                if (storedAnalysis) {
-                  try {
-                    const analysisData = JSON.parse(storedAnalysis);
-                    console.log(
-                      "🎉 [POLLING] Reloaded analysisHistory from safety check:",
-                      {
-                        average_DOS: analysisData.average_DOS,
-                        total_drawings: analysisData.total_drawings,
-                        successful_drawings: analysisData.successful_drawings,
-                      }
-                    );
-                    setAnalysisHistory(analysisData);
-                  } catch (err) {
-                    console.error(
-                      "🎉 [POLLING] Error reloading analysisHistory from safety check:",
-                      err
-                    );
-                  }
-                }
-              }, 1000);
-            }
-
-            return newHistory;
-          });
-        } catch (error) {
-          console.error("📊 [POLLING] Error parsing progress data:", error);
-        }
-      } else {
-        console.log("📊 [POLLING] No progress data found in localStorage");
-      }
-    }, 2000);
-
-    return () => {
-      console.log("📊 [POLLING] Cleaning up polling interval and timeout");
-      clearInterval(poll);
-      clearTimeout(timeout);
-    };
-  }, [liveAnalysisState.sessionActive]);
-
-  // handles showcasing of each individual result
-  const drawingClick = (index) => {
-    console.log("🖱️ [CLICK] Drawing clicked:", index);
-    console.log("🖱️ [CLICK] Current state:", {
-      allDrawingData: !!allDrawingData,
-      analysisHistory: !!analysisHistory,
-      individualResults: analysisHistory?.individual_results?.length,
-    });
-
-    if (!allDrawingData) {
-      console.log("🖱️ [CLICK] Missing drawing data, returning early");
-      return;
-    }
-
-    setSelectedDrawingIndex(index);
-    const selectedResult = analysisHistory?.individual_results?.[index];
-    console.log("🖱️ [CLICK] Selected result:", selectedResult);
-
-    // Always update charts if drawing data exists, even if result is pending
-    if (allDrawingData[index]) {
-      const selectedDrawing = allDrawingData[index];
-      console.log(
-        "🖱️ [CLICK] Setting charts with drawing:",
-        selectedDrawing.length
-      );
-
-      setDrawData(selectedDrawing);
-      setSpeedData(calculateSpeed(selectedDrawing));
-      setAngleData(processData(selectedDrawing));
-      setPData(CanIAvoidBugByThis(selectedDrawing));
-    }
-
-    // Only update result metadata if we have a valid result
-    if (selectedResult && !selectedResult.error) {
-      const resultWithMetadata = {
-        ...selectedResult,
-        average_DOS: analysisHistory?.average_DOS,
-        analysis_type: "multi_drawing_average",
-        selected_drawing: index + 1,
-        total_drawings:
-          analysisHistory?.total_drawings ||
-          analysisHistory?.individual_results?.length,
-        successful_drawings: analysisHistory?.successful_drawings,
-      };
-
-      console.log(
-        "🖱️ [CLICK] Setting result with metadata:",
-        resultWithMetadata
-      );
-      setResult(resultWithMetadata);
-    } else {
-      // Clear result for pending or failed drawings
-      setResult(null);
-    }
-  };
-
-  const performSingleDrawingAnalysis = async (drawingData) => {
-    try {
-      const email = user?.email || "anonymous";
-      const username = email.split("@")[0];
-
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          drawData: drawingData,
-          user: { email, username },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setResult(data.result);
-      localStorage.setItem("resultFromApi", JSON.stringify(data.result));
-
-      if (user?.id) {
-        await saveToDatabase(user.id, drawingData, data.result);
-      }
-    } catch (err) {
-      console.error("Single drawing analysis failed:", err);
-      setError("Failed to analyze drawing. Please try again.");
     } finally {
       setLoadingResult(false);
     }
   };
 
-  const saveToDatabase = async (userId, drawData, apiResult) => {
-    try {
-      const { data: drawing, error: drawError } = await supabase
-        .from("drawings")
-        .insert([{ user_id: userId, drawing_data: drawData }])
-        .select("id")
-        .single();
+  const updateChartsForDrawingWithData = (
+    index,
+    drawingDataArray,
+    resultsArray,
+    drawingsData
+  ) => {
+    const drawingData = drawingDataArray[index];
+    if (!drawingData) return;
 
-      if (drawError) throw drawError;
+    console.log(`Updating charts for drawing ${index + 1}`);
+    setDrawData(drawingData);
+    setSpeedData(calculateSpeed(drawingData));
+    setAngleData(processData(drawingData));
+    setPData(CanIAvoidBugByThis(drawingData));
 
-      await supabase
-        .from("api_results")
-        .insert([
-          { user_id: userId, drawing_id: drawing.id, result_data: apiResult },
-        ]);
-
-      console.log("Data saved successfully in Supabase!");
-    } catch (error) {
-      console.error("Error saving data to Supabase:", error);
+    // Use the passed drawingsData instead of state
+    const currentDrawing = drawingsData[index];
+    if (!currentDrawing) {
+      setResult(null);
+      return;
     }
+
+    const drawingResult = resultsArray.find(
+      (r) => r.drawing_id === currentDrawing.id
+    );
+    if (drawingResult && drawingResult.status === "completed") {
+      setResult(drawingResult.result_data);
+    } else {
+      setResult(null);
+    }
+  };
+  // update charts for a specific drawing
+  const updateChartsForDrawing = (index, drawingsArray, resultsArray) => {
+    const drawingData = drawingsArray[index];
+    if (!drawingData) return;
+
+    console.log(`Updating charts for drawing ${index + 1}`);
+    setDrawData(drawingData);
+    setSpeedData(calculateSpeed(drawingData));
+    setAngleData(processData(drawingData));
+    setPData(CanIAvoidBugByThis(drawingData));
+
+    const currentDrawing = drawings[index];
+    if (!currentDrawing) {
+      setResult(null);
+      return;
+    }
+
+    const drawingResult = resultsArray.find(
+      (r) => r.drawing_id === currentDrawing.id
+    );
+
+    if (drawingResult && drawingResult.status === "completed") {
+      setResult(drawingResult.result_data);
+    } else {
+      setResult(null);
+    }
+  };
+
+  // update analysis history
+  const updateAnalysisHistory = (drawingsArray, resultsArray) => {
+    const individualResults = drawingsArray.map((drawing) => {
+      if (!drawing || !drawing.id) {
+        console.warn("Drawing missing id:", drawing);
+        return null;
+      }
+      const result = resultsArray.find((r) => r.drawing_id === drawing.id);
+
+      if (!result) return null;
+      if (result.status === "failed")
+        return { error: true, errorMessage: result.result_data?.errorMessage };
+      if (result.status === "completed") return result.result_data;
+      return null;
+    });
+
+    const completedResults = individualResults.filter((r) => r && !r.error);
+    const dosScores = completedResults
+      .map((r) => parseFloat(r.DOS))
+      .filter((score) => !isNaN(score));
+
+    const averageDOS =
+      dosScores.length > 0
+        ? (dosScores.reduce((a, b) => a + b, 0) / dosScores.length).toFixed(2)
+        : null;
+
+    const history = {
+      individual_results: individualResults,
+      total_drawings: drawingsArray.length,
+      successful_drawings: completedResults.length,
+      average_DOS: averageDOS,
+    };
+    console.log("Updated analysis history:", history);
+    setAnalysisHistory(history);
+  };
+
+  // Real-time subscription to analysis updates
+  useEffect(() => {
+    if (!sessionId) return;
+    console.log("Setting up real-time subscription for session:", sessionId);
+
+    const subscription = supabase
+      .channel(`session-${sessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "api_results",
+          filter: `session_id=eq.${sessionId}`,
+        },
+        (payload) => {
+          console.log(" Received update:", payload);
+          handleRealTimeUpdate(payload);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [sessionId]);
+
+  // Handle real time updates
+  const handleRealTimeUpdate = (payload) => {
+    const { eventType, new: newRecord } = payload;
+
+    if (eventType === "INSERT") {
+      setResults((prev) => [...prev, newRecord]);
+    } else if (eventType === "UPDATE") {
+      setResults((prev) =>
+        prev.map((result) => (result.id === newRecord.id ? newRecord : result))
+      );
+    }
+
+    setTimeout(() => {
+      setResults((currentResults) => {
+        const updatedResults =
+          eventType === "INSERT"
+            ? [...currentResults, newRecord]
+            : currentResults.map((result) =>
+                result.id === newRecord.id ? newRecord : result
+              );
+
+        updateAnalysisHistory(drawings, [...results, updatedResults]);
+
+        // update current charts if selected drawing
+        const drawingIndex = drawings.findIndex(
+          (d) => d.id === newRecord.drawing_id
+        );
+        if (drawingIndex === selectedDrawingIndex && drawingIndex !== -1) {
+          updateChartsForDrawing(
+            selectedDrawingIndex,
+            allDrawingData,
+            updatedResults
+          );
+        }
+        return updatedResults;
+      });
+    }, 100);
+  };
+
+  // Initialize data on mount
+  useEffect(() => {
+    if (sessionId) {
+      loadInitialData();
+    }
+  }, [sessionId]);
+
+  // Update analysis history when drawings or results change
+  useEffect(() => {
+    if (drawings.length > 0) {
+      updateAnalysisHistory(drawings, results);
+    }
+  }, [drawings, results]);
+
+  // handles showcasing of each individual result
+  const drawingClick = (index) => {
+    console.log("🖱️ Drawing clicked:", index);
+    setSelectedDrawingIndex(index);
+    updateChartsForDrawing(index, allDrawingData, results);
   };
 
   const getDOSScore = () => {
-    // Show "Pending..." during live analysis
-    if (
-      liveAnalysisState.sessionActive &&
-      !liveAnalysisState.isSessionComplete
-    ) {
+    const allCompleted = drawings.every((drawing) => {
+      const result = results.find((r) => r.drawing_id === drawing.id);
+      return result && result.status === "completed";
+    });
+
+    if (!allCompleted) {
       return "Pending...";
     }
 
-    // For multi-drawing analysis, use the average DOS from analysisHistory
-    if (
-      analysisHistory &&
-      analysisHistory.average_DOS !== null &&
-      analysisHistory.average_DOS !== undefined
-    ) {
+    // Return average DOS if available
+    if (analysisHistory && analysisHistory.average_DOS !== null) {
       return analysisHistory.average_DOS;
     }
 
-    // Fallback to individual result DOS score
-    if (result && typeof result === "object") {
-      // Prioritize average DOS for multi-drawing analysis
-      if (result.average_DOS !== null && result.average_DOS !== undefined) {
-        return result.average_DOS;
-      }
-
-      // Fallback to individual DOS score
-      if (result.DOS !== null && result.DOS !== undefined) {
-        return result.DOS;
-      }
-    }
-
     return "N/A";
   };
 
+  // Gets current drawing DOS score
   const getCurrentDOSScore = () => {
     // Show "Pending..." for incomplete analysis
-    if (
-      liveAnalysisState.sessionActive &&
-      !liveAnalysisState.isSessionComplete
-    ) {
-      const currentResult =
-        analysisHistory?.individual_results?.[selectedDrawingIndex];
-      if (!currentResult || currentResult === null) {
-        return "Pending...";
-      }
+    if (selectedDrawingIndex === null || !drawings[selectedDrawingIndex]) {
+      return "N/A";
     }
 
-    if (!currentResult || typeof currentResult !== "object") return "N/A";
+    const drawing = drawings[selectedDrawingIndex];
+    if (!drawing || !drawing.id) {
+      return "N/A";
+    }
+    const drawingResult = results.find((r) => r.drawing_id === drawing.id);
 
-    if (currentResult.DOS !== null && currentResult.DOS !== undefined) {
-      return currentResult.DOS;
+    if (!drawingResult) return "Pending...";
+    if (drawingResult.status === "failed") return "Failed";
+    if (drawingResult.status === "processing") return "Analyzing...";
+    if (drawingResult.status === "completed") {
+      return drawingResult.result_data?.DOS || "N/A";
     }
 
-    return "N/A";
+    return "Pending...";
   };
 
-  const currentResult =
-    analysisHistory?.individual_results?.[selectedDrawingIndex];
-
-  // Debug: Track state changes
-  useEffect(() => {
-    console.log("🔄 [STATE] liveAnalysisState changed:", liveAnalysisState);
-  }, [liveAnalysisState]);
-
-  useEffect(() => {
-    console.log("🔄 [STATE] analysisHistory changed:", analysisHistory);
-  }, [analysisHistory]);
-
-  useEffect(() => {
-    console.log("🔄 [STATE] loadingResult changed:", loadingResult);
-  }, [loadingResult]);
-
-  useEffect(() => {
-    console.log(
-      "🔄 [STATE] selectedDrawingIndex changed:",
-      selectedDrawingIndex
-    );
-  }, [selectedDrawingIndex]);
-
-  useEffect(() => {
-    console.log("🔄 [STATE] allDrawingData changed:", {
-      length: allDrawingData.length,
-      hasData: allDrawingData.length > 0,
-    });
-  }, [allDrawingData]);
-
-  useEffect(() => {
-    console.log("🔄 [STATE] result changed:", result);
-  }, [result]);
-
   const downloadResults = () => {
-    console.log("💾 [DOWNLOAD] Download requested");
-    console.log("💾 [DOWNLOAD] Current state:", {
-      result: !!result,
-      analysisHistory: !!analysisHistory,
-    });
+    console.log("💾 Download requested");
 
     if (!result && !analysisHistory) {
-      console.log("💾 [DOWNLOAD] No results available");
       alert("No results available to download");
       return;
     }
@@ -897,10 +347,10 @@ export default function ResultPage() {
       speed_data: speedData,
       angle_data: angleData,
       pressure_data: pData,
+      session_id: sessionId,
       ...result,
     };
 
-    console.log("💾 [DOWNLOAD] Preparing download data:", downloadData);
     const dataStr = JSON.stringify(downloadData, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
@@ -913,43 +363,8 @@ export default function ResultPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    console.log("💾 [DOWNLOAD] Download completed");
   };
-
-  const getProgressDisplay = () => {
-    if (
-      liveAnalysisState.sessionActive &&
-      !liveAnalysisState.isSessionComplete
-    ) {
-      // Use the completed count from state, but clamp it to prevent "4/3" scenarios
-      const completedCount = Math.min(
-        liveAnalysisState.completed,
-        liveAnalysisState.totalDrawings
-      );
-      // Show the next drawing being analyzed (completed + 1), but clamp to total
-      const currentDrawing = Math.min(
-        completedCount + 1,
-        liveAnalysisState.totalDrawings
-      );
-      const progress = `Analyzing: ${currentDrawing}/${liveAnalysisState.totalDrawings}`;
-      return (
-        <>
-          {progress}
-          <AnimatedEllipsis />
-        </>
-      );
-    }
-    return null;
-  };
-
-  // If no analysis and no live session, redirect
-  if (
-    !liveAnalysisState.sessionActive &&
-    !analysisHistory &&
-    !result &&
-    !loadingResult
-  ) {
-    console.log("🎨 [RENDER] Redirecting to /machine");
+  if (!sessionId) {
     router.push("/machine");
     return null;
   }
@@ -965,18 +380,13 @@ export default function ResultPage() {
               Analyzing
               <AnimatedEllipsis />
             </p>
-          ) : liveAnalysisState.sessionActive &&
-            !liveAnalysisState.isSessionComplete ? (
-            <p>{getProgressDisplay()}</p>
           ) : (
-            // Show average DOS if session is complete or if we have analysis history
-            (liveAnalysisState.isSessionComplete || analysisHistory) &&
-            !loadingResult && <p>Average DOS Score: {getDOSScore()}</p>
+            <p>Average DOS Score: {getDOSScore()}</p>
           )}
           {error && <p style={{ color: "red" }}>{String(error)}</p>}
         </div>
 
-        {(analysisHistory || liveAnalysisState.sessionActive) && (
+        {drawings.length > 0 && (
           <div className={styles.title}>
             <h3>Individual Drawings:</h3>
             <div
@@ -987,37 +397,22 @@ export default function ResultPage() {
                 flexWrap: "wrap",
               }}
             >
-              {(
-                analysisHistory?.individual_results ||
-                Array.from(
-                  { length: liveAnalysisState.totalDrawings },
-                  (_, i) => null
-                )
-              ).map((individualResult, index) => {
+              {drawings.map((drawing, index) => {
+                const drawingResult = results.find(
+                  (r) => r.drawing_id === drawing.id
+                );
+
                 let displayContent = `#${index + 1}`;
-                let isClickable = individualResult && !individualResult.error;
+                let isClickable = true;
                 let backgroundColor = "rgba(255,255,255,0.1)";
 
-                if (
-                  liveAnalysisState.sessionActive &&
-                  !liveAnalysisState.isSessionComplete
-                ) {
-                  if (individualResult === null) {
-                    displayContent = `#${index + 1}`;
-                    // Make clickable if drawing data exists, even if pending
-                    isClickable =
-                      allDrawingData[index] && allDrawingData[index].length > 0;
-                    backgroundColor = "rgba(255, 165, 0, 0.3)"; // Orange for pending
-                  } else if (individualResult && !individualResult.error) {
-                    displayContent = `#${index + 1}`;
-                    isClickable = true;
-                    backgroundColor = "rgba(255,255,255,0.1)";
-                  }
-                }
-                if (individualResult && individualResult.error) {
-                  displayContent = `#${index + 1}: N/A`;
-                  isClickable = false;
-                  backgroundColor = "rgba(255,100,100,0.2)";
+                if (!drawingResult) {
+                  backgroundColor = "rgba(255, 165, 0, 0.3)"; // Orange for pending
+                } else if (drawingResult.status === "processing") {
+                  backgroundColor = "rgba(255, 165, 0, 0.3)"; // Orange for processing
+                } else if (drawingResult.status === "failed") {
+                  displayContent = `#${index + 1}: Failed`;
+                  backgroundColor = "rgba(255,100,100,0.2)"; // Red for failed
                 }
 
                 return (

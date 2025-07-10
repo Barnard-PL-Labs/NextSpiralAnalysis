@@ -1,20 +1,20 @@
 // pages/results/[id].jsx
 //Most of these is identical to the normal result page, but this one is linked to the dashboard
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react';
-import XYChart from '@/components/Scatter';
-import Spiral3D from '@/components/TimeTrace';
-import { SpeedTimeChart, calculateSpeed } from '@/components/ST';
-import Header from '@/components/Header';
-import styles from '@/styles/Result.module.css';
-import { CanIAvoidBugByThis, PTChart } from '@/components/PressureTime';
-import { Line3DPlot, processData } from '@/components/Angle';
-import SpiralPlot from '@/components/NewTimeTrace';
-import { supabase } from '@/lib/supabaseClient';
-import { useParams } from 'next/navigation';
-import LineGraph from '../../../components/LineGraph';
-import TremorPolarPlot from '../../../components/Tremor';
+import { useEffect, useState } from "react";
+import XYChart from "@/components/Scatter";
+import Spiral3D from "@/components/TimeTrace";
+import { SpeedTimeChart, calculateSpeed } from "@/components/ST";
+import Header from "@/components/Header";
+import styles from "@/styles/Result.module.css";
+import { CanIAvoidBugByThis, PTChart } from "@/components/PressureTime";
+import { Line3DPlot, processData } from "@/components/Angle";
+import SpiralPlot from "@/components/NewTimeTrace";
+import { supabase } from "@/lib/supabaseClient";
+import { useParams } from "next/navigation";
+import LineGraph from "../../../components/LineGraph";
+import TremorPolarPlot from "../../../components/Tremor";
 import { FaDownload } from "react-icons/fa";
 
 export default function ResultPage() {
@@ -35,28 +35,39 @@ export default function ResultPage() {
     const fetchData = async () => {
       if (!id) return;
 
-      const { data, error } = await supabase
-        .from('api_results')
-        .select(`
-          result_data,
-          drawings (
-            drawing_data
-          )
-        `)
-        .eq('drawing_id', id)
+      // ✅ NEW: Separate queries instead of join
+      // First get the api_result
+      const { data: resultData, error: resultError } = await supabase
+        .from("api_results")
+        .select("*")
+        .eq("drawing_id", id)
         .single();
 
-      if (error || !data) {
-        console.error('Error fetching result:', error);
-        setError('Failed to load analysis results.');
+      if (resultError || !resultData) {
+        console.error("Error fetching result:", resultError);
+        setError("Failed to load analysis results.");
         return;
       }
 
-      const drawingData = data.drawings?.drawing_data || [];
-      const resultData = data.result_data || {};
+      // Then get the associated drawing
+      const { data: drawingData, error: drawingError } = await supabase
+        .from("drawings")
+        .select("drawing_data")
+        .eq("id", resultData.drawing_id)
+        .single();
 
-      const isMulti = Array.isArray(drawingData[0]);
-      const drawings = isMulti ? drawingData : [drawingData];
+      if (drawingError || !drawingData) {
+        console.error("Error fetching drawing:", drawingError);
+        setError("Failed to load drawing data.");
+        return;
+      }
+
+      // ✅ Process the data (rest stays the same)
+      const drawingArray = drawingData.drawing_data || [];
+      const resultDataObj = resultData.result_data || {};
+
+      const isMulti = Array.isArray(drawingArray[0]);
+      const drawings = isMulti ? drawingArray : [drawingArray];
 
       setAllDrawingData(drawings);
       setSelectedDrawingIndex(0);
@@ -66,17 +77,20 @@ export default function ResultPage() {
       setPData(CanIAvoidBugByThis(drawings[0]));
 
       setResult({
-        ...resultData,
-        average_DOS: resultData.average_DOS,
-        analysis_type: isMulti ? 'multi_drawing_average' : 'single_drawing',
+        ...resultDataObj,
+        average_DOS: resultDataObj.average_DOS,
+        analysis_type: isMulti ? "multi_drawing_average" : "single_drawing",
         selected_drawing: 1,
         total_drawings: drawings.length,
         successful_drawings: drawings.length,
       });
 
       setAnalysisHistory({
-        average_DOS: resultData.average_DOS,
-        individual_results: isMulti ? resultData.individual_results || drawings.map((_, i) => ({ DOS: null })) : [],
+        average_DOS: resultDataObj.average_DOS,
+        individual_results: isMulti
+          ? resultDataObj.individual_results ||
+            drawings.map((_, i) => ({ DOS: null }))
+          : [],
         total_drawings: drawings.length,
         successful_drawings: drawings.length,
       });
@@ -96,38 +110,43 @@ export default function ResultPage() {
   };
 
   const getDOSScore = () => {
-    if (!result) return 'N/A';
-    return result.average_DOS ?? result.DOS ?? 'N/A';
+    if (!result) return "N/A";
+    return result.average_DOS ?? result.DOS ?? "N/A";
   };
 
-  const currentResult = analysisHistory?.individual_results?.[selectedDrawingIndex];
+  const currentResult =
+    analysisHistory?.individual_results?.[selectedDrawingIndex];
 
   const downloadResults = () => {
     if (!result && !analysisHistory) {
-      alert('No results available to download');
+      alert("No results available to download");
       return;
     }
 
     const downloadData = {
       timestamp: new Date().toISOString(),
-      analysis_type: analysisHistory ? 'multi_drawing_average' : 'single_drawing',
+      analysis_type: analysisHistory
+        ? "multi_drawing_average"
+        : "single_drawing",
       average_DOS: getDOSScore(),
       current_drawing_index: selectedDrawingIndex,
-      current_drawing_DOS: currentResult?.DOS || 'N/A',
+      current_drawing_DOS: currentResult?.DOS || "N/A",
       all_drawings: analysisHistory?.individual_results || [result],
       drawing_data: allDrawingData,
       speed_data: speedData,
       angle_data: angleData,
       pressure_data: pData,
-      ...result
+      ...result,
     };
 
     const dataStr = JSON.stringify(downloadData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `spiral_analysis_results_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `spiral_analysis_results_${
+      new Date().toISOString().split("T")[0]
+    }.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -141,55 +160,68 @@ export default function ResultPage() {
         <div className={styles.title}>
           <h2>Analysis Results</h2>
           <p>Average DOS Score: {getDOSScore()}</p>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
 
         {analysisHistory && analysisHistory.individual_results && (
           <div className={styles.title}>
             <h3>Individual Drawings:</h3>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
               {analysisHistory.individual_results.map((_, index) => (
                 <span
                   key={index}
                   onClick={() => drawingClick(index)}
                   style={{
-                    padding: '5px 10px',
-                    background: selectedDrawingIndex === index ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    border: selectedDrawingIndex === index ? '2px solid white' : '2px solid transparent',
-                    transition: 'all 0.2s ease',
+                    padding: "5px 10px",
+                    background:
+                      selectedDrawingIndex === index
+                        ? "rgba(255,255,255,0.3)"
+                        : "rgba(255,255,255,0.1)",
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    border:
+                      selectedDrawingIndex === index
+                        ? "2px solid white"
+                        : "2px solid transparent",
+                    transition: "all 0.2s ease",
                   }}
                 >
                   #{index + 1}
                 </span>
               ))}
             </div>
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
                 onClick={downloadResults}
                 style={{
-                  backgroundColor: '#4a90e2',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  margin: '0 auto'
+                  backgroundColor: "#4a90e2",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  transition: "background-color 0.2s ease",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  margin: "0 auto",
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#357abd';
+                  e.target.style.backgroundColor = "#357abd";
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#4a90e2';
+                  e.target.style.backgroundColor = "#4a90e2";
                 }}
               >
                 <FaDownload size={16} />
@@ -205,8 +237,10 @@ export default function ResultPage() {
             <div className={styles.chartContainer}>
               <LineGraph data={drawData} />
             </div>
-            <div style={{ marginTop: '10px', textAlign: 'center', color: 'black' }}>
-              DOS Score: {currentResult?.DOS ?? 'N/A'}
+            <div
+              style={{ marginTop: "10px", textAlign: "center", color: "black" }}
+            >
+              DOS Score: {currentResult?.DOS ?? "N/A"}
             </div>
           </div>
           <div className={styles.graphCard}>
