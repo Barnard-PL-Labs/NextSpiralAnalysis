@@ -1,31 +1,56 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 
 export default function ResultEntryPlaceholder() {
+  const router = useRouter();
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(interval);
+          router.push("/machine");
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [router]);
+
   return (
     <>
-    <Header />
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "sans-serif",
-        flexDirection: "column",
-        textAlign: "center",
-        padding: "2rem",
-      }}
-    >
-      <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
-       What are you looking for here?!
-      </h2>
-      <p style={{ fontSize: "1rem", color: "white" }}>
-        Your session-specific results live at <code>/result/[Id]</code>.
-      </p>
-    </main>
+      <Header />
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "sans-serif",
+          flexDirection: "column",
+          textAlign: "center",
+          padding: "2rem",
+          color: "white",
+        }}
+      >
+        <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+          What are you looking for here?!
+        </h2>
+        <p style={{ fontSize: "1rem", marginBottom: "1.5rem" }}>
+          Your session-specific results live at <code>/results/[id]</code>.
+        </p>
+        <p style={{ fontSize: "1rem" }}>
+          Going back in <strong>{countdown}</strong>...
+        </p>
+      </main>
     </>
   );
 }
+
 // "use client";
 // import { useState, useEffect } from "react";
 // import { useAuth } from "@/lib/authProvider";

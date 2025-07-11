@@ -33,7 +33,7 @@ const SpiralPlot = ({ data }) => {
     },
   };
 
-  return <Plot data={plotData} layout={layout} style={{ width: '100%', height: '100%' }} />;
+  return <div style={{ width: "100%", display: "flex", justifyContent: "center" }}><Plot data={plotData} layout={layout} style={{ width: "100%", maxWidth: 400, height: 300 }} /></div>;
 };
 
 export default SpiralPlot
