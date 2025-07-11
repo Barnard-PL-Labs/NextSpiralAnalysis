@@ -1,142 +1,239 @@
-// pages/results/[id].jsx
-//Most of these is identical to the normal result page, but this one is linked to the dashboard
 "use client";
 
-import { useEffect, useState } from "react";
-import XYChart from "@/components/Scatter";
-import Spiral3D from "@/components/TimeTrace";
-import { SpeedTimeChart, calculateSpeed } from "@/components/ST";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/authProvider";
+import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
 import styles from "@/styles/Result.module.css";
-import { CanIAvoidBugByThis, PTChart } from "@/components/PressureTime";
-import { Line3DPlot, processData } from "@/components/Angle";
+import LineGraph from "@/components/LineGraph";
+import { SpeedTimeChart, calculateSpeed } from "@/components/ST";
 import SpiralPlot from "@/components/NewTimeTrace";
-import { supabase } from "@/lib/supabaseClient";
-import { useParams } from "next/navigation";
-import LineGraph from "../../../components/LineGraph";
-import TremorPolarPlot from "../../../components/Tremor";
+import { CanIAvoidBugByThis, PTChart } from "@/components/PressureTime";
+import TremorPolarPlot from "@/components/Tremor";
+import { Line3DPlot, processData } from "@/components/Angle";
 import { FaDownload } from "react-icons/fa";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 
-export default function ResultPage() {
+function AnimatedEllipsis() {
+  const [dots, setDots] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setDots((d) => (d + 1) % 4), 500);
+    return () => clearInterval(interval);
+  }, []);
+  return <span>{".".repeat(dots)}</span>;
+}
+
+export default function UnifiedResultPage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const params = useParams();
-  const id = params?.id;
+  const searchParams = useSearchParams();
+  const sessionId = params?.id || searchParams.get("session");
 
+  const [drawings, setDrawings] = useState([]);
+  const [results, setResults] = useState([]);
+  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState(0);
+  const [loadingResult, setLoadingResult] = useState(true);
+  const [error, setError] = useState(null);
   const [drawData, setDrawData] = useState([]);
   const [result, setResult] = useState(null);
   const [speedData, setSpeedData] = useState([]);
   const [angleData, setAngleData] = useState([]);
   const [pData, setPData] = useState([]);
-  const [error, setError] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState(null);
-  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState(null);
-  const [allDrawingData, setAllDrawingData] = useState([]);
+
+  const [liveAnalysisState, setLiveAnalysisState] = useState({
+    sessionActive: false,
+    isSessionComplete: false,
+    totalDrawings: 0,
+    completed: 0,
+  });
+
+  const updateCharts = (index, drawingsArray, resultsArray) => {
+    const drawingData = drawingsArray[index]?.drawing_data;
+    if (!drawingData) return;
+
+    setDrawData(drawingData);
+    setSpeedData(calculateSpeed(drawingData));
+    setAngleData(processData(drawingData));
+    setPData(CanIAvoidBugByThis(drawingData));
+
+    const currentDrawing = drawingsArray[index];
+    if (currentDrawing) {
+      const drawingResult = resultsArray.find((r) => r.drawing_id === currentDrawing.id);
+      setResult(drawingResult?.status === "completed" ? drawingResult.result_data : null);
+    }
+  };
+
+  const handleRealTimeUpdate = (payload) => {
+    const newRecord = payload.new;
+    setResults((prevResults) => {
+      const existingIndex = prevResults.findIndex((r) => r.id === newRecord.id);
+      return existingIndex !== -1
+        ? prevResults.map((r, i) => (i === existingIndex ? newRecord : r))
+        : [...prevResults, newRecord];
+    });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!id) return;
+    if (!sessionId) {
+      router.push("/machine");
+      return;
+    }
 
-      // ✅ NEW: Separate queries instead of join
-      // First get the api_result
-      const { data: resultData, error: resultError } = await supabase
-        .from("api_results")
-        .select("*")
-        .eq("drawing_id", id)
-        .single();
+    const loadInitialData = async () => {
+      try {
+        setLoadingResult(true);
+        setLiveAnalysisState(s => ({ ...s, sessionActive: true }));
 
-      if (resultError || !resultData) {
-        console.error("Error fetching result:", resultError);
+        const { data: drawingsData, error: drawingsError } = await supabase
+          .from("drawings")
+          .select("*")
+          .eq("session_id", sessionId)
+          .order("created_at", { ascending: true });
+
+        if (drawingsError) throw drawingsError;
+
+        const finalDrawings = drawingsData || [];
+        setDrawings(finalDrawings);
+        setLiveAnalysisState(s => ({ ...s, totalDrawings: finalDrawings.length }));
+
+        if (finalDrawings.length > 0) {
+          const drawingIds = finalDrawings.map(d => d.id);
+          const { data: resultsData, error: resultsError } = await supabase
+            .from("api_results")
+            .select("*")
+            .in("drawing_id", drawingIds);
+
+          if (resultsError) throw resultsError;
+          setResults(resultsData || []);
+        }
+      } catch (err) {
+        console.error("Error loading result page:", err);
         setError("Failed to load analysis results.");
-        return;
+      } finally {
+        setLoadingResult(false);
       }
-
-      // Then get the associated drawing
-      const { data: drawingData, error: drawingError } = await supabase
-        .from("drawings")
-        .select("drawing_data")
-        .eq("id", resultData.drawing_id)
-        .single();
-
-      if (drawingError || !drawingData) {
-        console.error("Error fetching drawing:", drawingError);
-        setError("Failed to load drawing data.");
-        return;
-      }
-
-      // ✅ Process the data (rest stays the same)
-      const drawingArray = drawingData.drawing_data || [];
-      const resultDataObj = resultData.result_data || {};
-
-      const isMulti = Array.isArray(drawingArray[0]);
-      const drawings = isMulti ? drawingArray : [drawingArray];
-
-      setAllDrawingData(drawings);
-      setSelectedDrawingIndex(0);
-      setDrawData(drawings[0]);
-      setSpeedData(calculateSpeed(drawings[0]));
-      setAngleData(processData(drawings[0]));
-      setPData(CanIAvoidBugByThis(drawings[0]));
-
-      setResult({
-        ...resultDataObj,
-        average_DOS: resultDataObj.average_DOS,
-        analysis_type: isMulti ? "multi_drawing_average" : "single_drawing",
-        selected_drawing: 1,
-        total_drawings: drawings.length,
-        successful_drawings: drawings.length,
-      });
-
-      setAnalysisHistory({
-        average_DOS: resultDataObj.average_DOS,
-        individual_results: isMulti
-          ? resultDataObj.individual_results ||
-            drawings.map((_, i) => ({ DOS: null }))
-          : [],
-        total_drawings: drawings.length,
-        successful_drawings: drawings.length,
-      });
     };
 
-    fetchData();
-  }, [id]);
+    loadInitialData();
+
+    const subscription = supabase
+      .channel(`results-for-session-${sessionId}`)
+      .on(
+        "postgres_changes",
+        { event: '*', schema: 'public', table: 'api_results', filter: `session_id=eq.${sessionId}` },
+        handleRealTimeUpdate
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [sessionId, router]);
+
+  useEffect(() => {
+    if (drawings.length === 0 && !loadingResult) return;
+
+    const individualResults = drawings.map((drawing) => {
+      const result = results.find((r) => r.drawing_id === drawing.id);
+      if (!result) return { status: 'pending' };
+      if (result.status === "failed") return { error: true, message: result.result_data?.error };
+      if (result.status === "completed") return result.result_data;
+      return { status: 'processing' };
+    });
+
+    const completed = individualResults.filter(r => r && !r.status && !r.error);
+    const dosScores = completed.map(r => parseFloat(r.DOS)).filter(score => !isNaN(score));
+    const averageDOS = dosScores.length > 0 ? (dosScores.reduce((a, b) => a + b, 0) / dosScores.length).toFixed(2) : null;
+
+    const newAnalysisHistory = {
+      individual_results: individualResults,
+      total_drawings: drawings.length,
+      successful_drawings: completed.length,
+      average_DOS: averageDOS,
+    };
+    setAnalysisHistory(newAnalysisHistory);
+
+    setLiveAnalysisState(s => ({
+      ...s,
+      completed: completed.length,
+      isSessionComplete: drawings.length > 0 && completed.length === drawings.length,
+    }));
+
+    updateCharts(selectedDrawingIndex, drawings, results);
+
+  }, [drawings, results, selectedDrawingIndex, loadingResult]);
 
   const drawingClick = (index) => {
-    if (!allDrawingData) return;
     setSelectedDrawingIndex(index);
-    const drawing = allDrawingData[index];
-    setDrawData(drawing);
-    setSpeedData(calculateSpeed(drawing));
-    setAngleData(processData(drawing));
-    setPData(CanIAvoidBugByThis(drawing));
   };
 
   const getDOSScore = () => {
-    if (!result) return "N/A";
-    return result.average_DOS ?? result.DOS ?? "N/A";
+    if (loadingResult) return null;
+    if (!analysisHistory || !liveAnalysisState.isSessionComplete) return null;
+    return analysisHistory.average_DOS || "N/A";
   };
 
-  const currentResult =
-    analysisHistory?.individual_results?.[selectedDrawingIndex];
+  const getProgressDisplay = () => {
+    if (
+      liveAnalysisState.sessionActive &&
+      !liveAnalysisState.isSessionComplete
+    ) {
+      const completedCount = Math.min(
+        liveAnalysisState.completed,
+        liveAnalysisState.totalDrawings
+      );
+      const currentDrawing = Math.min(
+        completedCount + 1,
+        liveAnalysisState.totalDrawings
+      );
+
+      if(liveAnalysisState.totalDrawings === 0 && !loadingResult) return null;
+      if(liveAnalysisState.totalDrawings === 0 && loadingResult) return <p>Loading session<AnimatedEllipsis /></p>
+
+      const progress = `Analyzing: ${currentDrawing}/${liveAnalysisState.totalDrawings}`;
+      return (
+        <p>
+          {progress}
+          <AnimatedEllipsis />
+        </p>
+      );
+    }
+    return null;
+  };
+
+  const getCurrentDOSScore = () => {
+    const currentResult = analysisHistory?.individual_results[selectedDrawingIndex];
+
+    if (!currentResult) return <>Pending<AnimatedEllipsis /></>;
+    if (currentResult.error) return "DOS Score: Failed";
+    if (currentResult.status === 'processing' || currentResult.status === 'pending') return <>Pending<AnimatedEllipsis /></>;
+
+    const dos = parseFloat(currentResult.DOS);
+    return isNaN(dos) ? "DOS Score: N/A" : `DOS Score: ${dos.toFixed(4)}`;
+  };
 
   const downloadResults = () => {
-    if (!result && !analysisHistory) {
-      alert("No results available to download");
+    if (!analysisHistory) {
+      alert("No results are available to download yet.");
       return;
     }
 
     const downloadData = {
-      timestamp: new Date().toISOString(),
-      analysis_type: analysisHistory
-        ? "multi_drawing_average"
-        : "single_drawing",
-      average_DOS: getDOSScore(),
-      current_drawing_index: selectedDrawingIndex,
-      current_drawing_DOS: currentResult?.DOS || "N/A",
-      all_drawings: analysisHistory?.individual_results || [result],
-      drawing_data: allDrawingData,
-      speed_data: speedData,
-      angle_data: angleData,
-      pressure_data: pData,
-      ...result,
+      session_id: sessionId,
+      generated_at: new Date().toISOString(),
+      analysis_summary: {
+        total_drawings: analysisHistory.total_drawings,
+        successful_drawings: analysisHistory.successful_drawings,
+        average_DOS: analysisHistory.average_DOS,
+      },
+      individual_results: analysisHistory.individual_results,
+      raw_drawing_data: drawings.map(d => ({
+        drawing_id: d.id,
+        created_at: d.created_at,
+        data: d.drawing_data,
+      })),
     };
 
     const dataStr = JSON.stringify(downloadData, null, 2);
@@ -144,14 +241,15 @@ export default function ResultPage() {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `spiral_analysis_results_${
-      new Date().toISOString().split("T")[0]
-    }.json`;
+    link.download = `spiral_analysis_${sessionId}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  const drawingSelectorItems = analysisHistory?.individual_results || 
+    (liveAnalysisState.sessionActive ? Array.from({ length: liveAnalysisState.totalDrawings }) : []);
 
   return (
     <div className={styles.pageWrapper}>
@@ -159,11 +257,12 @@ export default function ResultPage() {
       <div className={styles.container}>
         <div className={styles.title}>
           <h2>Analysis Results</h2>
-          <p>Average DOS Score: {getDOSScore()}</p>
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {getProgressDisplay()} 
+          {getDOSScore() && <p>Average DOS Score: {getDOSScore()}</p>}
+          {error && <p style={{ color: "red" }}>{String(error)}</p>}
         </div>
 
-        {analysisHistory && analysisHistory.individual_results && (
+        {(analysisHistory || liveAnalysisState.sessionActive) && drawings.length > 0 && (
           <div className={styles.title}>
             <h3>Individual Drawings:</h3>
             <div
@@ -174,29 +273,51 @@ export default function ResultPage() {
                 flexWrap: "wrap",
               }}
             >
-              {analysisHistory.individual_results.map((_, index) => (
-                <span
-                  key={index}
-                  onClick={() => drawingClick(index)}
-                  style={{
-                    padding: "5px 10px",
-                    background:
-                      selectedDrawingIndex === index
-                        ? "rgba(255,255,255,0.3)"
-                        : "rgba(255,255,255,0.1)",
-                    borderRadius: "4px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    border:
-                      selectedDrawingIndex === index
-                        ? "2px solid white"
-                        : "2px solid transparent",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  #{index + 1}
-                </span>
-              ))}
+              {drawingSelectorItems.map((resultStatus, index) => {
+                let displayContent = `#${index + 1}`;
+                let backgroundColor = "rgba(255, 165, 0, 0.3)";
+
+                if (resultStatus?.error) {
+                  displayContent = `#${index + 1}: Failed`;
+                  backgroundColor = "rgba(255,100,100,0.2)";
+                } else if (resultStatus && !resultStatus.status) {
+                  backgroundColor = "rgba(255,255,255,0.1)";
+                }
+
+                return (
+                  <span
+                    key={index}
+                    onClick={() => drawingClick(index)}
+                    style={{
+                      padding: "5px 10px",
+                      background:
+                        selectedDrawingIndex === index
+                          ? "rgba(255,255,255,0.3)"
+                          : backgroundColor,
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      border:
+                        selectedDrawingIndex === index
+                          ? "2px solid white"
+                          : "2px solid transparent",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedDrawingIndex !== index) {
+                        e.target.style.background = "rgba(255,255,255,0.2)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedDrawingIndex !== index) {
+                        e.target.style.background = backgroundColor;
+                      }
+                    }}
+                  >
+                    {displayContent}
+                  </span>
+                );
+              })}
             </div>
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
@@ -217,12 +338,8 @@ export default function ResultPage() {
                   gap: "8px",
                   margin: "0 auto",
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#357abd";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "#4a90e2";
-                }}
+                onMouseEnter={(e) => { e.target.style.backgroundColor = "#357abd"; }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = "#4a90e2"; }}
               >
                 <FaDownload size={16} />
                 Download Results
@@ -237,10 +354,8 @@ export default function ResultPage() {
             <div className={styles.chartContainer}>
               <LineGraph data={drawData} />
             </div>
-            <div
-              style={{ marginTop: "10px", textAlign: "center", color: "black" }}
-            >
-              DOS Score: {currentResult?.DOS ?? "N/A"}
+            <div style={{ marginTop: "10px", textAlign: "center", color: "black" }}>
+              {getCurrentDOSScore()}
             </div>
           </div>
           <div className={styles.graphCard}>
@@ -264,7 +379,11 @@ export default function ResultPage() {
           <div className={styles.graphCard}>
             <h3>Tremor Polar Plot</h3>
             <div className={styles.chartContainer}>
-              <TremorPolarPlot result={result} />
+              {loadingResult ? (
+                <p>Loading tremor data...</p>
+              ) : (
+                <TremorPolarPlot result={result} />
+              )}
             </div>
           </div>
           <div className={styles.graphCard}>

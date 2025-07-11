@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
-import XYChart from "../../components/Scatter";
 import Pagination from "../../components/Pagination";
 import styles from "../../styles/Dashboard.module.css";
 import Link from "next/link";
@@ -35,12 +34,67 @@ const Dashboard = () => {
   const entriesPerPage = 7;
 
   useEffect(() => {
+    const groupResultsBySession = (results) => {
+      if (!results) return [];
+
+      const sessions = new Map();
+
+      results.forEach((entry) => {
+        if (!entry.drawings?.drawing_data) {
+          return; 
+        }
+
+
+        const groupingKey = entry.session_id || `legacy-${entry.id}`;
+
+        if (!sessions.has(groupingKey)) {
+          sessions.set(groupingKey, {
+            key: groupingKey,
+            session_id: entry.session_id,
+            drawing_id: entry.drawing_id, 
+            user_id: entry.user_id,
+            email: entry.email,
+            created_at: entry.created_at,
+            all_drawings: [],
+            all_results: [],
+          });
+        }
+        
+        const session = sessions.get(groupingKey);
+
+        session.all_drawings.push(entry.drawings.drawing_data);
+        session.all_results.push(entry.result_data);
+
+        if (new Date(entry.created_at) > new Date(session.created_at)) {
+          session.created_at = entry.created_at;
+        }
+      });
+
+      const groupedEntries = Array.from(sessions.values()).map(session => {
+        const dosValues = session.all_results
+          .map(res => parseFloat(res?.DOS)) 
+          .filter(dos => !isNaN(dos));
+
+        let sessionAverageDOS = null;
+        if (dosValues.length > 0) {
+          const sum = dosValues.reduce((a, b) => a + b, 0);
+          sessionAverageDOS = (sum / dosValues.length).toFixed(4);
+        }
+        
+        return {
+          ...session,
+          average_DOS: sessionAverageDOS 
+        };
+      });
+      
+      groupedEntries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      return groupedEntries;
+    };
+
     const fetchData = async () => {
       setLoading(true);
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session?.user) {
         setLoading(false);
@@ -48,8 +102,6 @@ const Dashboard = () => {
       }
 
       const user = session.user;
-
-      // Extract first name from email (assuming format: firstname.lastname)
       const getFirstName = (email) => {
         const emailPart = email.split("@")[0];
         return (
@@ -61,36 +113,21 @@ const Dashboard = () => {
       setUsername(getFirstName(user.email));
       setUserEmail(user.email);
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("avatar_path")
-        .eq("id", user.id)
-        .maybeSingle();
-
+      const { data: profile } = await supabase.from("profiles").select("avatar_path").eq("id", user.id).maybeSingle();
       if (profile?.avatar_path) {
-        const { data: signed } = await supabase.storage
-          .from("avatars")
-          .createSignedUrl(profile.avatar_path, 3600);
+        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_path, 3600);
         if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
       }
 
       let query = supabase
         .from("api_results")
-        .select(
-          `
-          id,
-          drawing_id,
-          session_id,
-          created_at,
-          result_data,
-          user_id,
-          email
-        `
-        )
+        .select(`
+          id, drawing_id, session_id, created_at, result_data, user_id, email,
+          drawings ( id, drawing_data )
+        `)
         .order("created_at", { ascending: false });
 
       const isSuperuser = SUPERUSER_EMAILS.includes(user.email.toLowerCase());
-
       if (!isSuperuser || !viewAll) {
         query = query.eq("user_id", user.id);
       }
@@ -98,38 +135,24 @@ const Dashboard = () => {
       const { data, error } = await query;
 
       if (!error && data) {
-        const parsed = data.map((entry) => {
-          let drawingData = [];
-          try {
-            drawingData =
-              typeof entry.drawings?.drawing_data === "string"
-                ? JSON.parse(entry.drawings.drawing_data)
-                : entry.drawings?.drawing_data || [];
-          } catch (e) {}
-          return {
-            ...entry,
-            drawings: { ...entry.drawings, drawing_data: drawingData },
-          };
-        });
-        setEntries(parsed);
+        const groupedData = groupResultsBySession(data);
+        setEntries(groupedData);
 
-        const dosValues = parsed
-          .map((e) => parseFloat(e.result_data?.average_DOS))
+        const allSessionAverages = groupedData
+          .map((e) => parseFloat(e.average_DOS))
           .filter((n) => !isNaN(n));
-        if (dosValues.length > 0) {
-          const sum = dosValues.reduce((a, b) => a + b, 0);
-          setAverageDOS((sum / dosValues.length).toFixed(2));
+
+        if (allSessionAverages.length > 0) {
+          const sum = allSessionAverages.reduce((a, b) => a + b, 0);
+          setAverageDOS((sum / allSessionAverages.length).toFixed(2));
         }
       }
-
       setLoading(false);
     };
 
     fetchData();
 
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 640);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth <= 640);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -139,27 +162,14 @@ const Dashboard = () => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
-  const paginatedEntries = entries
-    .slice(1)
-    .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
-  const pageCount = Math.max(
-    1,
-    Math.ceil((entries.length - 1) / entriesPerPage)
-  );
-
+  const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+  const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
   const isSuperuser = SUPERUSER_EMAILS.includes(userEmail.toLowerCase());
 
   return (
     <div className={styles.pageContainer}>
-      {isMobile ? (
-        <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} />
-      ) : (
-        <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />
-      )}
-      <SettingsPopup
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      {isMobile ? <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} /> : <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />}
+      <SettingsPopup isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
           <h1 className={styles.welcome} style={{ color: "white" }}>
@@ -170,12 +180,8 @@ const Dashboard = () => {
         {isSuperuser && (
           <div style={{ margin: "1rem 0", color: "white" }}>
             <label>
-              <input
-                type="checkbox"
-                checked={viewAll}
-                onChange={(e) => setViewAll(e.target.checked)}
-              />{" "}
-              View all user entries
+              <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)}/>
+              {" "}View all user entries
             </label>
           </div>
         )}
@@ -186,54 +192,27 @@ const Dashboard = () => {
           <>
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
-                <h2 style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+                <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
                   Latest Result
                 </h2>
-                {entries[0]?.result_data?.average_DOS && (
-                  <>
-                    <div className={styles.drawingCountBadge}>
-                      {Array.isArray(entries[0].drawings.drawing_data[0])
-                        ? entries[0].drawings.drawing_data.length
-                        : 1}
-                      {Array.isArray(entries[0].drawings.drawing_data[0])
-                        ? entries[0].drawings.drawing_data.length == 1
-                          ? " Drawing"
-                          : " Drawings"
-                        : " Drawing"}
-                    </div>
-                    <p className={styles.dosScoreText}>
-                      <strong>
-                        {" "}
-                        <u> Average DOS Score</u>:{" "}
-                      </strong>
-                      {entries[0].result_data?.average_DOS || "N/A"}
-                    </p>
-                  </>
-                )}
+                <div className={styles.drawingCountBadge}>
+                  {entries[0].all_drawings.length}
+                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                </div>
+                <p className={styles.dosScoreText}>
+                  <strong> <u> Average DOS Score</u>:  </strong>
+                  {entries[0].average_DOS || "N/A"}
+                </p>
                 <p>
-                  <strong>
-                    <u>Analyzed on</u>:
-                  </strong>{" "}
+                  <strong><u>Analyzed on</u>:</strong>{" "}
                   {new Date(entries[0].created_at).toLocaleString()}
                 </p>
                 <div className={styles.scatterPlot}>
-                  {entries[0]?.drawings?.drawing_data &&
-                  entries[0].drawings.drawing_data.length > 0 ? (
-                    <HorizontalSpiralHistory
-                      savedDrawings={
-                        Array.isArray(entries[0].drawings.drawing_data[0])
-                          ? entries[0].drawings.drawing_data
-                          : [entries[0].drawings.drawing_data]
-                      }
-                    />
-                  ) : (
-                    <p>No drawing data available.</p>
-                  )}
+                  <HorizontalSpiralHistory savedDrawings={entries[0].all_drawings}/>
                 </div>
-
                 <div className={styles.resultLink}>
                   <Link
-                    href={`/result/${entries[0].session_id}`}
+                    href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
                     className={styles.viewFullAnalysisLink}
                   >
                     View Full Analysis
@@ -242,30 +221,21 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2
-              className={styles.pastResultsHeading}
-              style={{ color: "white", fontWeight: "bold" }}
-            >
+            <h2 className={styles.pastResultsHeading} style={{ color: "white", fontWeight: "bold" }}>
               Past Results
               {averageDOS && ` - Your Overall Average: ${averageDOS}`}
             </h2>
             <ul className={styles.entriesList}>
               {paginatedEntries.map((entry, index) => (
-                <li key={entry.id} className={styles.accordionItem}>
-                  <div
-                    className={styles.accordionHeader}
-                    onClick={() => handleAccordionClick(index)}
-                  >
+                <li key={entry.key} className={styles.accordionItem}>
+                  <div className={styles.accordionHeader} onClick={() => handleAccordionClick(index)}>
                     <span>
                       {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS:
-                      {entry.result_data?.average_DOS ||
-                        entry.result_data?.DOS ||
-                        "N/A"}{" "}
-                      –{new Date(entry.created_at).toLocaleString()}
+                      {entry.average_DOS || "N/A"}{" "}
+                      – {new Date(entry.created_at).toLocaleString()}
                       {isSuperuser && (
                         <>
-                          {" "}
-                          — <strong>User:</strong> {entry.email || "N/A"}
+                          {" "} — <strong>User:</strong> {entry.email || "N/A"}
                         </>
                       )}
                     </span>
@@ -275,38 +245,16 @@ const Dashboard = () => {
                   </div>
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
-                      {entry?.drawings?.drawing_data && (
-                        <>
-                          <div className={styles.drawingCountBadge}>
-                            {Array.isArray(entry.drawings.drawing_data[0])
-                              ? entry.drawings.drawing_data.length
-                              : 1}
-                            {Array.isArray(entry.drawings.drawing_data[0])
-                              ? entry.drawings.drawing_data.length == 1
-                                ? " Drawing"
-                                : " Drawings"
-                              : " Drawing"}
-                          </div>
-                        </>
-                      )}
+                       <div className={styles.drawingCountBadge}>
+                          {entry.all_drawings.length}
+                          {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                       </div>
                       <div className={styles.scatterPlot}>
-                        {entry?.drawings?.drawing_data &&
-                        entry.drawings.drawing_data.length > 0 ? (
-                          <HorizontalSpiralHistory
-                            savedDrawings={
-                              Array.isArray(entry.drawings.drawing_data[0])
-                                ? entry.drawings.drawing_data
-                                : [entry.drawings.drawing_data]
-                            }
-                          />
-                        ) : (
-                          <p>No drawing data available.</p>
-                        )}
+                        <HorizontalSpiralHistory savedDrawings={entry.all_drawings} />
                       </div>
-
                       <div className={styles.resultLink}>
                         <Link
-                          href={`/result/${entry.drawing_id}`}
+                          href={`/result/${entry.session_id || entry.drawing_id}`}
                           className={styles.viewFullAnalysisLink}
                         >
                           View Full Analysis

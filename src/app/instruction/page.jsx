@@ -18,7 +18,7 @@ export default function DirectionsPage() {
                             <div className={styles.textBlock}>
                                 <h3 className={styles.subHeader}>What is Spiral Analysis?</h3>
                                 <p className={styles.intro}>
-                                    Spiral analysis is a sophisticated method used to evaluate **upper limb motor control**. It involves drawing a spiral on a digitizing tablet or touchscreen device, which captures various parameters such as pressure, speed, and accuracy. This non-invasive technique provides valuable insights into a person's neuromotor function.
+                                    Spiral analysis is a sophisticated method used to evaluate upper limb motor control. It involves drawing a spiral on a digitizing tablet or touchscreen device, which captures various parameters such as pressure, speed, and accuracy. This non-invasive technique provides valuable insights into a person's neuromotor function.
                                 </p>
                             </div>
 
@@ -39,14 +39,15 @@ export default function DirectionsPage() {
                     <section className={styles.section}>
                         <h3 className={styles.subHeader}>How to Use This Tool</h3>
                         <ul className={styles.directionsList}>
-                            <li><FaStarHalf />Draw at least <strong className={styles.highlight}>3-4 complete revolutions</strong> for accurate analysis.</li>
+                            <li><FaStar />Draw at least <strong className={styles.highlight}>3-4 complete revolutions</strong>.</li>
                             <li>Draw a spiral on the provided canvas using your mouse or touchscreen.</li>
                             <li>Try to make the spiral as round and evenly spaced as possible.</li>
-                            <li>Maintain a consistent drawing speed and pressure.</li>
-                            <li><FaStar />For best results, try to <strong className={styles.highlight}>draw in a single, continuous motion</strong> without interruption.</li>
-                            <li>Click the "Analyze" button to process your spiral.</li>
-                            <li>Review the results and graphs provided for insights into your drawing.</li>
-                            <li>Compare your results over time to track changes in your motor function.</li>
+                            <li>Try to maintain a consistent drawing speed and pressure.</li>
+                            <li><FaStar />For best results, try to <strong className={styles.highlight}>draw in a single, continuous motion</strong>.</li>
+                            <li>Click Save to proceed on to the next drawing.</li>
+                            <li>Click the "Finish Analysis" button to process your spiral.</li>
+                            <li>Review the results and graphs provided for insights into your upper limb motor control.</li>
+                            <li>Compare your results over time to track changes in your motor function!</li>
                         </ul>
                         {/* <p className={styles.note}>
                             For best results, try to draw in a single, continuous motion without interruptions.
@@ -64,9 +65,9 @@ export default function DirectionsPage() {
                             <li><strong>Speed:</strong> Measures the velocity of drawing at different points in the spiral, providing insights into motor planning and execution.</li>
                             <li><strong>Frequency Analysis:</strong> Examines the rhythmic components of the drawing, which can help identify specific types of tremors.</li>
                         </ul>
-                        <p className={styles.note}>
+                        {/* <p className={styles.note}>
                             For a full listing of the metrics provided by Spiral Analysis, please see the API documentation.
-                        </p>
+                        </p> */}
                     </section>
 
                     {/* Disclaimer Section */}

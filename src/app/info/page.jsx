@@ -24,27 +24,42 @@ const teamMembers = [
     websiteUrl: "https://www.marksantolucito.com/index.html",
   },
   {
-    name: "Alexandra Shanabrook",
+    name: "Yiping Wang, MS",
     position: "",
     bio: "",
     uni: "",
   },
   {
-    name: "Krystal Briggs",
+    name: "Qiping Yu, PhD",
     bio: "",
     uni: "",
   },
   {
-    name: "Joseph Rebagliati",
+    name: "Jianqin Qu, MS",
     bio: "",
     uni: "",
   },
   {
-    name: "Yuhao Dong",
+    name: "Mehmet Can Isik, MEng",
     uni: "",
   },
   {
-    name: "Whitney Deng",
+    name: "Alicia Floyd, MD",
+    bio: "",
+    uni: "",
+  },
+    {
+    name: "Annie Hsu, MD",
+    bio: "",
+    uni: "",
+  },
+    {
+    name: "Audrey Rakovich Seville, BA",
+    bio: "",
+    uni: "",
+  },
+    {
+    name: "Jonathan A. Sisti, MD",
     bio: "",
     uni: "",
   },

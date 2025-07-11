@@ -39,6 +39,7 @@
   flex: 1;
 }
 
+
 .title {
   text-align: center;
   color: white;
@@ -66,4 +67,30 @@
 .title p {
   font-size: 1.1rem;
   margin-bottom: 0px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .chartGrid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+@media (max-width: 400px) {
+  .chartGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .title h2 {
+    font-size: 1.3rem;
+  }
+  
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }

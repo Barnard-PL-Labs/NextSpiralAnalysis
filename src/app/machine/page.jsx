@@ -23,7 +23,6 @@ export default function MachinePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Override Supabase from method to catch api_results queries
     const originalFrom = supabase.from;
     
     supabase.from = function(table) {
@@ -32,7 +31,6 @@ export default function MachinePage() {
       if (table === 'api_results') {
         console.log('🔍 Supabase query to api_results table initiated');
         
-        // Override eq method to catch drawing_id filters
         const originalEq = queryBuilder.eq;
         queryBuilder.eq = function(column, value) {
           console.log(`📝 Query: ${table}.${column} = ${value}`);
@@ -45,12 +43,7 @@ export default function MachinePage() {
             console.error('This is the source of your 400 errors!');
             console.error('Call stack:');
             console.trace();
-            
-            // Force a breakpoint
             debugger;
-            
-            // You could also throw an error to stop execution:
-            // throw new Error(`Invalid drawing_id: ${value}`);
           }
           
           return originalEq.call(this, column, value);
@@ -60,30 +53,48 @@ export default function MachinePage() {
       return queryBuilder;
     };
     
-    // Cleanup function to restore original
     return () => {
       supabase.from = originalFrom;
     };
   }, []);
 
-  const getOrCreateAnonymousSession = () => {
-    let sessionId = localStorage.getItem("anonymous_session_id");
+const getOrCreateAnonymousSession = () => {
+  const sessionKey = "anonymous_session_id";
+  const timestampKey = "anonymous_session_timestamp";
+  const now = Date.now();
+  const MAX_SESSION_AGE_MS = 1 * 60 * 1000; // 1 minute for anon user to get a new one
 
-    if (!sessionId) {
-      sessionId = `anon_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
-      localStorage.setItem("anonymous_session_id", sessionId);
-      console.log("Created new anonymous session:", sessionId);
-    }
+  const lastTimestamp = parseInt(localStorage.getItem(timestampKey), 10);
+  const isExpired = isNaN(lastTimestamp) || now - lastTimestamp > MAX_SESSION_AGE_MS;
+
+  if (isExpired) {
+    const newSessionId = `anon_${now}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(sessionKey, newSessionId);
+    localStorage.setItem(timestampKey, now.toString());
+    return newSessionId;
+  }
+
+  const existingSession = localStorage.getItem(sessionKey);
+  return existingSession;
+};
+
+
+  const getOrCreateSessionId = () => {
+    if (currentSessionId) return currentSessionId;
+
+    const isAuthenticated = user?.id;
+    const sessionId = isAuthenticated
+      ? `session_${Date.now()}_${user.id}`
+      : getOrCreateAnonymousSession();
+
+    setCurrentSessionId(sessionId);
     return sessionId;
   };
 
   const saveAndAnalyzeCurrentDrawing = async () => {
-    const overallStartTime = performance.now();
-    console.log("🚀 STARTING saveAndAnalyzeCurrentDrawing");
+    console.log("STARTING saveAndAnalyzeCurrentDrawing");
 
-    if (currentDrawing.length == 0) {
+    if (currentDrawing.length < 1) {
       alert("Please draw something before saving.");
       return;
     }
@@ -97,7 +108,6 @@ export default function MachinePage() {
 
     const drawingToSave = [...currentDrawing];
 
-    // Clear canvas immediately
     if (canvasRef.current?.clearCanvas) {
       canvasRef.current.clearCanvas();
     }
@@ -107,12 +117,12 @@ export default function MachinePage() {
     setSavedDrawings(newDrawings);
 
     setIsAnalyzing(true);
+    
+    const sessionId = getOrCreateSessionId();
 
     try {
-      // save drawing to Database
-      const drawingId = await saveSingleDrawingToDatabase(drawingToSave);
+      const drawingId = await saveSingleDrawingToDatabase(drawingToSave, sessionId);
 
-      // analyze the drawing
       console.log(
         "About to send to API:",
         JSON.stringify(drawingToSave).substring(0, 200)
@@ -122,12 +132,12 @@ export default function MachinePage() {
       if (result === null || result === "error") {
         throw new Error("Analysis failed to produce valid results");
       }
-      // save analysis result to database immediately
-      await saveSingleAnalysisResult(drawingId, result);
+      
+      await saveSingleAnalysisResult(drawingId, result, sessionId);
 
       console.log("Drawing saved and analyzed, stored in database");
     } catch (error) {
-      console.error("❌ Drawing analysis failed:", error);
+      console.error("Drawing analysis failed:", error);
     } finally {
       setIsAnalyzing(false);
     }
@@ -136,7 +146,7 @@ export default function MachinePage() {
   const backgroundAnalysis = async (drawingData, drawingIndex = null) => {
     const startTime = performance.now();
     console.log(
-      `🕐 Starting analysis ${
+      `Starting analysis ${
         drawingIndex !== null ? `#${drawingIndex + 1}` : ""
       } at ${new Date().toLocaleTimeString()}`
     );
@@ -150,7 +160,6 @@ export default function MachinePage() {
       console.log("API Response Status:", response.status);
       console.log("API Response Status Text:", response.statusText);
 
-      // Safe JSON parsing with error handling
       let data;
       try {
         const responseText = await response.text();
@@ -176,11 +185,10 @@ export default function MachinePage() {
         throw new Error("Invalid analysis result received");
       }
 
-      // timing stuff - only record successful analyses here
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log(
-        `⏱️ Analysis ${
+        `Analysis ${
           drawingIndex !== null ? `#${drawingIndex + 1}` : ""
         } completed in ${duration.toFixed(2)}ms (${(duration / 1000).toFixed(
           2
@@ -189,11 +197,10 @@ export default function MachinePage() {
 
       return data.result;
     } catch (error) {
-      // timing stuff
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.warn(
-        ` ❌ Analysis ${
+        ` Analysis ${
           drawingIndex !== null ? `#${drawingIndex + 1}` : ""
         } failed after ${duration.toFixed(2)}ms:`,
         error.message
@@ -202,11 +209,10 @@ export default function MachinePage() {
     }
   };
 
-  const saveSingleDrawingToDatabase = async (drawingData) => {
+  const saveSingleDrawingToDatabase = async (drawingData, sessionId) => {
     const isAuthenticated = user?.id;
-    const sessionId = getOrCreateSessionId();
     console.log(
-      `💾 Saving drawing for ${
+      `Saving drawing for ${
         isAuthenticated ? "authenticated" : "anonymous"
       } user`
     );
@@ -236,26 +242,12 @@ export default function MachinePage() {
       throw error;
     }
 
-    console.log(`✅ Saved drawing to database with ID: ${savedDrawing.id}`);
+    console.log(`Saved drawing to database with ID: ${savedDrawing.id}`);
     return savedDrawing.id;
   };
 
-  const getOrCreateSessionId = () => {
-    if (currentSessionId) return currentSessionId;
-
+  const saveSingleAnalysisResult = async (drawingId, analysisResult, sessionId) => {
     const isAuthenticated = user?.id;
-    const sessionId = isAuthenticated
-      ? `session_${Date.now()}_${user.id}`
-      : getOrCreateAnonymousSession();
-
-    setCurrentSessionId(sessionId);
-    return sessionId;
-  };
-
-  // Save analysis result for a specific drawing
-  const saveSingleAnalysisResult = async (drawingId, analysisResult) => {
-    const isAuthenticated = user?.id;
-    const sessionId = getOrCreateSessionId();
     const email = isAuthenticated
       ? user.email || "anonymous@example.com"
       : "anonymous@example.com";
@@ -282,7 +274,7 @@ export default function MachinePage() {
       throw error;
     }
 
-    console.log(`✅ Saved analysis result for drawing ${drawingId}`);
+    console.log(`Saved analysis result for drawing ${drawingId}`);
   };
 
   const handleFinishEarly = useCallback(async () => {
@@ -292,7 +284,7 @@ export default function MachinePage() {
     }
     setUserFinished(true);
 
-    const sessionId = getOrCreateSessionId(); // Use consistent session
+    const sessionId = getOrCreateSessionId();
     const isAuthenticated = user?.id;
 
     const params = new URLSearchParams({
@@ -318,7 +310,7 @@ export default function MachinePage() {
       setCurrentDrawing([]);
       setSavedDrawings([]);
       setUserFinished(false);
-      setCurrentSessionId(null); // Reset session
+      setCurrentSessionId(null);
       if (canvasRef.current?.clearCanvas) {
         canvasRef.current.clearCanvas();
       }
