@@ -1,3 +1,31 @@
+import Header from "../../components/Header";
+
+export default function ResultEntryPlaceholder() {
+  return (
+    <>
+    <Header />
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "sans-serif",
+        flexDirection: "column",
+        textAlign: "center",
+        padding: "2rem",
+      }}
+    >
+      <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+       What are you looking for here?!
+      </h2>
+      <p style={{ fontSize: "1rem", color: "white" }}>
+        Your session-specific results live at <code>/result/[Id]</code>.
+      </p>
+    </main>
+    </>
+  );
+}
 // "use client";
 // import { useState, useEffect } from "react";
 // import { useAuth } from "@/lib/authProvider";
