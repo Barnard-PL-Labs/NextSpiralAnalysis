@@ -1,9 +1,14 @@
+"use client";
+
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "../components/Header";
+import { useResearcherMode } from "@/lib/researcherModeContext";
 
 export default function Home() {
+  const { researcherMode } = useResearcherMode();
+  
   return (
     <>
       <Head>
@@ -22,7 +27,19 @@ export default function Home() {
       <Header />
 
       <div className="attractiveContent">
-        {/* <h1 id="contentTitle">
+        {researcherMode ? (
+          <>
+            <h1 id="contentTitle">Spiral Analysis Tool</h1>
+            <p>Medical Technology</p>
+            <Link href="/machine">
+              <button className="indexButton" id="goMachine">
+                GET STARTED
+              </button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <h1 id="contentTitle">
           Analyze Your Motor Skills <br />
           <span id="diffPart"> with Precision</span>
         </h1>
@@ -33,9 +50,6 @@ export default function Home() {
           medical professional, or just curious, this non-invasive tool makes it
           easy to gain insights into hand stability.
         </p>
-        */}
-        <h1 id="contentTitle">Spiral Analysis Tool</h1>
-        <p>Medical Technology</p>
         <Link href="/machine">
           <button className="indexButton" id="goMachine">
             GET STARTED
@@ -46,6 +60,8 @@ export default function Home() {
             HOW IT WORKS ➝
           </button>
         </Link>
+          </>
+        )}
       </div>
     </>
   );

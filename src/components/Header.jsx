@@ -8,9 +8,11 @@ import LoginModal from "@/components/LoginModal";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { useResearcherMode } from "@/lib/researcherModeContext";
 
 export default function Header() {
   const { user } = useAuth();
+  const { researcherMode } = useResearcherMode();
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -64,7 +66,9 @@ export default function Header() {
           <ul className="navItems">
             <li><Link href="/"><span>Home</span></Link></li>
             <li><Link href="/machine"><span>Spiral Analysis</span></Link></li>
+            {!researcherMode && (
             <li><Link href="/instruction"><span>Learn More</span></Link></li>
+            )}
             <li><Link href="/info"><span>About Us</span></Link></li>
 
             {user ? (
@@ -103,10 +107,12 @@ export default function Header() {
       {isMobile && dropdownOpen && (
         <div className="fixed top-[75px] left-0 w-full bg-white text-black shadow-lg z-[99999] transition-all duration-300">
           <div className="flex flex-col w-full">
-            {[{ label: "Home", href: "/" },
+            {[
+              { label: "Home", href: "/" },
               { label: "Spiral Analysis", href: "/machine" },
-              { label: "Learn More", href: "/instruction" },
-              { label: "About Us", href: "/info" }].map((item) => (
+              ...(researcherMode ? [] : [{ label: "Learn More", href: "/instruction" }]),
+              { label: "About Us", href: "/info" }
+            ].map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setDropdownOpen(false)} className="w-full no-underline">
                 <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
                   {item.label}

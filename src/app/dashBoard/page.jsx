@@ -57,6 +57,7 @@ const Dashboard = () => {
             created_at: entry.created_at,
             all_drawings: [],
             all_results: [],
+            hand_used: entry.drawings?.hand_used || null,
           });
         }
         
@@ -64,6 +65,11 @@ const Dashboard = () => {
 
         session.all_drawings.push(entry.drawings.drawing_data);
         session.all_results.push(entry.result_data);
+        
+        // Update hand_used if not already set
+        if (!session.hand_used && entry.drawings?.hand_used) {
+          session.hand_used = entry.drawings.hand_used;
+        }
 
         if (new Date(entry.created_at) > new Date(session.created_at)) {
           session.created_at = entry.created_at;
@@ -123,7 +129,7 @@ const Dashboard = () => {
         .from("api_results")
         .select(`
           id, drawing_id, session_id, created_at, result_data, user_id, email,
-          drawings ( id, drawing_data )
+          drawings ( id, drawing_data, hand_used )
         `)
         .order("created_at", { ascending: false });
 
@@ -195,9 +201,28 @@ const Dashboard = () => {
                 <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
                   Latest Result
                 </h2>
-                <div className={styles.drawingCountBadge}>
-                  {entries[0].all_drawings.length}
-                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                  <div className={styles.drawingCountBadge}>
+                    {entries[0].all_drawings.length}
+                    {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                  </div>
+                  {entries[0].hand_used && (
+                    <div style={{
+                      backgroundColor: "#4a148c",
+                      color: "white",
+                      padding: "6px 12px",
+                      borderRadius: "20px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      textTransform: "capitalize",
+                      boxShadow: "0 2px 8px rgba(74, 20, 140, 0.3)",
+                      border: "2px solid rgba(255, 255, 255, 0.2)",
+                      marginTop: "15px",
+                      marginBottom: "8px"
+                    }}>
+                      {entries[0].hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+                    </div>
+                  )}
                 </div>
                 <p className={styles.dosScoreText}>
                   <strong> <u> Average DOS Score</u>:  </strong>
@@ -245,9 +270,28 @@ const Dashboard = () => {
                   </div>
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
-                       <div className={styles.drawingCountBadge}>
-                          {entry.all_drawings.length}
-                          {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                       <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                         <div className={styles.drawingCountBadge}>
+                            {entry.all_drawings.length}
+                            {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                         </div>
+                         {entry.hand_used && (
+                           <div style={{
+                             backgroundColor: "#4a148c",
+                             color: "white",
+                             padding: "6px 12px",
+                             borderRadius: "20px",
+                             fontSize: "14px",
+                             fontWeight: "600",
+                             textTransform: "capitalize",
+                             boxShadow: "0 2px 8px rgba(74, 20, 140, 0.3)",
+                             border: "2px solid rgba(255, 255, 255, 0.2)",
+                             marginTop: "15px",
+                             marginBottom: "8px"
+                           }}>
+                             {entry.hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+                           </div>
+                         )}
                        </div>
                       <div className={styles.scatterPlot}>
                         <HorizontalSpiralHistory savedDrawings={entry.all_drawings} />

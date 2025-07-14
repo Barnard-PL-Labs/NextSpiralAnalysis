@@ -25,10 +25,10 @@ export default function ResultEntryPlaceholder() {
     <>
       <Header />
       <main
-        style={{
+                style={{
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
+                    display: "flex",
+                    alignItems: "center",
           justifyContent: "center",
           fontFamily: "sans-serif",
           flexDirection: "column",

@@ -326,7 +326,7 @@
 
 .helpButton {
   position: absolute;
-  top: -10px;
+  top: 3px;
   right: 20px;
   width: 35px;
   height: 35px;
@@ -348,4 +348,186 @@
   background: rgba(255, 255, 255, 0.4);
   border-color: rgba(255, 255, 255, 0.7);
   transform: scale(1.1);
+}
+
+/* Top Controls Container */
+.topControlsContainer {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+.topRightControls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-right: 80px;
+}
+
+/* Hand Indicator Top Right */
+.handIndicatorTopRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(30, 58, 138, 0.9);
+  border: 2px solid #1e3a8a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.handIndicatorText {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.changeHandButtonTop {
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.3s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.changeHandButtonTop:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Hand Selection Styles */
+.handSelectionContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 200px auto 40px auto;
+  padding: 40px 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  max-width: 500px;
+  width: 90%;
+}
+
+.handSelectionTitle {
+  color: white;
+  font-family: "DM Sans", sans-serif;
+  font-size: 1.5em;
+  margin-bottom: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.handIcon {
+  font-size: 1.2em;
+  color: #1e3a8a;
+}
+
+.handButtonsWrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.handButton {
+  padding: 12px 24px;
+  background-color: #1e3a8a;
+  border: 2px solid #1e3a8a;
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease-in-out;
+  min-width: 140px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.handButton:hover {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.handButtonActive {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  transform: translateY(-1px);
+}
+
+.handButtonActive:hover {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+/* Selected Hand Indicator */
+.selectedHandIndicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(30, 58, 138, 0.2);
+  border: 2px solid #1e3a8a;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin: 20px 0;
+  backdrop-filter: blur(5px);
+}
+
+.selectedHandText {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.selectedHandText strong {
+  color: #ffffff;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.changeHandButton {
+  padding: 8px 16px;
+  background-color: #1e3a8a;
+  border: 1px solid #1e3a8a;
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.changeHandButton:hover {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  transform: translateY(-1px);
 }

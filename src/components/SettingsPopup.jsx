@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaCog, FaFlask, FaBrain } from "react-icons/fa";
+import { useResearcherMode } from "@/lib/researcherModeContext";
 import styles from "../styles/Settings.module.css";
 
 export default function SettingsPopup({ isOpen, onClose }) {
@@ -26,10 +27,12 @@ export default function SettingsPopup({ isOpen, onClose }) {
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
-  const [isConfirmNewPasswordFocused, setIsConfirmNewPasswordFocused] = useState(false);
+  const [isConfirmNewPasswordFocused, setIsConfirmNewPasswordFocused] =
+    useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showWebsiteMode, setShowWebsiteMode] = useState(false);
   const [websiteMode, setWebsiteMode] = useState("light"); // or "dark"
+  const { researcherMode, toggleResearcherMode } = useResearcherMode();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -86,10 +89,10 @@ export default function SettingsPopup({ isOpen, onClose }) {
     try {
       // Delete user profile data
       await supabase.from("profiles").delete().eq("id", user.id);
-      
+
       // Delete the user account
       const { error } = await supabase.auth.admin.deleteUser(user.id);
-      
+
       if (error) {
         setMessage(error.message);
       } else {
@@ -142,7 +145,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
           setShowDeleteConfirm(true);
           setShowPasswordConfirm(false);
         } else {
-          setMessage(`Password confirmed! ${currentAction} functionality will be implemented here.`);
+          setMessage(
+            `Password confirmed! ${currentAction} functionality will be implemented here.`
+          );
           setShowPasswordConfirm(false);
           setConfirmPassword("");
           setCurrentAction("");
@@ -182,7 +187,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
       if (error) {
         setMessage(error.message);
       } else {
-        setMessage("Email updated successfully! Please check your new email for verification.");
+        setMessage(
+          "Email updated successfully! Please check your new email for verification."
+        );
         setShowEmailChange(false);
         setNewEmail("");
         setConfirmEmail("");
@@ -259,10 +266,18 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setWebsiteMode(mode);
     // Here you can add logic to actually change the website theme
     // For example, updating localStorage, CSS variables, etc.
-    localStorage.setItem('websiteMode', mode);
+    localStorage.setItem("websiteMode", mode);
     setMessage(`Website mode changed to ${mode} mode`);
     setTimeout(() => {
       setShowWebsiteMode(false);
+      setMessage("");
+    }, 2000);
+  };
+
+  const handleResearcherModeToggle = () => {
+    toggleResearcherMode(!researcherMode);
+    setMessage(`Researcher mode ${!researcherMode ? "enabled" : "disabled"}`);
+    setTimeout(() => {
       setMessage("");
     }, 2000);
   };
@@ -271,64 +286,99 @@ export default function SettingsPopup({ isOpen, onClose }) {
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.settingsPopupContainer} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.settingsPopupContainer}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className={styles.closeButton} onClick={onClose}>
           ×
         </button>
-        
+
         <h2 className={styles.settingsHeader}>Account Settings</h2>
 
         <div className={styles.containersWrapper}>
           <div className={styles.accountContainer}>
-            <div className={`${styles.accountTitleRow} ${!showWebsiteMode ? styles.active : ''}`} onClick={() => setShowWebsiteMode(false)}>
+            <div
+              className={`${styles.accountTitleRow} ${
+                !showWebsiteMode ? styles.active : ""
+              }`}
+              onClick={() => setShowWebsiteMode(false)}
+            >
               <div className={styles.accountTitleContent}>
                 <FaUser className={styles.personIcon} />
                 <span>Your Account</span>
               </div>
-              <span className={styles.arrow}>{'>'}</span>
+              <span className={styles.arrow}>{">"}</span>
             </div>
-            <div className={`${styles.accountSubsection} ${showWebsiteMode ? styles.active : ''}`} onClick={() => setShowWebsiteMode(true)}>
-              <span>Website Mode</span>
-              <span className={styles.arrow}>{'>'}</span>
-            </div>
-            <button
-              className={styles.signOutButton} 
-              onClick={handleSignOut}
+            <div
+              className={`${styles.accountSubsection} ${
+                showWebsiteMode ? styles.active : ""
+              }`}
+              onClick={() => setShowWebsiteMode(true)}
             >
+              <div className={styles.accountTitleContent}>
+                <FaBrain className={styles.personIcon} />
+              <span>Website Mode</span>
+              </div>
+              <span className={styles.arrow}>{">"}</span>
+            </div>
+            <button className={styles.signOutButton} onClick={handleSignOut}>
               Sign Out
             </button>
           </div>
 
           <div className={styles.secondaryContainer}>
-            {!showPasswordConfirm && !showEmailChange && !showPasswordChange && !showDeleteConfirm && !showWebsiteMode ? (
+            {!showPasswordConfirm &&
+            !showEmailChange &&
+            !showPasswordChange &&
+            !showDeleteConfirm &&
+            !showWebsiteMode ? (
               <div className={styles.secondaryContent}>
-                <p onClick={() => handleActionClick("Change Email")}>Change Email</p>
-                <p onClick={() => handleActionClick("Change Password")}>Change Password</p>
-                <p onClick={() => handleActionClick("Delete Account")} className={styles.deleteAccountText}>Delete Account</p>
+                <p onClick={() => handleActionClick("Change Email")}>
+                  Change Email
+                </p>
+                <p onClick={() => handleActionClick("Change Password")}>
+                  Change Password
+                </p>
+                <p
+                  onClick={() => handleActionClick("Delete Account")}
+                  className={styles.deleteAccountText}
+                >
+                  Delete Account
+                </p>
               </div>
             ) : showWebsiteMode ? (
               <div className={styles.emailChangeContent}>
-                <button className={styles.backArrow} onClick={handleBackToOptions}>
+                <button
+                  className={styles.backArrow}
+                  onClick={handleBackToOptions}
+                >
                   ←
                 </button>
                 <h3 className={styles.confirmPasswordTitle}>Website Mode</h3>
-                <p className={styles.actionDescription}>Choose your preferred website appearance</p>
-                <div className={styles.websiteModeOptions}>
-                  <button
-                    className={`${styles.modeButton} ${websiteMode === 'light' ? styles.activeMode : ''}`}
-                    onClick={() => handleWebsiteModeChange('light')}
-                  >
-                    Light Mode
-                  </button>
-                  <button
-                    className={`${styles.modeButton} ${websiteMode === 'dark' ? styles.activeMode : ''}`}
-                    onClick={() => handleWebsiteModeChange('dark')}
-                  >
-                    Dark Mode
-                  </button>
+                <p className={styles.actionDescription}>
+                  {" "}
+                  Enable Researcher Account Mode?{" "}
+                </p>
+                <div className={styles.toggleContainer}>
+                  <label className={styles.toggleLabel}>
+                    <input
+                      type="checkbox"
+                      checked={researcherMode}
+                      onChange={handleResearcherModeToggle}
+                      className={styles.toggleInput}
+                    />
+                    <span className={`${styles.toggleSlider} ${researcherMode ? styles.toggleActive : ''}`}></span>
+                  </label>
+                  <span className={styles.toggleText}>
+                    {researcherMode ? "Enabled" : "Disabled"}
+                  </span>
                 </div>
+                <div className={styles.websiteModeOptions}></div>
                 {message && (
-                  <div className={`${styles.settingsMessage} ${styles.successMessage}`}>
+                  <div
+                    className={`${styles.settingsMessage} ${styles.successMessage}`}
+                  >
                     {message}
                   </div>
                 )}
@@ -337,7 +387,8 @@ export default function SettingsPopup({ isOpen, onClose }) {
               <div className={styles.deleteConfirmContent}>
                 <h3 className={styles.deleteConfirmTitle}>Delete Account</h3>
                 <p className={styles.deleteConfirmMessage}>
-                  Are you sure you want to delete your account? All medical data associated with this account will be permanently deleted.
+                  Are you sure you want to delete your account? All medical data
+                  associated with this account will be permanently deleted.
                 </p>
                 <div className={styles.deleteConfirmButtons}>
                   <button
@@ -355,18 +406,31 @@ export default function SettingsPopup({ isOpen, onClose }) {
                   </button>
                 </div>
                 {message && (
-                  <div className={`${styles.settingsMessage} ${message.includes("Error") ? styles.errorMessage : styles.successMessage}`}>
+                  <div
+                    className={`${styles.settingsMessage} ${
+                      message.includes("Error")
+                        ? styles.errorMessage
+                        : styles.successMessage
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
               </div>
             ) : showPasswordConfirm ? (
               <div className={styles.emailChangeContent}>
-                <button className={styles.backArrow} onClick={handleBackToOptions}>
+                <button
+                  className={styles.backArrow}
+                  onClick={handleBackToOptions}
+                >
                   ←
                 </button>
-                <h3 className={styles.confirmPasswordTitle}>Confirm Password</h3>
-                <p className={styles.actionDescription}>Please confirm your password to {currentAction.toLowerCase()}</p>
+                <h3 className={styles.confirmPasswordTitle}>
+                  Confirm Password
+                </h3>
+                <p className={styles.actionDescription}>
+                  Please confirm your password to {currentAction.toLowerCase()}
+                </p>
                 <div className={styles.passwordInputContainer}>
                   <input
                     type="password"
@@ -386,18 +450,30 @@ export default function SettingsPopup({ isOpen, onClose }) {
                   {loading ? "Confirming..." : "Confirm"}
                 </button>
                 {message && (
-                  <div className={`${styles.settingsMessage} ${message.includes("Incorrect") || message.includes("Please") ? styles.errorMessage : styles.successMessage}`}>
+                  <div
+                    className={`${styles.settingsMessage} ${
+                      message.includes("Incorrect") ||
+                      message.includes("Please")
+                        ? styles.errorMessage
+                        : styles.successMessage
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
               </div>
             ) : showEmailChange ? (
               <div className={styles.emailChangeContent}>
-                <button className={styles.backArrow} onClick={handleBackToOptions}>
+                <button
+                  className={styles.backArrow}
+                  onClick={handleBackToOptions}
+                >
                   ←
                 </button>
                 <h3 className={styles.confirmPasswordTitle}>Change Email</h3>
-                <p className={styles.actionDescription}>Enter your new email address</p>
+                <p className={styles.actionDescription}>
+                  Enter your new email address
+                </p>
                 <div className={styles.passwordInputContainer}>
                   <input
                     type="email"
@@ -417,7 +493,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
                     onChange={(e) => setConfirmEmail(e.target.value)}
                     onFocus={() => setIsConfirmEmailFocused(true)}
                     onBlur={() => setIsConfirmEmailFocused(false)}
-                    placeholder={isConfirmEmailFocused ? "" : "Confirm New Email"}
+                    placeholder={
+                      isConfirmEmailFocused ? "" : "Confirm New Email"
+                    }
                   />
                 </div>
                 <button
@@ -428,18 +506,31 @@ export default function SettingsPopup({ isOpen, onClose }) {
                   {loading ? "Updating..." : "Update Email"}
                 </button>
                 {message && (
-                  <div className={`${styles.settingsMessage} ${message.includes("do not match") || message.includes("Please") || message.includes("different") ? styles.errorMessage : styles.successMessage}`}>
+                  <div
+                    className={`${styles.settingsMessage} ${
+                      message.includes("do not match") ||
+                      message.includes("Please") ||
+                      message.includes("different")
+                        ? styles.errorMessage
+                        : styles.successMessage
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
               </div>
             ) : (
               <div className={styles.emailChangeContent}>
-                <button className={styles.backArrow} onClick={handleBackToOptions}>
+                <button
+                  className={styles.backArrow}
+                  onClick={handleBackToOptions}
+                >
                   ←
                 </button>
                 <h3 className={styles.confirmPasswordTitle}>Change Password</h3>
-                <p className={styles.actionDescription}>Enter your new password</p>
+                <p className={styles.actionDescription}>
+                  Enter your new password
+                </p>
                 <div className={styles.passwordInputContainer}>
                   <input
                     type="password"
@@ -459,7 +550,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     onFocus={() => setIsConfirmNewPasswordFocused(true)}
                     onBlur={() => setIsConfirmNewPasswordFocused(false)}
-                    placeholder={isConfirmNewPasswordFocused ? "" : "Confirm New Password"}
+                    placeholder={
+                      isConfirmNewPasswordFocused ? "" : "Confirm New Password"
+                    }
                   />
                 </div>
                 <button
@@ -470,7 +563,15 @@ export default function SettingsPopup({ isOpen, onClose }) {
                   {loading ? "Updating..." : "Update Password"}
                 </button>
                 {message && (
-                  <div className={`${styles.settingsMessage} ${message.includes("do not match") || message.includes("Please") || message.includes("characters") ? styles.errorMessage : styles.successMessage}`}>
+                  <div
+                    className={`${styles.settingsMessage} ${
+                      message.includes("do not match") ||
+                      message.includes("Please") ||
+                      message.includes("characters")
+                        ? styles.errorMessage
+                        : styles.successMessage
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
@@ -481,4 +582,4 @@ export default function SettingsPopup({ isOpen, onClose }) {
       </div>
     </div>
   );
-} 
+}

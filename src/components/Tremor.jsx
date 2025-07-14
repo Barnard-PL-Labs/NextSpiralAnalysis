@@ -20,7 +20,6 @@ const processTremorData = (result) => {
       const polarity = result[`traxis_pol${i}`];
       const frequency = result[`traxis_fr${i}`];
 
-      console.log(`Axis ${i} data:`, { direction, power, polarity, frequency });
 
       // More permissive filtering - check if we have valid numeric data
       const hasValidDirection = direction !== "No Axis" && direction !== null && direction !== undefined && !isNaN(parseFloat(direction));
@@ -57,40 +56,7 @@ const processTremorData = (result) => {
     mean: meanAmplitude * 10000,
     std: stdAmplitude * 10000,
   };
-  console.log("=== TREMOR DATA DEBUG ===");
-  console.log("Raw result keys:", Object.keys(result || {}));
-  console.log("traxis_dir values:", {
-    dir1: result[`traxis_dir1`],
-    dir2: result[`traxis_dir2`],
-    dir3: result[`traxis_dir3`],
-  });
-  console.log("traxis_pw values:", {
-    pw1: result[`traxis_pw1`],
-    pw2: result[`traxis_pw2`],
-    pw3: result[`traxis_pw3`],
-  });
-  console.log("Processed arrays:", {
-    axes,
-    powers,
-    polarities,
-    frequencies,
-    amplitudeData,
-  });
-  console.log("hasAxes will be:", axes.length > 0);
-  console.log("=== DETAILED AXES DEBUG ===");
-  console.log("Axes array:", axes);
-  console.log("Powers array:", powers);
-  console.log("Polarities array:", polarities);
-  console.log("Frequencies array:", frequencies);
-  console.log("Array lengths - axes:", axes.length, "powers:", powers.length, "polarities:", polarities.length, "frequencies:", frequencies.length);
-
-  console.log("Comprehensive Tremor Data:", {
-    axes,
-    powers,
-    polarities,
-    frequencies,
-    amplitudeData,
-  });
+  
   return { axes, powers, polarities, frequencies, amplitudeData };
 };
 
@@ -166,11 +132,7 @@ const TremorPolarPlot = ({ result }) => {
         },
         // Add bidirectional arrows for each axis (two traces per axis)
         ...axes.flatMap((axis, index) => {
-          console.log(`=== PROCESSING AXIS ${index + 1} ===`);
-          console.log(`Original axis direction: ${axis}°`);
-          console.log(`Original axis power: ${powers[index]}`);
-          console.log(`Original axis polarity: ${polarities[index]}`);
-          console.log(`Original axis frequency: ${frequencies[index]}`);
+          
           
           // Check for overlapping directions with previous axes (including opposite directions)
           const overlappingAxes = axes.slice(0, index).filter(prevAxis => {
@@ -191,7 +153,6 @@ const TremorPolarPlot = ({ result }) => {
           console.log(`Offset applied: ${offset}°`);
           console.log(`Final power value: ${powers[index]}`);
           console.log(`Axis color: ${axisColors[index % axisColors.length]}`);
-          console.log(`=== END AXIS ${index + 1} ===`);
           
           // Create multiple points along the line for proper rendering
           const numPoints = 10;
@@ -247,9 +208,8 @@ const TremorPolarPlot = ({ result }) => {
       ]
     : [];
 
-  console.log(`Total plot data traces: ${plotData.length}`);
   console.log(`Number of axes: ${axes.length}`);
-  console.log(`Expected arrows: ${axes.length * 4} (2 lines + 2 arrowheads per axis)`);
+  
 
   // Clinical metrics
   const maxPowerValue = hasAxes ? Math.max(...powers) : 0;

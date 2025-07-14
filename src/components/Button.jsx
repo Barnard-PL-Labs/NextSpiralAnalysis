@@ -29,24 +29,10 @@ export default function Buttons({
         </button>
       )}
 
-      {!userFinished && !isProcessingFinal && savedDrawingsCount < 15 ? (
+      {!userFinished && !isProcessingFinal && savedDrawingsCount < 15 && (
         <button className={styles.button} onClick={onSaveAndAnalyze}>
           Save
         </button>
-      ) : (
-        (isAnalysisComplete ||
-          (!isProcessingFinal &&
-            (userFinished || savedDrawingsCount >= 15))) && (
-          <button
-            className={styles.button}
-            onClick={sendData}
-            data-loading={isLoadingResults}
-            disabled={isLoadingResults}
-          >
-            <span className={styles.buttonText}>View Results</span>
-            {isLoadingResults && <span className={styles.buttonSpinner} />}
-          </button>
-        )
       )}
     </div>
   );

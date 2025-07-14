@@ -319,7 +319,7 @@
     cursor: pointer;
     transition: background-color 0.2s;
     width: auto;
-    margin-top: 0;
+    margin-top: 48px;
     margin-left: 0;
 }
 
@@ -629,4 +629,72 @@
 
 .accountSubsection.active {
     background-color: rgba(128, 128, 128, 0.1);
+}
+
+/* Toggle Switch Styles */
+.toggleContainer {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+    padding: 10px 0;
+}
+
+.toggleLabel {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    cursor: pointer;
+}
+
+.toggleInput {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleSlider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggleSlider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggleInput:checked + .toggleSlider {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+}
+
+.toggleInput:checked + .toggleSlider:before {
+    transform: translateX(26px);
+}
+
+.toggleActive {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a) !important;
+}
+
+.toggleText {
+    font-size: 1em;
+    font-weight: 500;
+    color: #333;
+    min-width: 80px;
 }

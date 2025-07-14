@@ -4,6 +4,7 @@ import { EB_Garamond, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import backgroundStyles from "@/styles/Background.module.css";
 import { AuthProvider } from "@/lib/authProvider";
+import { ResearcherModeProvider } from "@/lib/researcherModeContext";
 import ClientLayout from "@/components/ClientLayout";
 
 const geistSans = Geist({
@@ -46,7 +47,9 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}>
         <div className={backgroundStyles.drawingContainer} />
         <AuthProvider>
+          <ResearcherModeProvider>
           <ClientLayout>{children}</ClientLayout>
+          </ResearcherModeProvider>
         </AuthProvider>
       </body>
     </html>

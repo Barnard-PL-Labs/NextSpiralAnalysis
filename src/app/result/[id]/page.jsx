@@ -139,6 +139,7 @@ export default function UnifiedResultPage() {
       const result = results.find((r) => r.drawing_id === drawing.id);
       if (!result) return { status: 'pending' };
       if (result.status === "failed") return { error: true, message: result.result_data?.error };
+      if (result.status === "timeout") return { status: 'timeout', message: result.result_data?.message };
       if (result.status === "completed") return result.result_data;
       return { status: 'processing' };
     });
@@ -208,10 +209,32 @@ export default function UnifiedResultPage() {
 
     if (!currentResult) return <>Pending<AnimatedEllipsis /></>;
     if (currentResult.error) return "DOS Score: Failed";
+    if (currentResult.status === 'timeout') return "DOS Score: Timeout";
     if (currentResult.status === 'processing' || currentResult.status === 'pending') return <>Pending<AnimatedEllipsis /></>;
 
     const dos = parseFloat(currentResult.DOS);
     return isNaN(dos) ? "DOS Score: N/A" : `DOS Score: ${dos.toFixed(4)}`;
+  };
+
+  const areAllAnalysesCompleted = () => {
+    if (!analysisHistory || !analysisHistory.individual_results) return false;
+    
+    // Check if there's at least one valid completed analysis
+    const hasValidResult = analysisHistory.individual_results.some(result => {
+      return result && !result.error && !result.status && result.DOS !== undefined;
+    });
+    
+    if (!hasValidResult) return false;
+    
+    // Check if all analyses are done (completed, failed, or timed out - not pending or processing)
+    return analysisHistory.individual_results.every(result => {
+      // Analysis is done if it's completed (no error/status), failed (has error), or timed out (has status 'timeout')
+      return result && (
+        (!result.error && !result.status && result.DOS !== undefined) || // completed
+        result.error || // failed
+        result.status === 'timeout' // timed out
+      );
+    });
   };
 
   const downloadResults = () => {
@@ -228,10 +251,12 @@ export default function UnifiedResultPage() {
         successful_drawings: analysisHistory.successful_drawings,
         average_DOS: analysisHistory.average_DOS,
       },
+      hand_selection: drawings.length > 0 ? drawings[0].hand_used : null,
       individual_results: analysisHistory.individual_results,
       raw_drawing_data: drawings.map(d => ({
         drawing_id: d.id,
         created_at: d.created_at,
+        hand_used: d.hand_used,
         data: d.drawing_data,
       })),
     };
@@ -280,6 +305,9 @@ export default function UnifiedResultPage() {
                 if (resultStatus?.error) {
                   displayContent = `#${index + 1}: Failed`;
                   backgroundColor = "rgba(255,100,100,0.2)";
+                } else if (resultStatus?.status === 'timeout') {
+                  displayContent = `#${index + 1}: Timeout`;
+                  backgroundColor = "rgba(255,100,100,0.2)";
                 } else if (resultStatus && !resultStatus.status) {
                   backgroundColor = "rgba(255,255,255,0.1)";
                 }
@@ -319,32 +347,34 @@ export default function UnifiedResultPage() {
                 );
               })}
             </div>
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <button
-                onClick={downloadResults}
-                style={{
-                  backgroundColor: "#4a90e2",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  margin: "0 auto",
-                }}
-                onMouseEnter={(e) => { e.target.style.backgroundColor = "#357abd"; }}
-                onMouseLeave={(e) => { e.target.style.backgroundColor = "#4a90e2"; }}
-              >
-                <FaDownload size={16} />
-                Download Results
-              </button>
-            </div>
+            {areAllAnalysesCompleted() && (
+              <div style={{ textAlign: "center", marginTop: "20px" }}>
+                <button
+                  onClick={downloadResults}
+                  style={{
+                    backgroundColor: "#4a90e2",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 20px",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    margin: "0 auto",
+                  }}
+                  onMouseEnter={(e) => { e.target.style.backgroundColor = "#357abd"; }}
+                  onMouseLeave={(e) => { e.target.style.backgroundColor = "#4a90e2"; }}
+                >
+                  <FaDownload size={16} />
+                  Download Results
+                </button>
+              </div>
+            )}
           </div>
         )}
 
