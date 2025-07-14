@@ -202,9 +202,9 @@ const Dashboard = () => {
                   Latest Result
                 </h2>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-                  <div className={styles.drawingCountBadge}>
-                    {entries[0].all_drawings.length}
-                    {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                <div className={styles.drawingCountBadge}>
+                  {entries[0].all_drawings.length}
+                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
                   </div>
                   {entries[0].hand_used && (
                     <div style={{
@@ -271,9 +271,9 @@ const Dashboard = () => {
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
                        <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-                         <div className={styles.drawingCountBadge}>
-                            {entry.all_drawings.length}
-                            {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                       <div className={styles.drawingCountBadge}>
+                          {entry.all_drawings.length}
+                          {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
                          </div>
                          {entry.hand_used && (
                            <div style={{

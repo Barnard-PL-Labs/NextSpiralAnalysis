@@ -252,11 +252,19 @@ export default function UnifiedResultPage() {
         average_DOS: analysisHistory.average_DOS,
       },
       hand_selection: drawings.length > 0 ? drawings[0].hand_used : null,
+      demographics: drawings.length > 0 ? {
+        user_name: drawings[0].user_name,
+        user_age: drawings[0].user_age,
+        user_sex: drawings[0].user_sex
+      } : null,
       individual_results: analysisHistory.individual_results,
       raw_drawing_data: drawings.map(d => ({
         drawing_id: d.id,
         created_at: d.created_at,
         hand_used: d.hand_used,
+        user_name: d.user_name,
+        user_age: d.user_age,
+        user_sex: d.user_sex,
         data: d.drawing_data,
       })),
     };
