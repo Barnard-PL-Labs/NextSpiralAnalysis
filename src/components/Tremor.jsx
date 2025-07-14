@@ -172,17 +172,19 @@ const TremorPolarPlot = ({ result }) => {
           console.log(`Original axis polarity: ${polarities[index]}`);
           console.log(`Original axis frequency: ${frequencies[index]}`);
           
-          // Check for overlapping directions with previous axes
-          const overlappingAxes = axes.slice(0, index).filter(prevAxis => 
-            Math.abs(prevAxis - axis) < 2 || Math.abs(prevAxis - (axis + 180)) < 2
-          );
+          // Check for overlapping directions with previous axes (including opposite directions)
+          const overlappingAxes = axes.slice(0, index).filter(prevAxis => {
+            const angleDiff = Math.abs(prevAxis - axis);
+            const oppositeDiff = Math.abs(prevAxis - (axis + 180));
+            return angleDiff < 5 || oppositeDiff < 5; // 5 degree tolerance
+          });
           
           if (overlappingAxes.length > 0) {
             console.log(`Axis ${index + 1} overlaps with previous axes:`, overlappingAxes);
           }
           
-          // Slightly offset overlapping arrows for better visibility
-          const offset = overlappingAxes.length * 5; // 5 degree offset per overlap
+          // Apply offset to prevent visual overlap
+          const offset = overlappingAxes.length * 8; // 8 degree offset per overlap
           const adjustedAxis = axis + offset;
           
           console.log(`Adjusted axis direction: ${adjustedAxis}°`);
