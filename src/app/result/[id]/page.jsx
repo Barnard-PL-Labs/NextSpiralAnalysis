@@ -11,7 +11,7 @@ import SpiralPlot from "@/components/NewTimeTrace";
 import { CanIAvoidBugByThis, PTChart } from "@/components/PressureTime";
 import TremorPolarPlot from "@/components/Tremor";
 import { Line3DPlot, processData } from "@/components/Angle";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaComment } from "react-icons/fa";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 
 function AnimatedEllipsis() {
@@ -48,6 +48,16 @@ export default function UnifiedResultPage() {
     totalDrawings: 0,
     completed: 0,
   });
+
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackRatings, setFeedbackRatings] = useState({
+    usability: 0,
+    analysisAccuracy: 0,
+    performanceSpeed: 0,
+    visualDesign: 0
+  });
+  const [feedbackSuggestion, setFeedbackSuggestion] = useState("");
+  const [hoveredStar, setHoveredStar] = useState({ category: null, starIndex: null });
 
   const updateCharts = (index, drawingsArray, resultsArray) => {
     const drawingData = drawingsArray[index]?.drawing_data;
@@ -237,6 +247,63 @@ export default function UnifiedResultPage() {
     });
   };
 
+  const handleFeedbackSubmit = async () => {
+    try {
+      // All fields are optional - user can submit feedback with or without ratings/suggestions
+      const hasRatings = Object.values(feedbackRatings).some(rating => rating > 0);
+      const hasSuggestion = feedbackSuggestion.trim().length > 0;
+      
+      // Allow submission even if no ratings or suggestions provided
+      // This makes feedback completely optional
+
+      // Prepare feedback data
+      const feedbackData = {
+        session_id: sessionId,
+        created_at: new Date().toISOString(),
+        usability_rating: feedbackRatings.usability || 0,
+        analysis_accuracy_rating: feedbackRatings.analysisAccuracy || 0,
+        performance_speed_rating: feedbackRatings.performanceSpeed || 0,
+        visual_design_rating: feedbackRatings.visualDesign || 0,
+        suggestion_text: feedbackSuggestion.trim() || null,
+        user_id: user?.id || null,
+      };
+
+      // Insert feedback into database
+      const { error } = await supabase
+        .from("feedback")
+        .insert([feedbackData]);
+
+      if (error) {
+        console.error("Error saving feedback:", error);
+        alert("Failed to save feedback. Please try again.");
+        return;
+      }
+
+      console.log("Feedback saved successfully:", feedbackData);
+      
+      // Reset form and close modal
+      setShowFeedbackModal(false);
+      setFeedbackRatings({
+        usability: 0,
+        analysisAccuracy: 0,
+        performanceSpeed: 0,
+        visualDesign: 0
+      });
+      setFeedbackSuggestion("");
+      
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("Failed to submit feedback. Please try again.");
+    }
+  };
+
+  const handleStarClick = (category, starIndex) => {
+    setFeedbackRatings(prev => ({
+      ...prev,
+      [category]: starIndex
+    }));
+  };
+
   const downloadResults = () => {
     if (!analysisHistory) {
       alert("No results are available to download yet.");
@@ -383,6 +450,36 @@ export default function UnifiedResultPage() {
                   <FaDownload size={16} />
                   Download Results
                 </button>
+                <div style={{ marginTop: "10px" }}>
+                  <button
+                    onClick={() => setShowFeedbackModal(true)}
+                    style={{
+                      backgroundColor: "#a8c8e8",
+                      color: "navy",
+                      border: "none",
+                      padding: "8px 16px",
+                      borderRadius: "20px",
+                      fontSize: "12px",
+                      marginTop: "10px",
+                      marginBottom: "-25px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "#8bb8d8";
+                      e.target.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = "#a8c8e8";
+                      e.target.style.transform = "translateY(0)";
+                    }}
+                  >
+                    <FaComment size={12} style={{ marginRight: "6px", verticalAlign: "middle", display: "inline-block" }} />
+                    Feedback
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -434,6 +531,177 @@ export default function UnifiedResultPage() {
           </div>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            borderRadius: "12px",
+            padding: "24px",
+            maxWidth: "650px",
+            width: "90%",
+            maxHeight: "70vh",
+            overflow: "hidden",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+              position: "relative",
+            }}>
+              <h3 style={{ margin: 0, color: "navy", fontSize: "30px", fontWeight: "600",marginTop: "12px", marginBottom: "10px" }}>Rate Your Experience!</h3>
+              <button
+                onClick={() => {
+                  console.log("X button clicked");
+                  setShowFeedbackModal(false);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "25px",
+                  cursor: "pointer",
+                  color: "#444",
+                  padding: "0",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 10,
+                  position: "absolute",
+                  top: "-5px",
+                  right: "0px",
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              {/* Left side - Star ratings */}
+              <div style={{ flex: "1.1" }}>
+                {[
+                  { key: "usability", label: "Usability" },
+                  { key: "analysisAccuracy", label: "Percieved Analysis Accuracy" },
+                  { key: "performanceSpeed", label: "Performance & Speed" },
+                  { key: "visualDesign", label: "Visual Design" }
+                ].map(({ key, label }) => (
+                  <div key={key} style={{ marginBottom: "16px" }}>
+                    <div style={{ marginBottom: "12px", fontWeight: "500", color: "navy", textDecoration: "underline", paddingBottom: "4px" }}>
+                      {label}
+                    </div>
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      {[1, 2, 3, 4, 5].map((starIndex) => {
+                        const currentRating = feedbackRatings[key];
+                        const isSelected = currentRating >= starIndex;
+                        const isHovered = hoveredStar.category === key && hoveredStar.starIndex >= starIndex;
+                        
+                        return (
+                          <div 
+                            key={starIndex} 
+                            style={{ position: "relative", display: "inline-block" }}
+                            onMouseEnter={() => setHoveredStar({ category: key, starIndex })}
+                            onMouseLeave={() => setHoveredStar({ category: null, starIndex: null })}
+                          >
+                            <button
+                              onClick={() => handleStarClick(key, starIndex)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: "2px",
+                                fontSize: "18px",
+                                color: "#666",
+                                transition: "color 0.2s ease",
+                                position: "relative",
+                                zIndex: 1,
+                              }}
+                            >
+                              ★
+                            </button>
+                            {(isSelected || isHovered) && (
+                              <div style={{
+                                position: "absolute",
+                                top: "2px",
+                                left: "2px",
+                                fontSize: "18px",
+                                color: "#FFD700",
+                                zIndex: 2,
+                                pointerEvents: "none",
+                              }}>
+                                ★
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Right side - Suggestions */}
+              <div style={{ flex: "1.2" }}>
+                                 <div style={{ marginBottom: "8px", textDecoration: "underline", fontWeight: "500", fontSize: "24px", color: "navy", marginTop: "-75px", marginBottom: "40px", textAlign: "center" }}>
+                    Suggestions
+                  </div>
+                <textarea
+                  value={feedbackSuggestion}
+                  onChange={(e) => setFeedbackSuggestion(e.target.value)}
+                  placeholder="Share your suggestions for improvement!"
+                                      style={{
+                      width: "105%",
+                      maxWidth: "105%",
+                      minHeight: "300px",
+                      padding: "12px",
+                      border: "3px solid navy",
+                      borderRadius: "6px",
+                      fontSize: "14px",
+                      fontFamily: "inherit",
+                      resize: "vertical",
+                      marginTop: "-10px",
+                      marginLeft: "-10px",
+                      backgroundColor: "white",
+                      color: "black",
+                    }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-25px" }}>
+              <button
+                onClick={handleFeedbackSubmit}
+                style={{
+                  padding: "8px 16px",
+                  border: "none",
+                  borderRadius: "6px",
+                  background: "navy",
+                  color: "white",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                Submit Feedback
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

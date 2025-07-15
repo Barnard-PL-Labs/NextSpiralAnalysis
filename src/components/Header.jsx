@@ -105,16 +105,42 @@ export default function Header() {
 
       {/* Mobile Dropdown OUTSIDE header */}
       {isMobile && dropdownOpen && (
-        <div className="fixed top-[75px] left-0 w-full bg-white text-black shadow-lg z-[99999] transition-all duration-300">
-          <div className="flex flex-col w-full">
+        <div className="fixed top-[75px] left-0 w-full bg-white shadow-lg z-[99999] transition-all duration-300" style={{ borderRadius: "0 0 10px 10px" }}>
+          <div className="flex flex-col items-center w-full py-4">
             {[
               { label: "Home", href: "/" },
               { label: "Spiral Analysis", href: "/machine" },
               ...(researcherMode ? [] : [{ label: "Learn More", href: "/instruction" }]),
               { label: "About Us", href: "/info" }
             ].map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setDropdownOpen(false)} className="w-full no-underline">
-                <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
+              <Link key={item.href} href={item.href} onClick={() => setDropdownOpen(false)} className="no-underline">
+                <div className="mb-2 py-3 text-center transition-all duration-300" style={{
+                  color: "white",
+                  fontFamily: "DM Sans, sans-serif",
+                  fontWeight: "bold",
+                  background: "#2e2b7a",
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(0, 102, 153, 0.2)",
+                  fontSize: "16.5px",
+                  display: "inline-block",
+                  minWidth: "180px",
+                  cursor: "pointer"
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "#006699";
+                  e.target.style.background = "#c4e4f8";
+                  e.target.style.borderColor = "transparent";
+                  e.target.style.transform = "translateY(-1px)";
+                  e.target.style.boxShadow = "0 2px 4px rgba(0, 102, 153, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "white";
+                  e.target.style.background = "#2e2b7a";
+                  e.target.style.borderColor = "rgba(0, 102, 153, 0.2)";
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = "none";
+                }}>
                   {item.label}
                 </div>
               </Link>
@@ -122,20 +148,98 @@ export default function Header() {
 
             {user ? (
               <>
-                <Link href="/dashBoard" onClick={() => setDropdownOpen(false)} className="w-full no-underline">
-                  <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
+                <Link href="/dashBoard" onClick={() => setDropdownOpen(false)} className="no-underline">
+                  <div className="mb-2 py-3 text-center transition-all duration-300" style={{
+                    color: "white",
+                    fontFamily: "DM Sans, sans-serif",
+                    fontWeight: "bold",
+                    background: "#2e2b7a",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(0, 102, 153, 0.2)",
+                    fontSize: "16.5px",
+                    display: "inline-block",
+                    minWidth: "180px",
+                    cursor: "pointer"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = "#006699";
+                    e.target.style.background = "#c4e4f8";
+                    e.target.style.borderColor = "transparent";
+                    e.target.style.transform = "translateY(-1px)";
+                    e.target.style.boxShadow = "0 2px 4px rgba(0, 102, 153, 0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = "white";
+                    e.target.style.background = "#2e2b7a";
+                    e.target.style.borderColor = "rgba(0, 102, 153, 0.2)";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
+                  }}>
                     {getFirstName(user.email)}
                   </div>
                 </Link>
-                <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="w-full no-underline">
-                  <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
+                <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="no-underline">
+                  <div className="mb-2 py-3 text-center transition-all duration-300" style={{
+                    color: "white",
+                    fontFamily: "DM Sans, sans-serif",
+                    fontWeight: "bold",
+                    background: "#2e2b7a",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(0, 102, 153, 0.2)",
+                    fontSize: "16.5px",
+                    display: "inline-block",
+                    minWidth: "180px",
+                    cursor: "pointer"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = "#006699";
+                    e.target.style.background = "#c4e4f8";
+                    e.target.style.borderColor = "transparent";
+                    e.target.style.transform = "translateY(-1px)";
+                    e.target.style.boxShadow = "0 2px 4px rgba(0, 102, 153, 0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = "white";
+                    e.target.style.background = "#2e2b7a";
+                    e.target.style.borderColor = "rgba(0, 102, 153, 0.2)";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
+                  }}>
                     Logout
                   </div>
                 </button>
               </>
             ) : (
-              <button onClick={() => { setLoginOpen(true); setDropdownOpen(false); }} className="w-full no-underline">
-                <div className="py-4 text-lg font-semibold text-center hover:bg-gray-200 transition">
+              <button onClick={() => { setLoginOpen(true); setDropdownOpen(false); }} className="no-underline">
+                <div className="mb-2 py-3 text-center transition-all duration-300" style={{
+                  color: "white",
+                  fontFamily: "DM Sans, sans-serif",
+                  fontWeight: "bold",
+                  background: "#2e2b7a",
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(0, 102, 153, 0.2)",
+                  fontSize: "16.5px",
+                  display: "inline-block",
+                  minWidth: "180px",
+                  cursor: "pointer"
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = "#006699";
+                  e.target.style.background = "#c4e4f8";
+                  e.target.style.borderColor = "transparent";
+                  e.target.style.transform = "translateY(-1px)";
+                  e.target.style.boxShadow = "0 2px 4px rgba(0, 102, 153, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = "white";
+                  e.target.style.background = "#2e2b7a";
+                  e.target.style.borderColor = "rgba(0, 102, 153, 0.2)";
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = "none";
+                }}>
                   Login
                 </div>
               </button>

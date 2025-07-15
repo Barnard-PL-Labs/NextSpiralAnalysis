@@ -114,7 +114,7 @@ const getOrCreateAnonymousSession = () => {
 
     if (currentDrawing.length < 150) {
       alert(
-        "Your spiral is too small for accurate analysis. Please draw a larger spiral that:\n\n• Makes at least 3-4 complete revolutions\n• Fills most of the drawing area\n• Is drawn in a continuous motion"
+        "Your spiral doesn't have enough points for accurate analysis. Please draw a spiral that:\n\n• Makes at least 3-4 complete revolutions\n• Fills most of the drawing area\n• Is drawn in a continuous motion"
       );
       return;
     }

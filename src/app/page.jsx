@@ -45,7 +45,7 @@ export default function Home() {
         </h1>
         <p>
           Your movements reveal a lot about motor control. With Spiral Analysis,
-          a simple spiral drawing can measure smoothness, speed, and pressure,
+          a simple spiral drawing on your tablet can measure smoothness, speed, and pressure,
           helping you track neuromotor function. Whether you're a researcher, a
           medical professional, or just curious, this non-invasive tool makes it
           easy to gain insights into hand stability.
