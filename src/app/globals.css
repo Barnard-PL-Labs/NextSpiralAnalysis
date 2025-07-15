@@ -1,7 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:wght@400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -19,8 +18,7 @@ body {
 }
 
 h1 {
-  font-family: "Cinzel", serif;
-  /* color: #006699; */
+  font-family: "DM Sans", sans-serif;
   color: #ffffff;
   font-size: 35px;
   font-weight: bold;
@@ -59,7 +57,7 @@ header a {
   text-decoration: none;
 }
 #projectName {
-  font-family: "Cinzel", serif;
+  font-family: "DM Sans", sans-serif;
   display: flex;
   color: rgb(19, 77, 104);
 }
@@ -81,7 +79,7 @@ header a {
 
 .navItems span {
   color: white;
-  font-family: "Cinzel", serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: bold;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
@@ -111,7 +109,7 @@ header a {
 .logoutBtn span,
 .navItems button span {
   color: white;
-  font-family: "Cinzel", serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: bold;
   transition: all 0.3s ease-in-out;
   cursor: pointer;

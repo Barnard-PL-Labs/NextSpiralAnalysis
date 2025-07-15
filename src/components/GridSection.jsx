@@ -16,7 +16,7 @@ const GridSection = () => {
     {
       title:
         "Validation of digital spiral analysis as outcome parameter for clinical trials in essential tremor",
-      imageUrl: "/Icons/brains.jpg",
+      imageUrl: "/Icons/e-tremor.png",
       linkUrl:
         "https://movementdisorders.onlinelibrary.wiley.com/doi/full/10.1002/mds.23808",
     },

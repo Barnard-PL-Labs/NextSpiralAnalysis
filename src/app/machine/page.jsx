@@ -21,6 +21,7 @@ export default function MachinePage() {
   const [userFinished, setUserFinished] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [selectedHand, setSelectedHand] = useState(null); // 'dominant' or 'non-dominant'
+  const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' or 'R'
   const [showDemographics, setShowDemographics] = useState(false);
   const [demographics, setDemographics] = useState({
     name: '',
@@ -293,6 +294,7 @@ const getOrCreateAnonymousSession = () => {
         session_id: sessionId,
         is_anonymous: !isAuthenticated,
         hand_used: selectedHand,
+        hand_side: selectedHandSide, // Add hand_side to the drawing
         created_at: new Date().toISOString(),
         ...demographicsData
       })
@@ -376,9 +378,12 @@ const getOrCreateAnonymousSession = () => {
 
   const handleHandSelection = (hand) => {
     setSelectedHand(hand);
-    // Store the hand selection in localStorage for persistence
     localStorage.setItem('selectedHand', hand);
   };
+const handleHandSideSelection = (side) => {
+  setSelectedHandSide(side);
+  localStorage.setItem('selectedHandSide', side);
+};
 
   const handleDemographicsSave = async () => {
     try {
@@ -450,7 +455,9 @@ const getOrCreateAnonymousSession = () => {
       setUserFinished(false);
       setCurrentSessionId(null);
       setSelectedHand(null);
+      setSelectedHandSide(null); // Reset hand side
       localStorage.removeItem('selectedHand');
+      localStorage.removeItem('selectedHandSide'); // Clear hand side from localStorage
       if (canvasRef.current?.clearCanvas) {
         canvasRef.current.clearCanvas();
       }
@@ -462,15 +469,15 @@ const getOrCreateAnonymousSession = () => {
       {!showTutorial && <Header showVideo={false} />}
       <div style={{ position: "relative" }}>
         <div className={styles.machineContainer}>
-          {/* Only show "Draw Here" title when hand is selected */}
-          {selectedHand && <h1 className={styles.title}>Draw Here</h1>}
+          {/* Only show "Draw Here" title when both hand and side are selected */}
+          {selectedHand && selectedHandSide && <h1 className={styles.title}>Draw Here</h1>}
 
           {/* Hand indicator and help button in top right corner */}
           <div className={styles.topControlsContainer}>
             <div></div> {/* Empty div for left side */}
             
             <div className={styles.topRightControls}>
-              {selectedHand && (
+              {selectedHand && selectedHandSide && (
                 <div className={styles.handIndicatorTopRight}>
                   <span className={styles.handIndicatorText}>
                     {selectedHand === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
@@ -479,6 +486,7 @@ const getOrCreateAnonymousSession = () => {
                     onClick={() => {
                       if (savedDrawings.length === 0) {
                         setSelectedHand(null);
+                        setSelectedHandSide(null);
                       } else {
                         alert("Hand selection cannot be changed once drawings have been saved. Please clear all drawings first if you want to change hands.");
                       }
@@ -490,7 +498,7 @@ const getOrCreateAnonymousSession = () => {
                 </div>
               )}
               
-              {selectedHand && (
+              {selectedHand && selectedHandSide && (
                 <button
                   className={styles.helpButton}
                   onClick={() => setShowTutorial(true)}
@@ -503,7 +511,7 @@ const getOrCreateAnonymousSession = () => {
           </div>
 
           {/* Hand Selection Buttons - Show first */}
-          {!selectedHand && (
+          {(selectedHand === null || selectedHandSide === null) && (
             <div className={styles.handSelectionContainer}>
               <h3 className={styles.handSelectionTitle}>
                 Select Your Hand
@@ -512,18 +520,46 @@ const getOrCreateAnonymousSession = () => {
               <div className={styles.handButtonsWrapper}>
                 <button
                   onClick={() => handleHandSelection('dominant')}
-                  className={styles.handButton}
+                  className={
+                    styles.handButton + (selectedHand === 'dominant' ? ' ' + styles.handButtonActive : '')
+                  }
+                  aria-pressed={selectedHand === 'dominant'}
                 >
                   Dominant Hand
                 </button>
                 <button
                   onClick={() => handleHandSelection('non-dominant')}
-                  className={styles.handButton}
+                  className={
+                    styles.handButton + (selectedHand === 'non-dominant' ? ' ' + styles.handButtonActive : '')
+                  }
+                  aria-pressed={selectedHand === 'non-dominant'}
                 >
                   Non-Dominant Hand
                 </button>
               </div>
-              
+              {/* L/R Badges */}
+              <div className={styles.handLRBadgesWrapper}>
+                <button
+                  type="button"
+                  className={
+                    styles.handLRBadge + (selectedHandSide === 'L' ? ' ' + styles.handLRBadgeSelected : '')
+                  }
+                  onClick={() => handleHandSideSelection('L')}
+                  aria-pressed={selectedHandSide === 'L'}
+                >
+                  L
+                </button>
+                <button
+                  type="button"
+                  className={
+                    styles.handLRBadge + (selectedHandSide === 'R' ? ' ' + styles.handLRBadgeSelected : '')
+                  }
+                  onClick={() => handleHandSideSelection('R')}
+                  aria-pressed={selectedHandSide === 'R'}
+                >
+                  R
+                </button>
+              </div>
               {/* Optional Demographics button - only for non-logged in users */}
               {!user?.id && (
                 <div style={{ 
@@ -562,7 +598,7 @@ const getOrCreateAnonymousSession = () => {
           )}
 
           {/* Canvas and other buttons - Show after hand selection */}
-          {selectedHand && (
+          {selectedHand && selectedHandSide && (
             <>
               <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
               <MiniSpiralHistory savedDrawings={savedDrawings} />
@@ -582,7 +618,7 @@ const getOrCreateAnonymousSession = () => {
           )}
 
           {/* Save/Finish Button - Only show after hand selection */}
-          {selectedHand && (
+          {selectedHand && selectedHandSide && (
             <Button
               clearDrawing={clearCurrentDrawing}
               savedDrawingsCount={savedDrawings.length}

@@ -252,6 +252,7 @@ export default function UnifiedResultPage() {
         average_DOS: analysisHistory.average_DOS,
       },
       hand_selection: drawings.length > 0 ? drawings[0].hand_used : null,
+      hand_side: drawings.length > 0 ? drawings[0].hand_side : null,
       demographics: drawings.length > 0 ? {
         user_name: drawings[0].user_name,
         user_age: drawings[0].user_age,
@@ -262,6 +263,7 @@ export default function UnifiedResultPage() {
         drawing_id: d.id,
         created_at: d.created_at,
         hand_used: d.hand_used,
+        hand_side: d.hand_side,
         user_name: d.user_name,
         user_age: d.user_age,
         user_sex: d.user_sex,

@@ -55,7 +55,7 @@ export default function Home() {
             GET STARTED
           </button>
         </Link>
-        <Link href="/info">
+        <Link href="/instruction">
           <button className="indexButton" id="goInfo">
             HOW IT WORKS ➝
           </button>

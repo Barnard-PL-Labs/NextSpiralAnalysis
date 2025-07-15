@@ -111,7 +111,7 @@
 }
 
 .title {
-  font-family: "Cinzel", serif;
+  font-family: "DM Sans", sans-serif;
   color: #ffffff;
 }
 
@@ -481,8 +481,10 @@
 }
 
 .handButtonActive:hover {
-  background-color: #1e3a8a;
-  border-color: #1e3a8a;
+  background-color: #0f172a;
+  border-color: #0f172a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Selected Hand Indicator */
@@ -529,5 +531,47 @@
 .changeHandButton:hover {
   background-color: #0f172a;
   border-color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.handLRBadgesWrapper {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 22px;
+  margin-bottom: 10px;
+}
+
+.handLRBadge {
+  padding: 10px 22px;
+  background-color: #e3eaf7;
+  border: 2px solid #1e3a8a;
+  color: #1e3a8a;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease-in-out;
+  min-width: 48px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08);
+  letter-spacing: 1px;
+  outline: none;
+}
+
+.handLRBadge:hover {
+  background-color: #d0e0fa;
+  color: #0f172a;
+  border-color: #0f172a;
+  transform: translateY(-2px);
+}
+
+.handLRBadgeSelected,
+.handLRBadgeSelected:hover {
+  background-color: #1e3a8a;
+  color: #fff;
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.18);
   transform: translateY(-1px);
 }
