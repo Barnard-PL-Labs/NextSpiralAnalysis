@@ -61,7 +61,7 @@ const processTremorData = (result) => {
 };
 
 const TremorPolarPlot = ({ result }) => {
-  const [currentSection, setCurrentSection] = useState(0);
+  // const [currentSection, setCurrentSection] = useState(0);
   
   if (!result) {
     return <div>Loading tremor data...</div>; // or return null
@@ -266,52 +266,66 @@ const TremorPolarPlot = ({ result }) => {
   };
 
   // Clinical sections for carousel
-  const clinicalSections = [
-    {
-      title: "Primary Axis",
-      color: "#16a34a",
-      bgColor: "rgba(0,100,0,0.2)",
-      borderColor: "#16a34a",
-      data: [
-        { label: "Direction", value: `${dominantDirection}°`, color: "#cc6600" },
-        { label: "Power", value: maxPower.toFixed(2), color: "#cc6600" },
-        { label: "Quality", value: isNaN(dominantPolarity) ? "N/A" : `${(dominantPolarity * 100).toFixed(0)}%`, 
-          color: dominantPolarity > 0.95 ? "#00aa00" : "#cc6600" },
-      ]
-    },
-    {
-      title: "Amplitude",
-      color: "#ff8800",
-      bgColor: "rgba(100,50,0,0.2)",
-      borderColor: "#ff8800",
-      data: [
-        { label: "Max", value: amplitudeData.max.toFixed(1), color: "#cc6600" },
-        { label: "Mean", value: amplitudeData.mean.toFixed(1), color: "#cc6600" },
-        { label: "Variation", value: `${amplitudeData.mean > 0 ? ((amplitudeData.std / amplitudeData.mean) * 100).toFixed(0) : "0"}%`, 
-          color: amplitudeData.std / amplitudeData.mean > 0.5 ? "#cc0000" : "#00aa00" },
-      ]
-    },
-    {
-      title: "Assessment",
-      color: "#4488ff",
-      bgColor: "rgba(0,0,100,0.2)",
-      borderColor: "#4488ff",
-      data: [
-        { label: "Type", value: isDirectional ? "Directional" : "Symmetric", 
-          color: isDirectional ? "#cc6600" : "#00aa00" },
-        { label: "Frequency", value: isNaN(dominantFrequency) ? "N/A" : `${dominantFrequency.toFixed(1)}Hz`, color: "#cc3300" },
-        { label: "Category", value: result["Cal Tremor"] || "N/A", color: "#0066cc" },
-      ]
-    }
-  ];
+  // const clinicalSections = [
+  //   {
+  //     title: "Primary Axis",
+  //     color: "#16a34a",
+  //     bgColor: "rgba(0,100,0,0.2)",
+  //     borderColor: "#16a34a",
+  //     data: [
+  //       { label: "Direction", value: `${dominantDirection}°`, color: "#cc6600" },
+  //       { label: "Power", value: maxPower.toFixed(2), color: "#cc6600" },
+  //       { label: "Quality", value: isNaN(dominantPolarity) ? "N/A" : `${(dominantPolarity * 100).toFixed(0)}%`, 
+  //         color: dominantPolarity > 0.95 ? "#00aa00" : "#cc6600" },
+  //     ]
+  //   },
+  //   {
+  //     title: "Amplitude",
+  //     color: "#ff8800",
+  //     bgColor: "rgba(100,50,0,0.2)",
+  //     borderColor: "#ff8800",
+  //     data: [
+  //       { label: "Max", value: amplitudeData.max.toFixed(1), color: "#cc6600" },
+  //       { label: "Mean", value: amplitudeData.mean.toFixed(1), color: "#cc6600" },
+  //       { label: "Variation", value: `${amplitudeData.mean > 0 ? ((amplitudeData.std / amplitudeData.mean) * 100).toFixed(0) : "0"}%`, 
+  //         color: amplitudeData.std / amplitudeData.mean > 0.5 ? "#cc0000" : "#00aa00" },
+  //     ]
+  //   },
+  //   {
+  //     title: "Assessment",
+  //     color: "#4488ff",
+  //     bgColor: "rgba(0,0,100,0.2)",
+  //     borderColor: "#4488ff",
+  //     data: [
+  //       { label: "Type", value: isDirectional ? "Directional" : "Symmetric", 
+  //         color: isDirectional ? "#cc6600" : "#00aa00" },
+  //       { label: "Frequency", value: isNaN(dominantFrequency) ? "N/A" : `${dominantFrequency.toFixed(1)}Hz`, color: "#cc3300" },
+  //       { label: "Category", value: result["Cal Tremor"] || "N/A", color: "#0066cc" },
+  //     ]
+  //   }
+  // ];
 
-  const nextSection = () => {
-    setCurrentSection((prev) => (prev + 1) % clinicalSections.length);
-  };
+  // const nextSection = () => {
+  //   setCurrentSection((prev) => (prev + 1) % clinicalSections.length);
+  // };
 
-  const prevSection = () => {
-    setCurrentSection((prev) => (prev - 1 + clinicalSections.length) % clinicalSections.length);
-  };
+  // const prevSection = () => {
+  //   setCurrentSection((prev) => (prev - 1 + clinicalSections.length) % clinicalSections.length);
+  // };
+  const clinicalMetrics = {
+  title: "Tremor Profile",
+  color: "#4a90e2",
+  bgColor: "rgba(74, 144, 226, 0.1)",
+  borderColor: "#4a90e2",
+  data: [
+    { label: "Direction", value: `${dominantDirection.toFixed(0)}°` },
+    { 
+      label: "Frequency", 
+      value: isNaN(dominantFrequency) ? "N/A" : `${dominantFrequency.toFixed(1)} Hz` 
+    },
+    { label: "Amplitude", value: `${amplitudeData.mean.toFixed(1)} μm` },
+  ],
+};
 
   return (
     <div
@@ -341,152 +355,66 @@ const TremorPolarPlot = ({ result }) => {
           </div>
 
           {/* Right Side - Clinical Information Carousel */}
-          <div
-            style={{
-              flex: "0.6",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              minWidth: "100px",
-              maxWidth: "180px",
-            }}
-          >
-            {/* Clinical Information Carousel */}
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "rgba(0,0,0,0.05)",
-                borderRadius: "8px",
-                height: "fit-content",
-              }}
-            >
-              {/* Carousel Navigation */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                }}
-              >
-                <button
-                  onClick={prevSection}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#666",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    padding: "4px 6px",
-                    borderRadius: "4px",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = "#fff"}
-                  onMouseLeave={(e) => e.target.style.color = "#666"}
-            >
-                  ‹
-                </button>
-                
-              <h4
-                style={{
-                    margin: "0",
-                    color: clinicalSections[currentSection].color,
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    flex: "1",
-                }}
-              >
-                  {clinicalSections[currentSection].title}
-              </h4>
-                
-                <button
-                  onClick={nextSection}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#666",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    padding: "4px 6px",
-                    borderRadius: "4px",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = "#fff"}
-                  onMouseLeave={(e) => e.target.style.color = "#666"}
-                >
-                  ›
-                </button>
-            </div>
-
-              {/* Current Section Content */}
-            <div
-              style={{
-                  backgroundColor: clinicalSections[currentSection].bgColor,
-                  padding: "12px",
-                  borderRadius: "6px",
-                  border: `2px solid ${clinicalSections[currentSection].borderColor}`,
-                  minHeight: "120px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                {clinicalSections[currentSection].data.map((item, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: index < clinicalSections[currentSection].data.length - 1 ? "8px" : "0",
-              }}
-            >
-                    <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
-                      {item.label}:
-                    </span>
-                    <span style={{ color: item.color, fontSize: "12px", fontWeight: "bold" }}>
-                      {item.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Section Indicators */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "6px",
-                  marginTop: "10px",
-                }}
-              >
-                {clinicalSections.map((_, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: index === currentSection ? clinicalSections[currentSection].color : "#444",
-                      transition: "all 0.2s",
-                    }}
-                  />
-                ))}
-            </div>
-          </div>
-
-          {/* Compact Legend */}
-          <div
-            style={{
-                fontSize: "10px",
-                marginTop: "10px",
-              color: "#666666",
-              textAlign: "center",
-            }}
-          >
-            </div>
-          </div>
+{/* Right Side - Clinical Information */}
+<div
+  style={{
+    flex: "0.6",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    minWidth: "100px",
+    maxWidth: "180px",
+  }}
+>
+  <div
+    style={{
+      padding: "12px",
+      backgroundColor: "rgba(0,0,0,0.05)",
+      borderRadius: "8px",
+    }}
+  >
+    <h4
+      style={{
+        margin: "0 0 8px 0",
+        color: clinicalMetrics.color,
+        fontSize: "11px",
+        fontWeight: "bold",
+        textAlign: "center",
+      }}
+    >
+      {clinicalMetrics.title}
+    </h4>
+    <div
+      style={{
+        backgroundColor: clinicalMetrics.bgColor,
+        padding: "12px",
+        borderRadius: "6px",
+        border: `2px solid ${clinicalMetrics.borderColor}`,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+      }}
+    >
+      {clinicalMetrics.data.map((item, index) => (
+        <div
+          key={index}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
+            {item.label}:
+          </span>
+          <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
         </>
       ) : (
         <div

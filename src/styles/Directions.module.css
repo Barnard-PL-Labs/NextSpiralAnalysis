@@ -1,3 +1,6 @@
+/* Directions.module.css */
+
+/* ---------- Page shell ---------- */
 .mainContainer {
   background: linear-gradient(
     -45deg,
@@ -12,7 +15,6 @@
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 150px);
-
   padding-bottom: 50px;
 }
 
@@ -25,10 +27,10 @@
   border-radius: 16px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
   color: #000000;
-  /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; */
   box-sizing: border-box;
 }
 
+/* ---------- Headings / text ---------- */
 .directionsHeader {
   font-size: 2.2em;
   font-weight: 700;
@@ -45,48 +47,30 @@
   margin-bottom: 15px;
 }
 
-.highlight {
-  color: #6b5b9d;
-}
-.textBlock {
-  margin-bottom: 20px;
-}
+.highlight { color: #6b5b9d; }
+
+.textBlock { margin-bottom: 20px; }
+
 .intro {
   font-size: 1.2em;
   color: #000000;
   margin-top: 25px;
 }
 
+/* Optional wrapper classes used in JSX */
+.section { margin-bottom: 28px; }
+.analysisIntro { display: block; }
+
+/* ---------- Callouts (no left stripe) ---------- */
 .keyPoints {
   background-color: #f5f5f5;
   padding: 20px;
   border-radius: 16px;
-  border-left: 5px solid #00aeef;
   margin-bottom: 20px;
-}
 
-.metricsList,
-.directionsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.metricsList li,
-.directionsList li {
-  font-size: 1.1em;
-  background: #f5f5f5;
-  margin-bottom: 15px;
-  padding: 15px 20px;
-  border-radius: 8px;
-  color: #000000;
-  border-left: 5px solid #00aeef;
-  transition: background-color 0.2s;
-}
-
-.metricsList li:hover,
-.directionsList li:hover {
-  background-color: #e8e8e8;
+  /* removed the old cyan left bar */
+  border-left: none;
+  border: 1px solid #e6e6e6;
 }
 
 .note {
@@ -96,7 +80,10 @@
   color: #666;
   font-size: 0.95em;
   margin-bottom: 20px;
-  border-left: 5px solid #00aeef;
+
+  /* removed cyan bar */
+  border-left: none;
+  border: 1px solid #e6e6e6;
 }
 
 .warning {
@@ -105,5 +92,84 @@
   background-color: #f5f5f5;
   border-radius: 8px;
   color: #333;
-  border-left: 5px solid #d73a49;
+
+  /* removed red bar; keep subtle border */
+  border-left: none;
+  border: 1px solid #f0b8be;
 }
+
+/* ---------- Lists ---------- */
+.metricsList,
+.directionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===== How to Use: numbered circle badges (ring colored, inside transparent) ===== */
+.directionsList {
+  counter-reset: step;
+}
+
+.directionsList li {
+  position: relative;
+  background: #f5f5f5;
+  margin-bottom: 15px;
+  padding: 15px 20px 15px 66px; /* space for badge */
+  border-radius: 8px;
+  color: #000000;
+
+  /* removed old cyan left bar */
+  border-left: none;
+  border: 1px solid #e6e6e6;
+
+  transition: background-color 0.2s;
+}
+
+.directionsList li:hover { background-color: #e8e8e8; }
+
+.directionsList li::before {
+  content: counter(step);
+  counter-increment: step;
+
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  /* colored ring, transparent interior */
+  border: 3px solid #00aeef;   /* ring color */
+  background: transparent;
+
+  /* number inherits normal text color */
+  color: #000;
+
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ===== Key Metrics: plain cards (no dots, no badges) ===== */
+.metricsList li {
+  font-size: 1.1em;
+  background: #f5f5f5;
+  margin-bottom: 15px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: #000000;
+
+  /* remove any bullets/strips/badges */
+  border-left: none;
+  border: 1px solid #e6e6e6;
+  position: relative;
+}
+
+.metricsList li::before { content: none; }
+
+.metricsList li:hover { background-color: #e8e8e8; }
