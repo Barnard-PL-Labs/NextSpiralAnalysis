@@ -23,6 +23,7 @@
   text-align: center;
   margin-top: 100px;
   position: relative;
+  
 }
 
 .loadingContainer {
@@ -389,6 +390,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
 }
 
 .changeHandButtonTop {
@@ -454,7 +456,7 @@
   padding: 12px 24px;
   background-color: #1e3a8a;
   border: 2px solid #1e3a8a;
-  color: white;
+  color: rgb(255, 255, 255);
   font-family: Arial, sans-serif;
   font-weight: 600;
   border-radius: 8px;
@@ -511,6 +513,7 @@
   color: #ffffff;
   text-decoration: underline;
   font-weight: 700;
+
 }
 
 .changeHandButton {
@@ -526,6 +529,7 @@
   transition: all 0.3s ease-in-out;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
 }
 
 .changeHandButton:hover {
@@ -561,17 +565,20 @@
 }
 
 .handLRBadge:hover {
-  background-color: #d0e0fa;
-  color: #0f172a;
+  background-color: #0f172a;
   border-color: #0f172a;
+  color: #fff;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3)
 }
 
 .handLRBadgeSelected,
 .handLRBadgeSelected:hover {
-  background-color: #1e3a8a;
+  background-color: #0f172a;
+  border-color: #0f172a;
   color: #fff;
-  border-color: #1e3a8a;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.18);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  transform: translateY(-1px)
 }
+
+
