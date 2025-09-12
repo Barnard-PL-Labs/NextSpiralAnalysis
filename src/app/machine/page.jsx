@@ -349,79 +349,80 @@ export default function MachinePage() {
       <div style={{ position: "relative" }}>
         <div className={styles.machineContainer}>
           {/* Initial selection prompt (no horizontal controls here) */}
-          {(!selectedHand || !selectedHandSide) && (
-            <div className={styles.handSelectionContainer}>
-              <h3 className={styles.handSelectionTitle}>
-                Select Your Hand
-                <FaHandPaper className={styles.handIcon} />
-              </h3>
+{/* Initial selection prompt (no horizontal controls here) */}
+{(!selectedHand || !selectedHandSide) && (
+  <div className={styles.handSelectionContainer}>
+    <h3 className={styles.handSelectionTitle}>
+      Select Your Hand
+      <FaHandPaper className={styles.handIcon} />
+    </h3>
 
-              <div className={styles.handButtonsWrapper}>
-                <button
-                  onClick={() => handleHandSelection("dominant")}
-                  className={
-                    styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")
-                  }
-                  aria-pressed={selectedHand === "dominant"}
-                >
-                  Dominant Hand
-                </button>
-                <button
-                  onClick={() => handleHandSelection("non-dominant")}
-                  className={
-                    styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")
-                  }
-                  aria-pressed={selectedHand === "non-dominant"}
-                >
-                  Non-Dominant Hand
-                </button>
-              </div>
+    <div className={styles.handButtonsWrapper}>
+      <button
+        onClick={() => handleHandSelection("dominant")}
+        className={
+          styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")
+        }
+        aria-pressed={selectedHand === "dominant"}
+      >
+        Dominant Hand
+      </button>
+      <button
+        onClick={() => handleHandSelection("non-dominant")}
+        className={
+          styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")
+        }
+        aria-pressed={selectedHand === "non-dominant"}
+      >
+        Non-Dominant Hand
+      </button>
+    </div>
 
-              <div className={styles.handLRBadgesWrapper}>
-                <button
-                  type="button"
-                  className={
-                    styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")
-                  }
-                  onClick={() => handleHandSideSelection("L")}
-                  aria-pressed={selectedHandSide === "L"}
-                >
-                  L
-                </button>
-                <button
-                  type="button"
-                  className={
-                    styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")
-                  }
-                  onClick={() => handleHandSideSelection("R")}
-                  aria-pressed={selectedHandSide === "R"}
-                >
-                  R
-                </button>
-              </div>
+    <div className={styles.handLRBadgesWrapper}>
+      <button
+        type="button"
+        className={
+          styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")
+        }
+        onClick={() => handleHandSideSelection("L")}
+        aria-pressed={selectedHandSide === "L"}
+      >
+        L
+      </button>
+      <button
+        type="button"
+        className={
+          styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")
+        }
+        onClick={() => handleHandSideSelection("R")}
+        aria-pressed={selectedHandSide === "R"}
+      >
+        R
+      </button>
+    </div>
 
-              {!user?.id && (
-                <div style={{ display: "flex", justifyContent: "center", marginTop: 25 }}>
-                  <button
-                    onClick={() => setShowDemographics(true)}
-                    style={{
-                      backgroundColor: "#6fadebfa",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 16px",
-                      borderRadius: "20px",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      cursor: "pointer",
-                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    Optional Demographics
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+    {/* Demographics trigger — visible to all users */}
+    <div style={{ display: "flex", justifyContent: "center", marginTop: 25 }}>
+      <button
+        onClick={() => setShowDemographics(true)}
+        style={{
+          backgroundColor: "#6fadebfa",
+          color: "white",
+          border: "none",
+          padding: "8px 16px",
+          borderRadius: "20px",
+          fontSize: "14px",
+          fontWeight: "500",
+          cursor: "pointer",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        }}
+      >
+        Optional Demographics
+      </button>
+    </div>
+  </div>
+)}
+
 
           {/* Title + Canvas + Controls */}
           {showCanvas && (
