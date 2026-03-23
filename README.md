@@ -118,3 +118,5 @@ Set the Supabase environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC
 - `src/components/` — reusable components (Header, etc.)
 - `src/styles/` — page/component-specific CSS (global styles in `src/app/global.css`)
 - `supabase/migrations/` — database schema migrations
+*
+*
