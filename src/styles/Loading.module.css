@@ -4,13 +4,14 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 }
+
 .orbitSpinner {
   position: relative;
   width: 60px;
@@ -26,7 +27,7 @@
   height: 8px;
   margin: -4px 0 0 -4px;
   border-radius: 50%;
-  background-color: #4b9ce2;
+  background-color: var(--color-accent);
 }
 
 @keyframes rotateOrbit {
@@ -38,7 +39,8 @@
 .loadingText {
   margin-top: 10px;
   font-size: 14px;
-  color: #555;
-  font-family: "Segoe UI", sans-serif;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
   letter-spacing: 0.5px;
+  font-weight: 500;
 }

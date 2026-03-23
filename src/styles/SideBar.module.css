@@ -1,103 +1,90 @@
 .sidebarContainer {
-  flex-direction: column;
-  display: flex;
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
   z-index: 999;
-  }
-  
+  padding-top: 75px;
+}
 
 .toggleButton {
-  color:rgb(150, 183, 244);
+  color: var(--color-accent);
   position: absolute;
   top: 20px;
+  left: 10px;
   z-index: 1000;
 }
-  
- 
+
 .sidebar {
-  /* background: #000000; */
-  border: yellow;
-  color: #ffffff;
-  height: 100vh; 
-  top: 65px; 
+  color: var(--color-text-primary);
+  height: calc(100vh - 75px);
+  top: 75px;
   left: 0;
   overflow-y: auto;
   position: fixed;
-  background: linear-gradient(to bottom, #141E30, #243B55);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
   width: 250px;
   transition: width 0.3s ease;
-  padding-top: 80px;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+  padding-top: 20px;
 }
-  
+
 .sidebar.collapsed {
   width: 50px;
 }
-  
+
 .navItems {
   list-style-type: none;
   padding: 0;
-  margin:0;
+  margin: 0;
 }
-  
+
 .navItems li {
-  margin: 20px 0;
+  margin: 0;
   transition: background 0.2s ease;
 }
-  
+
 .navItems a {
-  align-items: center;
-  color: #ecf0f1;
-  text-decoration: none;
-  padding: 10px;
-  transition: background-color 0.3s ease;
   display: flex;
+  align-items: center;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
 }
-  
+
 .navItems li:hover {
-  background: rgba(255, 255, 255, 0.05);
-  cursor: pointer;
+  background: var(--color-surface-2);
 }
-  
+
 .icon {
-  font-size: 24px;
-  color: #CDD9E5;
+  font-size: 20px;
+  color: var(--color-accent);
   transition: color 0.2s ease;
-}
-.collapsed {
-  width: 80px;
+  flex-shrink: 0;
 }
 
 .navItems li span {
-  color: #CDD9E5;
-  font-size: 18px;
+  color: var(--color-text-primary);
+  font-size: 14px;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
+  margin-left: 16px;
+  white-space: nowrap;
 }
-
-.navItems li span svg {
-  margin-right: 15px;
-  font-size: 22px;
-}
-
 
 .navItems li:hover .icon {
-  color: #ffffff;
+  color: var(--color-accent-hover);
 }
+
 .navItem {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  transition: all 0.3s ease;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
 }
 
 .collapsedItem {
   justify-content: center;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
