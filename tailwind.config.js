@@ -8,8 +8,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "var(--color-bg)",
+        foreground: "var(--color-text-primary)",
+        surface: "var(--color-surface)",
+        "surface-2": "var(--color-surface-2)",
+        border: "var(--color-border)",
+        primary: "var(--color-text-primary)",
+        secondary: "var(--color-text-secondary)",
+        accent: "var(--color-accent)",
+        danger: "var(--color-danger)",
+        success: "var(--color-success)",
+        warn: "var(--color-warn)",
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
       },
     },
   },
