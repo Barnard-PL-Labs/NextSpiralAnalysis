@@ -118,7 +118,7 @@ header a {
 
 .navItems span:hover {
   color: var(--color-accent);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .navItems button {
@@ -146,7 +146,7 @@ header a {
 .logoutBtn span:hover,
 .navItems button span:hover {
   color: var(--color-accent);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .attractiveContent {

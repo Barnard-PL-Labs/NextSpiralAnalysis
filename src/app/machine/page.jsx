@@ -24,6 +24,7 @@ export default function MachinePage() {
   const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' | 'R'
   const [showDemographics, setShowDemographics] = useState(false);
   const [demographics, setDemographics] = useState({ name: "", age: "", sex: "" });
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -287,61 +288,33 @@ export default function MachinePage() {
     localStorage.setItem("selectedHandSide", side);
   };
 
-  const handleDemographicsSave = async () => {
-    try {
-      const sessionId = getOrCreateSessionId();
-      const { data: existingDrawings, error: checkError } = await supabase
-        .from("drawings")
-        .select("id, session_id")
-        .eq("session_id", sessionId);
-      if (checkError) {
-        alert(`Failed to check existing drawings: ${checkError.message}`);
-        return;
-      }
-      if (!existingDrawings || existingDrawings.length === 0) {
-        localStorage.setItem("pendingDemographics", JSON.stringify(demographics));
-        localStorage.setItem("userDemographics", JSON.stringify(demographics));
-        setShowDemographics(false);
-        return;
-      }
-      const { error } = await supabase
-        .from("drawings")
-        .update({
-          user_name: demographics.name || null,
-          user_age: demographics.age ? parseInt(demographics.age) : null,
-          user_sex: demographics.sex || null,
-        })
-        .eq("session_id", sessionId);
-      if (error) {
-        alert(`Failed to save demographics: ${error.message}`);
-        return;
-      }
+  const handleContinue = () => {
+    if (showDemographics && (demographics.name || demographics.age || demographics.sex)) {
+      localStorage.setItem("pendingDemographics", JSON.stringify(demographics));
       localStorage.setItem("userDemographics", JSON.stringify(demographics));
-      setShowDemographics(false);
-    } catch {
-      alert("Failed to save demographics. Please try again.");
     }
+    setIsConfirmed(true);
   };
 
-  const handleDemographicsClose = () => setShowDemographics(false);
-
   const clearAllDrawings = () => {
-    const confirmed = window.confirm(
+    const ok = window.confirm(
       "Are you sure you want to clear all your drawings? This will also reset your hand selection."
     );
-    if (!confirmed) return;
+    if (!ok) return;
     setCurrentDrawing([]);
     setSavedDrawings([]);
     setUserFinished(false);
     setCurrentSessionId(null);
     setSelectedHand(null);
     setSelectedHandSide(null);
+    setIsConfirmed(false);
+    setShowDemographics(false);
     localStorage.removeItem("selectedHand");
     localStorage.removeItem("selectedHandSide");
     if (canvasRef.current?.clearCanvas) canvasRef.current.clearCanvas();
   };
 
-  const showCanvas = Boolean(selectedHand && selectedHandSide);
+  const showCanvas = isConfirmed;
 
   return (
     <>
@@ -349,16 +322,22 @@ export default function MachinePage() {
       <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "var(--color-bg)" }}>
         <div className={styles.machineContainer}>
           {/* Initial selection prompt */}
-{(!selectedHand || !selectedHandSide) && (
+{!isConfirmed && (
   <div className={styles.handSelectionContainer}>
 
-    {/* Card header */}
+    {/* Page header */}
     <div className={styles.cardHeader}>
       <div className={styles.cardIconWrapper}>
         <FaHandPaper className={styles.cardIcon} />
       </div>
       <h1 className={styles.cardTitle}>Spiral Drawing Assessment</h1>
       <p className={styles.cardSubtitle}>Patient Information &amp; Setup</p>
+    </div>
+
+    {/* Pre-Test sub-header */}
+    <div className={styles.preTestHeader}>
+      <h2 className={styles.preTestTitle}>Pre-Test Information</h2>
+      <p className={styles.preTestDescription}>Please provide the following information to begin the assessment</p>
     </div>
 
     {/* Dominance */}
@@ -416,10 +395,62 @@ export default function MachinePage() {
     <div className={styles.selectionDivider} />
 
     {/* Demographics toggle */}
-    <div className={styles.demographicsRow} onClick={() => setShowDemographics(true)}>
-      <input type="checkbox" className={styles.demographicsCheckbox} readOnly checked={false} onChange={() => {}} />
+    <div className={styles.demographicsRow} onClick={() => setShowDemographics(prev => !prev)}>
+      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
       <span className={styles.demographicsLabel}>Include optional demographics</span>
     </div>
+
+    {/* Inline demographics panel */}
+    {showDemographics && (
+      <div className={styles.demographicsPanel}>
+        <div className={styles.demographicsField}>
+          <label className={styles.demographicsFieldLabel}>Name</label>
+          <input
+            type="text"
+            value={demographics.name}
+            onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
+            className={styles.demographicsInput}
+            placeholder="Enter name"
+          />
+        </div>
+        <div className={styles.demographicsField}>
+          <label className={styles.demographicsFieldLabel}>Age</label>
+          <input
+            type="number"
+            value={demographics.age}
+            onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
+            className={styles.demographicsInput}
+            placeholder="Enter age"
+            min="0"
+            max="120"
+          />
+        </div>
+        <div className={styles.demographicsField}>
+          <label className={styles.demographicsFieldLabel}>Gender</label>
+          <div className={styles.sexButtonsRow}>
+            <button
+              type="button"
+              onClick={() => setDemographics({ ...demographics, sex: "M" })}
+              className={styles.sexButton + (demographics.sex === "M" ? " " + styles.sexButtonActive : "")}
+            >Male</button>
+            <button
+              type="button"
+              onClick={() => setDemographics({ ...demographics, sex: "F" })}
+              className={styles.sexButton + (demographics.sex === "F" ? " " + styles.sexButtonActive : "")}
+            >Female</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Continue button */}
+    <button
+      onClick={handleContinue}
+      disabled={!selectedHand || !selectedHandSide}
+      className={styles.continueButton}
+    >
+      Continue to Spiral Analysis →
+    </button>
 
   </div>
 )}
@@ -490,147 +521,6 @@ export default function MachinePage() {
       </div>
 
       {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} forceShow={true} />}
-
-      {/* Demographics Popup */}
-      {showDemographics && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: 15,
-              padding: 30,
-              width: "90%",
-              maxWidth: 400,
-              position: "relative",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-            }}
-          >
-            <button
-              onClick={handleDemographicsClose}
-              style={{
-                position: "absolute",
-                top: 15,
-                right: 20,
-                background: "none",
-                border: "none",
-                fontSize: 24,
-                cursor: "pointer",
-                color: "#666",
-                fontWeight: "bold",
-              }}
-            >
-              ×
-            </button>
-
-            <h2 style={{ marginTop: 0, marginBottom: 25, color: "#333", textAlign: "center", fontSize: 24 }}>
-              Optional Demographics
-            </h2>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", marginBottom: 8, color: "#333", fontWeight: 500 }}>Name:</label>
-              <input
-                type="text"
-                value={demographics.name}
-                onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  border: "2px solid #ddd",
-                  borderRadius: 8,
-                  fontSize: 16,
-                  color: "black",
-                }}
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", marginBottom: 8, color: "#333", fontWeight: 500 }}>Age:</label>
-              <input
-                type="number"
-                value={demographics.age}
-                onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  border: "2px solid #ddd",
-                  borderRadius: 8,
-                  fontSize: 16,
-                  color: "black",
-                }}
-                placeholder="Enter your age"
-                min="1"
-                max="120"
-              />
-            </div>
-
-            <div style={{ marginBottom: 30 }}>
-              <label style={{ display: "block", marginBottom: 8, color: "#333", fontWeight: 500 }}>Sex:</label>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button
-                  onClick={() => setDemographics({ ...demographics, sex: "M" })}
-                  style={{
-                    flex: 1,
-                    padding: 12,
-                    border: demographics.sex === "M" ? "2px solid #6c757d" : "2px solid #ddd",
-                    borderRadius: 8,
-                    fontSize: 16,
-                    backgroundColor: demographics.sex === "M" ? "#6c757d" : "white",
-                    color: demographics.sex === "M" ? "white" : "#333",
-                    cursor: "pointer",
-                    fontWeight: demographics.sex === "M" ? 600 : 400,
-                  }}
-                >
-                  Male (M)
-                </button>
-                <button
-                  onClick={() => setDemographics({ ...demographics, sex: "F" })}
-                  style={{
-                    flex: 1,
-                    padding: 12,
-                    border: demographics.sex === "F" ? "2px solid #6c757d" : "2px solid #ddd",
-                    borderRadius: 8,
-                    fontSize: 16,
-                    backgroundColor: demographics.sex === "F" ? "#6c757d" : "white",
-                    color: demographics.sex === "F" ? "white" : "#333",
-                    cursor: "pointer",
-                    fontWeight: demographics.sex === "F" ? 600 : 400,
-                  }}
-                >
-                  Female (F)
-                </button>
-              </div>
-            </div>
-
-            <button
-              onClick={handleDemographicsSave}
-              style={{
-                width: "100%",
-                padding: 14,
-                backgroundColor: "var(--color-accent)",
-                color: "white",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                fontSize: 16,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Save Demographics
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
