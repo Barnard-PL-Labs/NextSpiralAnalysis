@@ -417,75 +417,226 @@
 .handSelectionContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   margin: 60px auto 40px auto;
-  padding: 40px 60px;
+  padding: 32px 40px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  max-width: 520px;
   width: 90%;
 }
 
+/* Card header */
+.cardHeader {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.cardIconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--color-accent), #6366f1);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.cardTitle {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 6px;
+}
+
+.cardSubtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Section label with dot */
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+.sectionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* 2-col option grid */
+.handOptionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.handOptionCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.handOptionCard:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-2);
+}
+
+.handOptionCardActive {
+  border-color: var(--color-accent);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-accent);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+}
+
+.handOptionCardActive:hover {
+  border-color: var(--color-accent);
+  background: rgba(37, 99, 235, 0.12);
+}
+
+/* Demographics checkbox row */
+.demographicsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border: none;
+}
+
+.demographicsRow:hover {
+  background: var(--color-border);
+}
+
+.demographicsCheckbox {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+
+.demographicsLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* legacy - kept for canvas-view controls bar */
 .handSelectionTitle {
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: 1.5em;
-  margin-bottom: 40px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 24px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .handIcon {
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: var(--color-accent);
+}
+
+/* labeled group wrapper */
+.selectionGroup {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.selectionGroupLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.selectionDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0 20px;
 }
 
 .handButtonsWrapper {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 10px;
 }
 
+/* outlined by default, filled when active */
 .handButton {
-  padding: 12px 24px;
-  background-color: var(--color-accent);
-  border: 2px solid var(--color-accent);
-  color: white;
+  padding: 9px 20px;
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
   font-family: var(--font-sans);
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.2s ease-in-out;
-  min-width: 140px;
-  letter-spacing: 0.3px;
+  min-width: 130px;
 }
 
 .handButton:hover {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
+  background-color: var(--color-surface-2);
+  transform: translateY(-1px);
 }
 
 .handButtonActive {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
   box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
 }
 
 .handButtonActive:hover {
   background-color: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
+  color: white;
   box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
 }
 
 /* Selected Hand Indicator */
@@ -532,38 +683,64 @@
   transform: translateY(-1px);
 }
 
+/* canvas-view controls bar */
+.controlsBar {
+  display: inline-flex;
+  gap: 0;
+  align-items: stretch;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.controlsGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.controlsGroup + .controlsGroup {
+  border-left: 1px solid var(--color-border);
+}
+
+.controlsGroupLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .handLRBadgesWrapper {
   display: flex;
   justify-content: center;
-  gap: 18px;
-  margin-top: 22px;
-  margin-bottom: 10px;
+  gap: 12px;
 }
 
 .handLRBadge {
-  padding: 10px 22px;
-  background-color: var(--color-surface-2);
-  border: 2px solid var(--color-accent);
+  padding: 9px 0;
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-accent);
   color: var(--color-accent);
   font-family: var(--font-sans);
   font-weight: 700;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 15px;
   transition: all 0.2s ease-in-out;
-  min-width: 48px;
+  width: 64px;
   text-align: center;
-  box-shadow: var(--shadow-card);
-  letter-spacing: 1px;
   outline: none;
 }
 
 .handLRBadge:hover {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  background-color: var(--color-surface-2);
+  transform: translateY(-1px);
 }
 
 .handLRBadgeSelected,

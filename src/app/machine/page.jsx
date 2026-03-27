@@ -348,78 +348,79 @@ export default function MachinePage() {
       {!showTutorial && <Header showVideo={false} />}
       <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "var(--color-bg)" }}>
         <div className={styles.machineContainer}>
-          {/* Initial selection prompt (no horizontal controls here) */}
-{/* Initial selection prompt (no horizontal controls here) */}
+          {/* Initial selection prompt */}
 {(!selectedHand || !selectedHandSide) && (
   <div className={styles.handSelectionContainer}>
-    <h3 className={styles.handSelectionTitle}>
-      Select Your Hand
-      <FaHandPaper className={styles.handIcon} />
-    </h3>
 
-    <div className={styles.handButtonsWrapper}>
-      <button
-        onClick={() => handleHandSelection("dominant")}
-        className={
-          styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")
-        }
-        aria-pressed={selectedHand === "dominant"}
-      >
-        Dominant Hand
-      </button>
-      <button
-        onClick={() => handleHandSelection("non-dominant")}
-        className={
-          styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")
-        }
-        aria-pressed={selectedHand === "non-dominant"}
-      >
-        Non-Dominant Hand
-      </button>
+    {/* Card header */}
+    <div className={styles.cardHeader}>
+      <div className={styles.cardIconWrapper}>
+        <FaHandPaper className={styles.cardIcon} />
+      </div>
+      <h1 className={styles.cardTitle}>Spiral Drawing Assessment</h1>
+      <p className={styles.cardSubtitle}>Patient Information &amp; Setup</p>
     </div>
 
-    <div className={styles.handLRBadgesWrapper}>
-      <button
-        type="button"
-        className={
-          styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")
-        }
-        onClick={() => handleHandSideSelection("L")}
-        aria-pressed={selectedHandSide === "L"}
-      >
-        L
-      </button>
-      <button
-        type="button"
-        className={
-          styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")
-        }
-        onClick={() => handleHandSideSelection("R")}
-        aria-pressed={selectedHandSide === "R"}
-      >
-        R
-      </button>
+    {/* Dominance */}
+    <div className={styles.selectionGroup}>
+      <label className={styles.sectionLabel}>
+        <span className={styles.sectionDot} />
+        Is this your dominant hand?
+      </label>
+      <div className={styles.handOptionsGrid}>
+        <button
+          onClick={() => handleHandSelection("dominant")}
+          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
+          aria-pressed={selectedHand === "dominant"}
+        >
+          Dominant
+        </button>
+        <button
+          onClick={() => handleHandSelection("non-dominant")}
+          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
+          aria-pressed={selectedHand === "non-dominant"}
+        >
+          Non-Dominant
+        </button>
+      </div>
     </div>
 
-    {/* Demographics trigger — visible to all users */}
-    <div style={{ display: "flex", justifyContent: "center", marginTop: 25 }}>
-      <button
-        onClick={() => setShowDemographics(true)}
-        style={{
-          backgroundColor: "var(--color-accent)",
-          color: "white",
-          border: "none",
-          padding: "8px 16px",
-          borderRadius: "var(--radius-lg)",
-          fontSize: "14px",
-          fontWeight: "500",
-          cursor: "pointer",
-          boxShadow: "var(--shadow-card)",
-        }}
-      >
-        Optional Demographics
-      </button>
+    <div className={styles.selectionDivider} />
+
+    {/* Hand side */}
+    <div className={styles.selectionGroup}>
+      <label className={styles.sectionLabel}>
+        <span className={styles.sectionDot} />
+        Which hand will be tested?
+      </label>
+      <div className={styles.handOptionsGrid}>
+        <button
+          type="button"
+          className={styles.handOptionCard + (selectedHandSide === "L" ? " " + styles.handOptionCardActive : "")}
+          onClick={() => handleHandSideSelection("L")}
+          aria-pressed={selectedHandSide === "L"}
+        >
+          Left Hand
+        </button>
+        <button
+          type="button"
+          className={styles.handOptionCard + (selectedHandSide === "R" ? " " + styles.handOptionCardActive : "")}
+          onClick={() => handleHandSideSelection("R")}
+          aria-pressed={selectedHandSide === "R"}
+        >
+          Right Hand
+        </button>
+      </div>
     </div>
+
+    <div className={styles.selectionDivider} />
+
+    {/* Demographics toggle */}
+    <div className={styles.demographicsRow} onClick={() => setShowDemographics(true)}>
+      <input type="checkbox" className={styles.demographicsCheckbox} readOnly checked={false} onChange={() => {}} />
+      <span className={styles.demographicsLabel}>Include optional demographics</span>
+    </div>
+
   </div>
 )}
 
@@ -431,69 +432,34 @@ export default function MachinePage() {
 
               {/* Horizontal controls UNDER the title, only in machine view */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 24,
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    justifyContent: "center",
-                  }}
-                >
-                  {/* Hand Side */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, color: "var(--color-text-secondary)", minWidth: 70, textAlign: "right" }}>
-                      Hand Side
-                    </span>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        type="button"
-                        onClick={() => handleHandSideSelection("L")}
-                        aria-pressed={selectedHandSide === "L"}
-                        className={
-                          styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")
-                        }
-                      >
-                        L
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleHandSideSelection("R")}
-                        aria-pressed={selectedHandSide === "R"}
-                        className={
-                          styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")
-                        }
-                      >
-                        R
-                      </button>
-                    </div>
+                <div className={styles.controlsBar}>
+                  <div className={styles.controlsGroup}>
+                    <span className={styles.controlsGroupLabel}>Side</span>
+                    <button
+                      type="button"
+                      onClick={() => handleHandSideSelection("L")}
+                      aria-pressed={selectedHandSide === "L"}
+                      className={styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")}
+                    >L</button>
+                    <button
+                      type="button"
+                      onClick={() => handleHandSideSelection("R")}
+                      aria-pressed={selectedHandSide === "R"}
+                      className={styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")}
+                    >R</button>
                   </div>
-
-                  {/* Dominance */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, color: "var(--color-text-secondary)", minWidth: 70, textAlign: "right" }}>
-                      Dominance
-                    </span>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        onClick={() => handleHandSelection("dominant")}
-                        aria-pressed={selectedHand === "dominant"}
-                        className={
-                          styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")
-                        }
-                      >
-                        Dominant
-                      </button>
-                      <button
-                        onClick={() => handleHandSelection("non-dominant")}
-                        aria-pressed={selectedHand === "non-dominant"}
-                        className={
-                          styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")
-                        }
-                      >
-                        Non-Dominant
-                      </button>
-                    </div>
+                  <div className={styles.controlsGroup}>
+                    <span className={styles.controlsGroupLabel}>Dominance</span>
+                    <button
+                      onClick={() => handleHandSelection("dominant")}
+                      aria-pressed={selectedHand === "dominant"}
+                      className={styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")}
+                    >Dominant</button>
+                    <button
+                      onClick={() => handleHandSelection("non-dominant")}
+                      aria-pressed={selectedHand === "non-dominant"}
+                      className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
+                    >Non-Dominant</button>
                   </div>
                 </div>
               </div>
