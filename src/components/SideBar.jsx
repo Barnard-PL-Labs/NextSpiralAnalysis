@@ -21,20 +21,20 @@ const Sidebar = ({ onSettingsClick, isOpen, onToggle }) => {
           <ul className={styles.navItems}>
             <li>
               <Link href="/">
-                <div className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}>
+                <div className={`${styles.navItem} ${!open ? styles.collapsedItem : ''}`}>
                   <FaHome className={styles.icon} />
-                  {isOpen && <span>Home</span>}
+                  {open && <span>Home</span>}
                 </div>
               </Link>
             </li>
             <li>
               <button
                 onClick={onSettingsClick}
-                className={`${styles.navItem} ${!isOpen ? styles.collapsedItem : ''}`}
+                className={`${styles.navItem} ${!open ? styles.collapsedItem : ''}`}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
               >
                 <FaUserCog className={styles.icon} />
-                {isOpen && <span>Settings</span>}
+                {open && <span>Settings</span>}
               </button>
             </li>
           </ul>
