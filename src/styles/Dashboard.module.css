@@ -1,8 +1,8 @@
 .pageContainer {
   display: flex;
   min-height: 100vh;
-  color: white;
-  padding-bottom: 25px;
+  background: var(--color-bg);
+  padding-bottom: 48px;
 }
 
 .content {
@@ -39,7 +39,7 @@
 }
 
 .welcome {
-  color: white;
+  color: var(--color-text-primary);
   font-size: 1.75rem;
   font-weight: 600;
 }
@@ -150,7 +150,7 @@
 }
 
 .noEntry {
-  color: white;
+  color: var(--color-text-secondary);
   font-size: 2rem;
   font-weight: 500;
 }
@@ -236,6 +236,8 @@
 
 .pastResultsHeading {
   font-size: 1.65rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
   margin-top: 50px;
   margin-bottom: 20px;
 }

@@ -1,700 +1,456 @@
 /* Settings.module.css */
 
-.settingsContainer {
-    background: rgba(255, 255, 255, 0.8);
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 80px;
-    margin-top: 50%;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    color: #333;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    min-height: 600px;
-}
-
-/* Popup Styles */
+/* ── Overlay ── */
 .modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
+/* ── Popup shell ── */
 .settingsPopupContainer {
-    background: rgba(253, 253, 253, 0.95);
-    max-width: 800px;
-    width: 90%;
-    padding: 60px;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    color: #333;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    position: relative;
-    max-height: 80vh;
-    overflow-y: auto;
-    margin-top: 10vh;
+  background: var(--color-surface);
+  max-width: 720px;
+  width: 92%;
+  padding: 36px 40px 40px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
+/* ── Close ── */
 .closeButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 30px;
-    cursor: pointer;
-    color: #666;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
 }
 
 .closeButton:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #333;
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
 }
 
+/* ── Header ── */
 .settingsHeader {
-    font-size: 1.8em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left;
-    margin-top: 5px;
-    margin-left: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 24px;
 }
 
+/* ── Two-panel layout ── */
 .containersWrapper {
-    display: flex;
-    gap: 0;
-    margin-top: 50px;
-    align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
+/* Left nav panel */
 .accountContainer {
-    background: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    padding: 20px 0px 80px 20px;
-    margin-bottom: 5px;
-    margin-top: 0;
-    width: 300px;
-    max-height: 210px;
-    flex-shrink: 0;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 0 16px;
+  width: 220px;
+  flex-shrink: 0;
 }
 
+/* Right content panel */
 .secondaryContainer {
-    background: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    padding: 20px 0px 20px 20px;
-    margin-bottom: 5px;
-    margin-top: -60px;
-    width: 350px;
-    min-height: 350px;
-    flex-shrink: 0;
-    position: relative;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 0;
+  flex: 1;
+  min-height: 280px;
+  position: relative;
 }
 
-.secondaryTitleRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left;
-    margin-top: 30px;
-    margin-left: -20px;
-    background-color: rgba(128, 128, 128, 0.1);
-    border-radius: 5px;
-    margin-right: 0px;
-    padding: 8px 20px;
+/* ── Left nav rows ── */
+.accountTitleRow,
+.accountSubsection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 0;
 }
 
-.secondaryTitleContent {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+.accountTitleRow:hover,
+.accountSubsection:hover {
+  background: var(--color-border);
 }
 
-.secondaryContent {
-    padding: 8px 20px;
-    color: #333;
-    font-size: 1.2em;
-    font-weight: 600;
-    line-height: 1.5;
-    margin-top: 30px;
-    margin-left: -20px;
-    border-radius: 5px;
-    margin-right: 0px;
-}
-
-.secondaryContent p {
-    margin-bottom: 20px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.secondaryContent p:hover {
-    background-color: rgba(128, 128, 128, 0.2);
-}
-
-.secondaryContent p:last-child {
-    margin-bottom: 0;
-}
-
-.deleteAccountText {
-    color: #d73a49;
-}
-
-.deleteAccountText:hover {
-    background-color: rgba(215, 58, 73, 0.1);
-}
-
-.emailChangeContent {
-    padding: 20px;
-    color: #333;
-    margin-top: 30px;
-}
-
-.confirmPasswordTitle {
-    font-size: 1.2em;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.passwordInputContainer {
-    margin-bottom: 20px;
-}
-
-.passwordInput {
-    width: 100%;
-    padding: 2px 16px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-    color: #333;
-    transition: border-color 0.2s, background-color 0.2s;
-    box-sizing: border-box;
-}
-
-.passwordInput:focus {
-    border-color: #0366d6;
-    background-color: white;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
-}
-
-.passwordInput::placeholder {
-    color: #999;
-    font-weight: 400;
-}
-
-.confirmButton {
-    background-color: #0366d6;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 0.9em;
-    font-weight: 500;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: auto;
-    margin-bottom: 15px;
-}
-
-.confirmButton:hover:not(:disabled) {
-    background-color: #0056b3;
-}
-
-.confirmButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.accountTitleRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 10px;
-    text-align: left;
-    margin-top: 30px;
-    margin-left: -20px;
-    background-color: transparent;
-    border-radius: 5px;
-    margin-right: 0px;
-    padding: 8px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.accountTitleRow:hover {
-    background-color: rgba(128, 128, 128, 0.1);
-}
-
-.accountTitleRow.active {
-    background-color: rgba(128, 128, 128, 0.1);
+.accountTitleRow.active,
+.accountSubsection.active {
+  background: var(--color-border);
+  color: var(--color-accent);
+  font-weight: 600;
 }
 
 .accountTitleContent {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .personIcon {
-    font-size: 1.1em;
-    color: #6a6565;
-    width: 20px;
-    height: 20px;
-    display: block;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.accountTitleRow.active .personIcon,
+.accountSubsection.active .personIcon {
+  color: var(--color-accent);
 }
 
 .arrow {
-    font-size: 1.2em;
-    color: #666;
-    margin-left: auto;
-    transition: color 0.2s ease;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
 }
 
-.accountTitle {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 40px;
-    text-align: left;
-    margin-top: 30px;
-    margin-left: 0;
-}
-
-.signOutText {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    text-align: left;
-    margin: 0;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
-    transition: color 0.2s;
-}
-
-.signOutText:hover {
-    color: #0366d6;
-}
-
+/* Sign out */
 .signOutButton {
-    background-color: #0366d6;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 0.9em;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: auto;
-    margin-top: 48px;
-    margin-left: 0;
+  display: block;
+  width: calc(100% - 32px);
+  margin: 16px 16px 0;
+  padding: 8px 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .signOutButton:hover {
-    background-color: #0056b3;
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
-.settingsSubHeader {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left;
-    margin-top: 55px;
-    margin-left: 0;
+/* ── Right panel: options list ── */
+.secondaryContent {
+  padding: 8px 0;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.settingsButton, .settingsDeleteBtn {
-    background-color: #0366d6;
-    color: #fff;
-    padding: 12px;
-    font-size: 1em;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-bottom: 10px;
-    width: 150px;
+.secondaryContent p {
+  margin: 0;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.settingsButton:hover:not(:disabled) {
-    background-color: #0056b3;
+.secondaryContent p:hover {
+  background: var(--color-border);
 }
 
-.settingsDeleteBtn {
-    background-color: #d73a49;
+.deleteAccountText {
+  color: var(--color-danger) !important;
 }
 
-.settingsDeleteBtn:hover {
-    background-color: #c0392b;
-}
-.settingsDeleteBtn:active{
-    background-color: #740000;
+.deleteAccountText:hover {
+  background: rgba(220, 38, 38, 0.06) !important;
 }
 
-.settingsInput {
-    width: 100%;
-    padding: 15px 20px;
-    font-size: 1em;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-    color: #333;
-    transition: border-color 0.2s;
-    box-sizing: border-box; 
-}
-
-.settingsInput:focus {
-    border-color: #0366d6;
-    background-color: white;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
-}
-
-/* Message Styling */
-.settingsMessage {
-    background-color: #f0f4f8;
-    border-left: 4px solid #0366d6;
-    padding: 15px;
-    border-radius: 6px;
-    font-size: 0.9em;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.errorMessage {
-    border-left-color: #d73a49;
-    background-color: #f9dcdc;
-}
-
-.successMessage {
-    border-left-color: #28a745;
-    background-color: #e6f4ea;
-}
-
-.settingsContainer > * {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.settingsLabel {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #333;
-    font-size: 0.9em;
-}
-
-.actionDescription {
-    font-size: 0.9em;
-    color: #666;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.backButton {
-    background-color: #6c757d;
-    color: #fff;
-    padding: 12px 24px;
-    font-size: 1em;
-    font-weight: 500;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: auto;
-    margin-bottom: 15px;
-}
-
-.backButton:hover:not(:disabled) {
-    background-color: #5a6268;
-}
-
-.backButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+/* ── Right panel: sub-views ── */
+.emailChangeContent {
+  padding: 16px 20px 20px;
+  position: relative;
 }
 
 .backArrow {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
 }
 
 .backArrow:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #333;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
+.confirmPasswordTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 36px 0 6px;
+}
+
+.actionDescription {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+/* ── Inputs ── */
+.passwordInputContainer {
+  margin-bottom: 12px;
+}
+
+.passwordInput {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.passwordInput:focus {
+  border-color: var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.passwordInput::placeholder {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+/* ── Buttons ── */
+.confirmButton {
+  background: var(--color-accent);
+  color: white;
+  padding: 9px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 12px;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.confirmButton:disabled {
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+/* ── Delete confirm ── */
 .deleteConfirmContent {
-    padding: 20px;
-    color: #333;
-    margin-top: 10px;
-    position: relative;
-}
-
-.closeDeleteButton {
-    position: absolute;
-    top: 5px;
-    left: 10px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #666;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.closeDeleteButton:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #333;
+  padding: 16px 20px 20px;
+  position: relative;
 }
 
 .deleteConfirmTitle {
-    font-size: 1.4em;
-    font-weight: 700;
-    color: #d73a49;
-    margin-bottom: 20px;
-    text-align: left;
-    margin-top: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-danger);
+  margin: 36px 0 12px;
 }
 
 .deleteConfirmMessage {
-    font-size: 1em;
-    color: #000000;
-    margin-bottom: 30px;
-    text-align: left;
-    line-height: 1.5;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.6;
 }
 
 .deleteConfirmButtons {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .cancelButton {
-    background-color: #227fd0db;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 0.8em;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    flex: 1;
+  flex: 1;
+  padding: 9px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .cancelButton:hover {
-    background-color: #137ccd;
+  background: var(--color-surface-2);
+  border-color: var(--color-accent);
 }
 
 .deleteConfirmButton {
-    background-color: #d73a49;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 0.8em;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    flex: 1;
+  flex: 1;
+  padding: 9px 16px;
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
 .deleteConfirmButton:hover:not(:disabled) {
-    background-color: #c0392b;
+  background: #b91c1c;
 }
 
 .deleteConfirmButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.6;
+  background: var(--color-border);
+  cursor: not-allowed;
 }
 
-/* Website Mode Styles */
-.websiteModeOptions {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
+/* ── Messages ── */
+.settingsMessage {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  margin-top: 8px;
 }
 
-.modeButton {
-    flex: 1;
-    padding: 12px 20px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    color: #333;
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+.errorMessage {
+  border-left-color: var(--color-danger);
+  background: rgba(220, 38, 38, 0.06);
+  color: var(--color-danger);
 }
 
-.modeButton:hover {
-    border-color: #3b82f6;
-    background-color: #f0f8ff;
+.successMessage {
+  border-left-color: var(--color-success);
+  background: rgba(22, 163, 74, 0.06);
+  color: var(--color-success);
 }
 
-.modeButton.activeMode {
-    border-color: #3b82f6;
-    background-color: #3b82f6;
-    color: white;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.modeButton.activeMode:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
-}
-
-.accountSubsection {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left;
-    margin-top: 5px;
-    margin-left: -20px;
-    background-color: transparent;
-    border-radius: 5px;
-    margin-right: 0px;
-    padding: 8px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.accountSubsection:hover {
-    background-color: rgba(128, 128, 128, 0.1);
-}
-
-.accountSubsection.active {
-    background-color: rgba(128, 128, 128, 0.1);
-}
-
-/* Toggle Switch Styles */
+/* ── Toggle switch ── */
 .toggleContainer {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin: 20px 0;
-    padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0;
 }
 
 .toggleLabel {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-    cursor: pointer;
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  cursor: pointer;
 }
 
 .toggleInput {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .toggleSlider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 34px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  inset: 0;
+  background: var(--color-border);
+  border-radius: 28px;
+  transition: background 0.25s;
 }
 
-.toggleSlider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.toggleSlider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 4px;
+  top: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.25s;
 }
 
-.toggleInput:checked + .toggleSlider {
-    background: linear-gradient(135deg, #1e3a8a, #0f172a);
-}
-
-.toggleInput:checked + .toggleSlider:before {
-    transform: translateX(26px);
-}
-
+.toggleInput:checked + .toggleSlider,
 .toggleActive {
-    background: linear-gradient(135deg, #1e3a8a, #0f172a) !important;
+  background: var(--color-accent) !important;
+}
+
+.toggleInput:checked + .toggleSlider::before {
+  transform: translateX(20px);
 }
 
 .toggleText {
-    font-size: 1em;
-    font-weight: 500;
-    color: #333;
-    min-width: 80px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }
+
+.websiteModeOptions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Unused legacy — kept to avoid import errors */
+.settingsContainer { display: none; }
+.settingsInput { display: none; }
+.settingsButton { display: none; }
+.settingsDeleteBtn { display: none; }
+.settingsSubHeader { display: none; }
+.secondaryTitleRow { display: none; }
+.secondaryTitleContent { display: none; }
+.settingsLabel { display: none; }
+.backButton { display: none; }
+.closeDeleteButton { display: none; }
+.modeButton { display: none; }
+.signOutText { display: none; }
+.accountTitle { display: none; }
+.helpButton { display: none; }

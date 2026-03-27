@@ -20,9 +20,22 @@ export const AuthProvider = ({ children }) => {
 
     fetchSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth event:", event, session);
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
+      if (event === "SIGNED_IN" && session?.user) {
+        const { data: existing } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from("profiles").insert({
+            id: session.user.id,
+            username: session.user.email?.split("@")[0] || "",
+            created_at: new Date().toISOString(),
+          });
+        }
+      }
     });
 
     return () => {

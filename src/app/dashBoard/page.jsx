@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -178,13 +179,13 @@ const Dashboard = () => {
       <SettingsPopup isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
-          <h1 className={styles.welcome} style={{ color: "white" }}>
+          <h1 className={styles.welcome}>
             Welcome back{username ? `, ${username}` : ""}!
           </h1>
         </div>
 
         {isSuperuser && (
-          <div style={{ margin: "1rem 0", color: "white" }}>
+          <div style={{ margin: "1rem 0" }}>
             <label>
               <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)}/>
               {" "}View all user entries
@@ -208,15 +209,14 @@ const Dashboard = () => {
                   </div>
                   {entries[0].hand_used && (
                     <div style={{
-                      backgroundColor: "#4a148c",
+                      backgroundColor: "var(--color-accent)",
                       color: "white",
                       padding: "6px 12px",
-                      borderRadius: "20px",
+                      borderRadius: "var(--radius-lg)",
                       fontSize: "14px",
                       fontWeight: "600",
                       textTransform: "capitalize",
-                      boxShadow: "0 2px 8px rgba(74, 20, 140, 0.3)",
-                      border: "2px solid rgba(255, 255, 255, 0.2)",
+                      boxShadow: "var(--shadow-card)",
                       marginTop: "15px",
                       marginBottom: "8px"
                     }}>
@@ -246,7 +246,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 className={styles.pastResultsHeading} style={{ color: "white", fontWeight: "bold" }}>
+            <h2 className={styles.pastResultsHeading}>
               Past Results
               {averageDOS && ` - Your Overall Average: ${averageDOS}`}
             </h2>

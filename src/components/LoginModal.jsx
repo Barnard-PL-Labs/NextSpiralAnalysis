@@ -22,9 +22,19 @@ export default function LoginModal({ isOpen, closeModal }) {
       setMessage("Passwords don't match!");
       return;
     }
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) setMessage(error.message);
-    else setMessage("Check your email to confirm your account!");
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      setMessage(error.message);
+    } else {
+      if (data.user) {
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          username: fullName.trim() || email.split("@")[0],
+          created_at: new Date().toISOString(),
+        });
+      }
+      setMessage("Check your email to confirm your account!");
+    }
   };
 
   const switchToSignup = () => {

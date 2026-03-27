@@ -346,7 +346,7 @@ export default function MachinePage() {
   return (
     <>
       {!showTutorial && <Header showVideo={false} />}
-      <div style={{ position: "relative" }}>
+      <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "var(--color-bg)" }}>
         <div className={styles.machineContainer}>
           {/* Initial selection prompt (no horizontal controls here) */}
 {/* Initial selection prompt (no horizontal controls here) */}
@@ -406,15 +406,15 @@ export default function MachinePage() {
       <button
         onClick={() => setShowDemographics(true)}
         style={{
-          backgroundColor: "#6fadebfa",
+          backgroundColor: "var(--color-accent)",
           color: "white",
           border: "none",
           padding: "8px 16px",
-          borderRadius: "20px",
+          borderRadius: "var(--radius-lg)",
           fontSize: "14px",
           fontWeight: "500",
           cursor: "pointer",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+          boxShadow: "var(--shadow-card)",
         }}
       >
         Optional Demographics
@@ -442,7 +442,7 @@ export default function MachinePage() {
                 >
                   {/* Hand Side */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, opacity: 0.8, minWidth: 70, textAlign: "right" }}>
+                    <span style={{ fontSize: 14, color: "var(--color-text-secondary)", minWidth: 70, textAlign: "right" }}>
                       Hand Side
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -471,7 +471,7 @@ export default function MachinePage() {
 
                   {/* Dominance */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, opacity: 0.8, minWidth: 70, textAlign: "right" }}>
+                    <span style={{ fontSize: 14, color: "var(--color-text-secondary)", minWidth: 70, textAlign: "right" }}>
                       Dominance
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -651,10 +651,10 @@ export default function MachinePage() {
               style={{
                 width: "100%",
                 padding: 14,
-                backgroundColor: "#6fadebfa",
+                backgroundColor: "var(--color-accent)",
                 color: "white",
                 border: "none",
-                borderRadius: 8,
+                borderRadius: "var(--radius-sm)",
                 fontSize: 16,
                 fontWeight: 600,
                 cursor: "pointer",

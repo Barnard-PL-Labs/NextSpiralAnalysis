@@ -21,9 +21,8 @@
 
 .machineContainer {
   text-align: center;
-  margin-top: 100px;
+  margin-top: 24px;
   position: relative;
-  
 }
 
 .loadingContainer {
@@ -39,7 +38,7 @@
 .loadingContainer h2 {
   margin-top: 210px;
   margin-bottom: 2rem;
-  color: rgb(255, 255, 255);
+  color: var(--color-text-primary);
   position: relative;
   display: inline-block;
 }
@@ -112,8 +111,8 @@
 }
 
 .title {
-  font-family: "DM Sans", sans-serif;
-  color: #ffffff;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
 }
 
 .canvasContainer {
@@ -181,7 +180,7 @@
 }
 
 #counter {
-  color: #ffffff;
+  color: var(--color-text-primary);
   margin-top: 10px;
   font-weight: 500;
 }
@@ -379,42 +378,38 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(30, 58, 138, 0.9);
-  border: 2px solid #1e3a8a;
-  border-radius: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 }
 
 .handIndicatorText {
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  
+  letter-spacing: 0.3px;
 }
 
 .changeHandButtonTop {
   padding: 4px 8px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-family: Arial, sans-serif;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 11px;
-  transition: all 0.3s ease-in-out;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.2s ease-in-out;
+  letter-spacing: 0.3px;
 }
 
 .changeHandButtonTop:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
   transform: translateY(-1px);
 }
 
@@ -424,18 +419,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 200px auto 40px auto;
+  margin: 60px auto 40px auto;
   padding: 40px 60px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   max-width: 500px;
   width: 90%;
 }
 
 .handSelectionTitle {
-  color: white;
-  font-family: "DM Sans", sans-serif;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   font-size: 1.5em;
   margin-bottom: 40px;
   text-align: center;
@@ -447,7 +443,7 @@
 
 .handIcon {
   font-size: 1.2em;
-  color: #1e3a8a;
+  color: var(--color-accent);
 }
 
 .handButtonsWrapper {
@@ -458,38 +454,37 @@
 
 .handButton {
   padding: 12px 24px;
-  background-color: #1e3a8a;
-  border: 2px solid #1e3a8a;
-  color: rgb(255, 255, 255);
-  font-family: Arial, sans-serif;
+  background-color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+  color: white;
+  font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
   min-width: 140px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .handButton:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+  box-shadow: var(--shadow-card);
 }
 
 .handButtonActive {
-  background-color: #0f172a;
-  border-color: #0f172a;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-card);
   transform: translateY(-1px);
 }
 
 .handButtonActive:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-card);
   transform: translateY(-1px);
 }
 
@@ -498,47 +493,42 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 58, 138, 0.2);
-  border: 2px solid #1e3a8a;
-  border-radius: 10px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 12px 20px;
   margin: 20px 0;
-  backdrop-filter: blur(5px);
 }
 
 .selectedHandText {
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   font-size: 16px;
   font-weight: 500;
 }
 
 .selectedHandText strong {
-  color: #ffffff;
-  text-decoration: underline;
+  color: var(--color-accent);
   font-weight: 700;
-
 }
 
 .changeHandButton {
   padding: 8px 16px;
-  background-color: #1e3a8a;
-  border: 1px solid #1e3a8a;
+  background-color: var(--color-accent);
+  border: 1px solid var(--color-accent);
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 12px;
-  transition: all 0.3s ease-in-out;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  
+  transition: all 0.2s ease-in-out;
+  letter-spacing: 0.3px;
 }
 
 .changeHandButton:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
   transform: translateY(-1px);
 }
 
@@ -552,37 +542,37 @@
 
 .handLRBadge {
   padding: 10px 22px;
-  background-color: #e3eaf7;
-  border: 2px solid #1e3a8a;
-  color: #1e3a8a;
-  font-family: Arial, sans-serif;
+  background-color: var(--color-surface-2);
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  font-family: var(--font-sans);
   font-weight: 700;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   font-size: 18px;
   transition: all 0.2s ease-in-out;
   min-width: 48px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08);
+  box-shadow: var(--shadow-card);
   letter-spacing: 1px;
   outline: none;
 }
 
 .handLRBadge:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
-  color: #fff;
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3)
+  box-shadow: var(--shadow-lg);
 }
 
 .handLRBadgeSelected,
 .handLRBadgeSelected:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
-  transform: translateY(-1px)
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
 }
 
 

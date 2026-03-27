@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { FaUser, FaCog, FaFlask, FaBrain } from "react-icons/fa";
+import { FaUser, FaCog, FaFlask, FaBrain, FaIdCard } from "react-icons/fa";
 import { useResearcherMode } from "@/lib/researcherModeContext";
 import styles from "../styles/Settings.module.css";
 
@@ -32,6 +32,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showWebsiteMode, setShowWebsiteMode] = useState(false);
   const [websiteMode, setWebsiteMode] = useState("light"); // or "dark"
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileUsername, setProfileUsername] = useState("");
+  const [profileBio, setProfileBio] = useState("");
   const { researcherMode, toggleResearcherMode } = useResearcherMode();
 
   useEffect(() => {
@@ -41,6 +44,15 @@ export default function SettingsPopup({ isOpen, onClose }) {
         router.push("/login");
       } else {
         setUser(data.user);
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, bio")
+          .eq("id", data.user.id)
+          .maybeSingle();
+        if (profile) {
+          setProfileUsername(profile.username || "");
+          setProfileBio(profile.bio || "");
+        }
       }
     };
 
@@ -247,12 +259,27 @@ export default function SettingsPopup({ isOpen, onClose }) {
     }
   };
 
+  const handleProfileSave = async () => {
+    if (!user) return;
+    setLoading(true);
+    setMessage("");
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      username: profileUsername.trim(),
+      bio: profileBio.trim(),
+    });
+    setLoading(false);
+    if (error) setMessage(error.message);
+    else setMessage("Profile updated successfully!");
+  };
+
   const handleBackToOptions = () => {
     setShowPasswordConfirm(false);
     setShowEmailChange(false);
     setShowPasswordChange(false);
     setShowDeleteConfirm(false);
     setShowWebsiteMode(false);
+    setShowProfile(false);
     setConfirmPassword("");
     setNewEmail("");
     setConfirmEmail("");
@@ -300,9 +327,9 @@ export default function SettingsPopup({ isOpen, onClose }) {
           <div className={styles.accountContainer}>
             <div
               className={`${styles.accountTitleRow} ${
-                !showWebsiteMode ? styles.active : ""
+                !showWebsiteMode && !showProfile ? styles.active : ""
               }`}
-              onClick={() => setShowWebsiteMode(false)}
+              onClick={() => { setShowWebsiteMode(false); setShowProfile(false); setMessage(""); }}
             >
               <div className={styles.accountTitleContent}>
                 <FaUser className={styles.personIcon} />
@@ -312,13 +339,25 @@ export default function SettingsPopup({ isOpen, onClose }) {
             </div>
             <div
               className={`${styles.accountSubsection} ${
+                showProfile ? styles.active : ""
+              }`}
+              onClick={() => { setShowProfile(true); setShowWebsiteMode(false); setMessage(""); }}
+            >
+              <div className={styles.accountTitleContent}>
+                <FaIdCard className={styles.personIcon} />
+                <span>Profile</span>
+              </div>
+              <span className={styles.arrow}>{">"}</span>
+            </div>
+            <div
+              className={`${styles.accountSubsection} ${
                 showWebsiteMode ? styles.active : ""
               }`}
-              onClick={() => setShowWebsiteMode(true)}
+              onClick={() => { setShowWebsiteMode(true); setShowProfile(false); setMessage(""); }}
             >
               <div className={styles.accountTitleContent}>
                 <FaBrain className={styles.personIcon} />
-              <span>Website Mode</span>
+                <span>Website Mode</span>
               </div>
               <span className={styles.arrow}>{">"}</span>
             </div>
@@ -328,7 +367,47 @@ export default function SettingsPopup({ isOpen, onClose }) {
           </div>
 
           <div className={styles.secondaryContainer}>
-            {!showPasswordConfirm &&
+            {showProfile ? (
+              <div className={styles.emailChangeContent}>
+                <h3 className={styles.confirmPasswordTitle}>Profile</h3>
+                <p className={styles.actionDescription}>
+                  {user?.email}
+                </p>
+                <div className={styles.passwordInputContainer}>
+                  <input
+                    type="text"
+                    className={styles.passwordInput}
+                    value={profileUsername}
+                    onChange={(e) => setProfileUsername(e.target.value)}
+                    placeholder="Display name"
+                    maxLength={50}
+                  />
+                </div>
+                <div className={styles.passwordInputContainer}>
+                  <textarea
+                    className={styles.passwordInput}
+                    value={profileBio}
+                    onChange={(e) => setProfileBio(e.target.value)}
+                    placeholder="Bio (optional)"
+                    rows={3}
+                    maxLength={200}
+                    style={{ resize: "none", lineHeight: 1.5 }}
+                  />
+                </div>
+                <button
+                  className={styles.confirmButton}
+                  onClick={handleProfileSave}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Profile"}
+                </button>
+                {message && (
+                  <div className={`${styles.settingsMessage} ${message.includes("Error") || message.includes("error") ? styles.errorMessage : styles.successMessage}`}>
+                    {message}
+                  </div>
+                )}
+              </div>
+            ) : !showPasswordConfirm &&
             !showEmailChange &&
             !showPasswordChange &&
             !showDeleteConfirm &&
@@ -583,3 +662,4 @@ export default function SettingsPopup({ isOpen, onClose }) {
     </div>
   );
 }
+
