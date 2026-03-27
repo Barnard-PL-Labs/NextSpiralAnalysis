@@ -6,14 +6,16 @@ import styles from '../styles/SideBar.module.css';
 import { FaUserCog, FaHome } from 'react-icons/fa';
 import { Squash as Hamburger } from 'hamburger-react';
 
-const Sidebar = ({ onSettingsClick }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const Sidebar = ({ onSettingsClick, isOpen, onToggle }) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isOpen !== undefined ? isOpen : internalOpen;
+  const toggle = onToggle || (() => setInternalOpen(prev => !prev));
 
   return (
     <div className={styles.sidebarContainer}>
-      <aside className={`${styles.sidebar} ${!isOpen ? styles.collapsed : ''}`}>
+      <aside className={`${styles.sidebar} ${!open ? styles.collapsed : ''}`}>
         <div className={styles.toggleButton}>
-          <Hamburger toggled={isOpen} toggle={() => setIsOpen(prev => !prev)} />
+          <Hamburger toggled={open} toggle={toggle} />
         </div>
         <nav>
           <ul className={styles.navItems}>
