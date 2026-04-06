@@ -185,88 +185,123 @@ const Dashboard = () => {
         </div>
 
         {isSuperuser && (
-          <div className={styles.superuserRow}>
-            <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)} />
-            <span>View all user entries</span>
+          <div style={{ margin: "1rem 0" }}>
+            <label>
+              <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)}/>
+              {" "}View all user entries
+            </label>
           </div>
         )}
 
         {loading ? (
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.95rem" }}>Loading...</p>
+          <p>Loading...</p>
         ) : entries.length > 0 ? (
           <>
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
-                <p className={styles.latestResultLabel}>Latest Result</p>
-                <div className={styles.metaRow}>
-                  <span className={styles.drawingCountBadge}>
-                    {entries[0].all_drawings.length}{entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                  </span>
+                <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
+                  Latest Result
+                </h2>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                <div className={styles.drawingCountBadge}>
+                  {entries[0].all_drawings.length}
+                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                  </div>
                   {entries[0].hand_used && (
-                    <span className={styles.handBadge}>
-                      {entries[0].hand_used === "dominant" ? "Dominant" : "Non-Dominant"} Hand
-                    </span>
+                    <div style={{
+                      backgroundColor: "var(--color-accent)",
+                      color: "white",
+                      padding: "6px 12px",
+                      borderRadius: "var(--radius-lg)",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      textTransform: "capitalize",
+                      boxShadow: "var(--shadow-card)",
+                      marginTop: "15px",
+                      marginBottom: "8px"
+                    }}>
+                      {entries[0].hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+                    </div>
                   )}
                 </div>
-                <div className={styles.statRow}>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Avg DOS Score</span>
-                    <span className={styles.dosValue}>{entries[0].average_DOS || "N/A"}</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Analyzed</span>
-                    <span className={styles.statValue}>{new Date(entries[0].created_at).toLocaleString()}</span>
-                  </div>
-                </div>
+                <p className={styles.dosScoreText}>
+                  <strong> <u> Average DOS Score</u>:  </strong>
+                  {entries[0].average_DOS || "N/A"}
+                </p>
+                <p>
+                  <strong><u>Analyzed on</u>:</strong>{" "}
+                  {new Date(entries[0].created_at).toLocaleString()}
+                </p>
                 <div className={styles.scatterPlot}>
-                  <HorizontalSpiralHistory savedDrawings={entries[0].all_drawings} />
+                  <HorizontalSpiralHistory savedDrawings={entries[0].all_drawings}/>
                 </div>
                 <div className={styles.resultLink}>
-                  <Link href={`/result/${entries[0].session_id || entries[0].drawing_id}`} className={styles.viewFullAnalysisLink}>
-                    View Full Analysis →
+                  <Link
+                    href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
+                    className={styles.viewFullAnalysisLink}
+                  >
+                    View Full Analysis
                   </Link>
                 </div>
               </div>
             </div>
 
-            <p className={styles.pastResultsHeading}>Past Results</p>
-            {averageDOS && (
-              <p className={styles.overallAvg}>Overall average DOS: <strong style={{ color: "#4f46e5" }}>{averageDOS}</strong></p>
-            )}
+            <h2 className={styles.pastResultsHeading}>
+              Past Results
+              {averageDOS && ` - Your Overall Average: ${averageDOS}`}
+            </h2>
             <ul className={styles.entriesList}>
               {paginatedEntries.map((entry, index) => (
                 <li key={entry.key} className={styles.accordionItem}>
                   <div className={styles.accordionHeader} onClick={() => handleAccordionClick(index)}>
-                    <div className={styles.accordionHeaderText}>
-                      <span style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>
-                        {index + 1 + (currentPage - 1) * entriesPerPage}
-                      </span>
-                      <span className={styles.accordionDos}>DOS {entry.average_DOS || "N/A"}</span>
-                      <span className={styles.accordionDate}>{new Date(entry.created_at).toLocaleString()}</span>
-                      {isSuperuser && entry.email && (
-                        <span className={styles.accordionUser}>{entry.email}</span>
+                    <span>
+                      {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS:
+                      {entry.average_DOS || "N/A"}{" "}
+                      – {new Date(entry.created_at).toLocaleString()}
+                      {isSuperuser && (
+                        <>
+                          {" "} — <strong>User:</strong> {entry.email || "N/A"}
+                        </>
                       )}
-                    </div>
-                    <span className={`${styles.chevron} ${activeIndex === index ? styles.chevronOpen : ""}`}>▼</span>
+                    </span>
+                    <span className={styles.arrow}>
+                      {activeIndex === index ? "▲" : "▼"}
+                    </span>
                   </div>
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
-                      <div className={styles.metaRow}>
-                        <span className={styles.drawingCountBadge}>
-                          {entry.all_drawings.length}{entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                        </span>
-                        {entry.hand_used && (
-                          <span className={styles.handBadge}>
-                            {entry.hand_used === "dominant" ? "Dominant" : "Non-Dominant"} Hand
-                          </span>
-                        )}
-                      </div>
+                       <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                       <div className={styles.drawingCountBadge}>
+                          {entry.all_drawings.length}
+                          {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                         </div>
+                         {entry.hand_used && (
+                           <div style={{
+                             backgroundColor: "#4a148c",
+                             color: "white",
+                             padding: "6px 12px",
+                             borderRadius: "20px",
+                             fontSize: "14px",
+                             fontWeight: "600",
+                             textTransform: "capitalize",
+                             boxShadow: "0 2px 8px rgba(74, 20, 140, 0.3)",
+                             border: "2px solid rgba(255, 255, 255, 0.2)",
+                             marginTop: "15px",
+                             marginBottom: "8px"
+                           }}>
+                             {entry.hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+                           </div>
+                         )}
+                       </div>
                       <div className={styles.scatterPlot}>
                         <HorizontalSpiralHistory savedDrawings={entry.all_drawings} />
                       </div>
                       <div className={styles.resultLink}>
-                        <Link href={`/result/${entry.session_id || entry.drawing_id}`} className={styles.viewFullAnalysisLink}>
-                          View Full Analysis →
+                        <Link
+                          href={`/result/${entry.session_id || entry.drawing_id}`}
+                          className={styles.viewFullAnalysisLink}
+                        >
+                          View Full Analysis
                         </Link>
                       </div>
                     </div>
@@ -274,7 +309,11 @@ const Dashboard = () => {
                 </li>
               ))}
             </ul>
-            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} pageCount={pageCount} />
+            <Pagination
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageCount={pageCount}
+            />
           </>
         ) : (
           <p className={styles.noEntry}>No entries found.</p>
