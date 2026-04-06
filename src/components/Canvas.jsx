@@ -14,7 +14,7 @@ const styles = {
     position: "relative",
   },
   spiralCanvas: {
-    border: "1.5px solid #d0d7e6",
+    border: "2px solid #c7d2fe",
     backgroundColor: "white",
     cursor: "crosshair",
     touchAction: "none",
@@ -22,20 +22,23 @@ const styles = {
     WebkitUserSelect: "none",
     userSelect: "none",
     display: "block",
+    borderRadius: "8px",
+    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.12)",
   },
   startHint: {
     position: "absolute",
     top: "16px",
     left: "12px",
-    background: "rgba(255,255,255,0.92)",
-    border: "1px solid #e2e8f0",
-    borderRadius: "20px",
-    padding: "5px 14px",
-    fontSize: "13px",
-    color: "#64748b",
+    background: "rgba(238, 242, 255, 0.95)",
+    border: "1px solid #c7d2fe",
+    borderRadius: "6px",
+    padding: "5px 12px",
+    fontSize: "12px",
+    color: "#4338ca",
     pointerEvents: "none",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+    boxShadow: "0 1px 4px rgba(99, 102, 241, 0.1)",
     whiteSpace: "nowrap",
+    backdropFilter: "blur(4px)",
   },
 };
 
@@ -73,7 +76,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     // Dashed vertical center line
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
-    ctx.strokeStyle = "#d0d7e6";
+    ctx.strokeStyle = "#e0e7ff";
     ctx.lineWidth = 1;
     ctx.moveTo(cx, 0);
     ctx.lineTo(cx, height);

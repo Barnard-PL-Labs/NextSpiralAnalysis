@@ -319,7 +319,7 @@ export default function MachinePage() {
   return (
     <>
       {!showTutorial && <Header showVideo={false} />}
-      <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "#edf2fb" }}>
+      <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #faf5ff 100%)" }}>
         <div className={styles.machineContainer}>
           {/* Initial selection prompt */}
 {!isConfirmed && (

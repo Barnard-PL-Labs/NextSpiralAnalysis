@@ -153,7 +153,7 @@
 
 .button {
   padding: 10px 45px;
-  background-color: var(--color-accent);
+  background: linear-gradient(to right, #4f46e5, #9333ea);
   border: none;
   color: white;
   font-family: var(--font-sans);
@@ -164,16 +164,17 @@
   transition: all 0.2s ease-in-out;
   position: relative;
   min-width: 160px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
 }
 
 .button:hover {
-  background-color: var(--color-accent-hover);
+  background: linear-gradient(to right, #4338ca, #7e22ce);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 .button:active {
-  background-color: var(--color-accent-hover);
+  background: linear-gradient(to right, #4338ca, #7e22ce);
   transform: scale(0.98);
 }
 
@@ -204,9 +205,9 @@
 
 .clearButton {
   padding: 6px 20px;
-  background-color: var(--color-danger);
-  border: none;
-  color: white;
+  background-color: transparent;
+  border: 1.5px solid #e2e8f0;
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 500;
   border-radius: var(--radius-lg);
@@ -217,15 +218,16 @@
 }
 
 .clearButton:hover {
-  background-color: #b91c1c;
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
   transform: translateY(-1px);
 }
 
 .clearCurrentButton {
   padding: 6px 20px;
-  background-color: var(--color-accent);
-  border: none;
-  color: white;
+  background-color: transparent;
+  border: 1.5px solid #e2e8f0;
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 500;
   border-radius: var(--radius-lg);
@@ -236,7 +238,8 @@
 }
 
 .clearCurrentButton:hover {
-  background-color: var(--color-accent-hover);
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
   transform: translateY(-1px);
 }
 
@@ -424,9 +427,9 @@
   margin: 60px auto 40px auto;
   padding: 32px 40px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 2px solid rgba(199, 210, 254, 0.5);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
   max-width: 520px;
   width: 90%;
 }
@@ -659,7 +662,7 @@
   width: 100%;
   margin-top: 20px;
   padding: 14px;
-  background: linear-gradient(135deg, var(--color-accent), #6366f1);
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -668,12 +671,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
 }
 
 .continueButton:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 .continueButton:disabled {
@@ -880,9 +883,9 @@
 /* Drawing card — white container around controls + canvas */
 .drawingCard {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 2px solid rgba(199, 210, 254, 0.5);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 20px 24px 24px;
   display: inline-flex;
   flex-direction: column;

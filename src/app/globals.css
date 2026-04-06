@@ -13,8 +13,8 @@
   --color-border: #e2e8f0;
   --color-text-primary: #0f172a;
   --color-text-secondary: #64748b;
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
   --color-danger: #dc2626;
   --color-success: #16a34a;
   --color-warn: #d97706;
@@ -64,7 +64,9 @@ h1 {
   top: 0;
   left: 0;
   height: 75px;
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
@@ -117,7 +119,7 @@ header a {
 }
 
 .navItems span:hover {
-  color: var(--color-accent);
+  color: #4f46e5;
   text-decoration: none;
 }
 
@@ -196,7 +198,7 @@ header a {
   color: var(--color-text-primary);
 }
 .indexButton {
-  background: var(--color-accent);
+  background: linear-gradient(to right, #4f46e5, #9333ea);
   border: none;
   color: white;
   font-weight: 600;
@@ -211,7 +213,7 @@ header a {
   font-size: 16px;
 }
 .indexButton:hover {
-  background: var(--color-accent-hover);
+  background: linear-gradient(to right, #4338ca, #7e22ce);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }

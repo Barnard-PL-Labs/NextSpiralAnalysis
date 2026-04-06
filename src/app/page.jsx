@@ -29,7 +29,7 @@ export default function Home() {
           paddingTop: "75px",
           paddingBottom: "40px",
           textAlign: "center",
-          background: "var(--color-bg)",
+          background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #faf5ff 100%)",
         }}
       >
         <div
