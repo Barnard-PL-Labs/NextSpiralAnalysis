@@ -44,7 +44,7 @@ body {
 h1 {
   font-family: var(--font-sans);
   color: var(--color-text-primary);
-  font-size: 35px;
+  font-size: 1.875rem;
   font-weight: 700;
 }
 

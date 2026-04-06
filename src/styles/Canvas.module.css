@@ -152,7 +152,7 @@
 }
 
 .button {
-  padding: 10px 45px;
+  padding: 10px 20px;
   background: linear-gradient(to right, #4f46e5, #9333ea);
   border: none;
   color: white;
@@ -160,10 +160,10 @@
   font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   transition: all 0.2s ease-in-out;
   position: relative;
-  min-width: 160px;
+  min-width: 120px;
   box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
 }
 
@@ -204,43 +204,41 @@
 }
 
 .clearButton {
-  padding: 6px 20px;
+  padding: 10px 20px;
   background-color: transparent;
   border: 1.5px solid #e2e8f0;
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease-in-out;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .clearButton:hover {
   background-color: #f8fafc;
   border-color: #cbd5e1;
-  transform: translateY(-1px);
 }
 
 .clearCurrentButton {
-  padding: 6px 20px;
+  padding: 10px 20px;
   background-color: transparent;
   border: 1.5px solid #e2e8f0;
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease-in-out;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .clearCurrentButton:hover {
   background-color: #f8fafc;
   border-color: #cbd5e1;
-  transform: translateY(-1px);
 }
 
 .saveButton:hover {
@@ -836,7 +834,7 @@
 }
 
 .controlsGroupLabel {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -900,6 +898,14 @@
   height: 1px;
   background: var(--color-border);
   margin: 16px 0;
+}
+
+.actionButtonRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 

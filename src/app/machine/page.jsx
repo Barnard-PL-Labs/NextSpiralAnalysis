@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Canvas from "@/components/Canvas";
-import Button from "@/components/Button";
 import styles from "@/styles/Canvas.module.css";
 import MiniSpiralHistory from "@/components/MiniSpiralHistory";
 import Header from "@/components/Header";
@@ -459,12 +458,12 @@ export default function MachinePage() {
           {/* Title + Canvas + Controls */}
           {showCanvas && (
             <>
-              <h1 className={styles.title} style={{ marginBottom: 6 }}>Draw Your Spiral</h1>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: 15, marginBottom: 28, marginTop: 0 }}>
+              <h1 className={styles.title} style={{ marginBottom: 6, fontSize: "1.875rem" }}>Draw Your Spiral</h1>
+              <p style={{ color: "var(--color-text-secondary)", fontSize: "1rem", marginBottom: 28, marginTop: 0 }}>
                 Select your preferences and draw a spiral from the center outward
               </p>
 
-              {/* White card containing controls + canvas */}
+              {/* White card containing controls + canvas + action buttons */}
               <div className={styles.drawingCard}>
                 {/* Controls inside card */}
                 <div className={styles.controlsBar} style={{ border: "none", boxShadow: "none", background: "transparent", marginBottom: 0 }}>
@@ -501,27 +500,32 @@ export default function MachinePage() {
                 <div className={styles.cardDivider} />
 
                 <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
+
+                <div className={styles.cardDivider} />
+
+                {/* Action buttons inside card */}
+                <div className={styles.actionButtonRow}>
+                  <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
+                    Clear
+                  </button>
+                  <button onClick={clearAllDrawings} className={styles.clearButton}>
+                    Clear All
+                  </button>
+                  {!userFinished && savedDrawings.length > 0 && (
+                    <button className={styles.button} onClick={handleFinishEarly}>
+                      Finish Analysis
+                      <span className={styles.countBadge}>{savedDrawings.length}</span>
+                    </button>
+                  )}
+                  {!userFinished && savedDrawings.length < 15 && (
+                    <button className={styles.button} onClick={saveAndAnalyzeCurrentDrawing}>
+                      Save
+                    </button>
+                  )}
+                </div>
               </div>
 
               <MiniSpiralHistory savedDrawings={savedDrawings} />
-
-              <div className={styles.buttonContainer}>
-                <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
-                  Clear
-                </button>
-                <button onClick={clearAllDrawings} className={styles.clearButton}>
-                  Clear All
-                </button>
-              </div>
-
-              <Button
-                clearDrawing={clearCurrentDrawing}
-                savedDrawingsCount={savedDrawings.length}
-                onSaveAndAnalyze={saveAndAnalyzeCurrentDrawing}
-                isAnalyzing={isAnalyzing}
-                onFinishEarly={handleFinishEarly}
-                userFinished={userFinished}
-              />
             </>
           )}
         </div>
