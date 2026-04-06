@@ -1,22 +1,24 @@
 .pageContainer {
   display: flex;
   min-height: 100vh;
-  background: var(--color-bg);
+  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #faf5ff 100%);
   padding-bottom: 48px;
 }
 
 .content {
   width: 1000px;
-  padding: 20px;
+  max-width: 100%;
+  padding: 32px 28px;
   margin-top: 92px;
   margin-left: 180px;
 }
+
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;
     margin-right: 0;
-    margin-top: 80px; /* still allow header height */
-    padding: 20px;
+    margin-top: 80px;
+    padding: 24px 20px;
     max-width: 90%;
     margin-inline: auto;
   }
@@ -26,51 +28,151 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 30px;
-}
-
-.avatarImage {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #e2e8f0;
-  background-color: white;
+  margin-bottom: 32px;
 }
 
 .welcome {
   color: var(--color-text-primary);
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Latest result card ── */
+.latestResultContainer {
+  margin-bottom: 12px;
 }
 
 .latestResultBox {
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-  color: #333;
-  padding: 20px;
-  border-radius: 12px;
-  border-left: 5px solid #3b82f6;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  background: white;
+  border: 1.5px solid rgba(199, 210, 254, 0.6);
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.latestResultLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+
+.latestResultTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.drawingCountBadge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.handBadge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.statItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.statValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.dosValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+/* ── Past results list ── */
+.pastResultsHeading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 40px;
+  margin-bottom: 14px;
+}
+
+.overallAvg {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  margin-bottom: 14px;
 }
 
 .entriesList {
   list-style-type: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.entriesList li {
-  padding: 12px 16px;
-  margin-top: 16px;
-  margin-bottom: 16px;
-  background-color: #f1f5f9;
-  border-radius: 8px;
-  border-left: 4px solid #94a3b8;
-  transition: background-color 0.2s ease;
+.accordionItem {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.entriesList li:hover {
-  background-color: #e2e8f0;
+.accordionItem:hover {
+  border-color: rgba(199, 210, 254, 0.8);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08);
 }
 
 .accordionHeader {
@@ -78,45 +180,135 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-}
-.accordionItem{
-  color:black;
-}
-.accordionContent {
-  margin-top: 10px;
+  padding: 14px 20px;
+  user-select: none;
 }
 
-.arrow {
-  font-size: 1rem;
-  color: #64748b;
-}
-
-.resultLink {
-  margin-top: 15px;
+.accordionHeaderText {
+  font-size: 0.9rem;
   font-weight: 500;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
+.accordionDos {
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.accordionDate {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.accordionUser {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.chevron {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.accordionContent {
+  border-top: 1px solid var(--color-border);
+  padding: 16px 20px 20px;
+}
+
+/* ── Scatter plot ── */
+.scatterPlot {
+  width: 100%;
+  height: 280px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+}
+
+.scatterPlot > div {
+  min-width: 300px;
+  width: 100%;
+}
+
+/* ── View full analysis link ── */
+.resultLink {
+  margin-top: 18px;
+}
+
+.viewFullAnalysisLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #4f46e5;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1.5px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.04);
+  transition: all 0.2s ease;
+}
+
+.viewFullAnalysisLink:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* ── No entries ── */
+.noEntry {
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 40px;
+  text-align: center;
+}
+
+/* ── Superuser toggle ── */
+.superuserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+}
+
+.superuserRow input {
+  accent-color: #4f46e5;
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Pagination ── */
 .pagination {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 50px;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 2px 20px;
-  border-radius: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  gap: 4px;
+  margin-top: 32px;
   width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
 
 .pagination button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 50%;
-  background-color: transparent;
-  color: #333;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: white;
+  color: var(--color-text-secondary);
   font-weight: 500;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 36px;
@@ -124,120 +316,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-sans);
 }
 
 .pagination button:hover {
-  background-color: #f1f5f9;
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.04);
 }
 
 .pagination button.activePage {
   color: white;
-  background-color: #3b82f6;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.scatterPlot {
-  width: 95%;
-  height: 310px;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  margin: 0 auto;
-}
-.scatterPlot > div {
-  min-width: 300px;
-  width: 100%;
-}
-
-.noEntry {
-  color: var(--color-text-secondary);
-  font-size: 2rem;
-  font-weight: 500;
-}
-
-.ellipsis {
-  color: white;
-  font-size: 1.2rem;
-  padding: 0 5px;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .activePage {
-  background-color: #2c3e50;
-  color: rgb(31, 10, 10);
-  font-weight: bold;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
+  color: white;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  border-color: transparent;
+}
+
+.ellipsis {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: 0 4px;
 }
 
 .gotoContainer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-left: 0.3rem;
-  padding-left: .5rem;
-  border-left: 1px solid #dadee3;
+  gap: 6px;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .gotoInput {
-  width: 60px;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #d2d5d9;
-  color: #333;
+  width: 52px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   text-align: center;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  background: white;
   transition: all 0.2s ease;
-}
-
-.gotoInput::-webkit-outer-spin-button,
-.gotoInput::-webkit-inner-spin-button {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
-  margin-right: 2px;
+  font-family: var(--font-sans);
 }
 
 .gotoInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.viewFullAnalysisLink {
-  text-decoration: none;
-  color: black;
-  transition: text-decoration 0.2s ease;
-}
-
-.viewFullAnalysisLink:hover {
-  text-decoration: underline;
-}
-
-.drawingCountBadge {
-  display: inline-block;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-  margin-top: 15px;
-  margin-bottom: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.dosScoreText {
-  margin-bottom: 10px;
-}
-
-.pastResultsHeading {
-  font-size: 1.65rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-top: 50px;
-  margin-bottom: 20px;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
