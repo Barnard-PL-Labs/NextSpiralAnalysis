@@ -319,7 +319,7 @@ export default function MachinePage() {
   return (
     <>
       {!showTutorial && <Header showVideo={false} />}
-      <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "var(--color-bg)" }}>
+      <div style={{ minHeight: "100vh", paddingTop: "75px", paddingBottom: "48px", background: "#edf2fb" }}>
         <div className={styles.machineContainer}>
           {/* Initial selection prompt */}
 {!isConfirmed && (
@@ -459,11 +459,15 @@ export default function MachinePage() {
           {/* Title + Canvas + Controls */}
           {showCanvas && (
             <>
-              <h1 className={styles.title}>Draw Here</h1>
+              <h1 className={styles.title} style={{ marginBottom: 6 }}>Draw Your Spiral</h1>
+              <p style={{ color: "var(--color-text-secondary)", fontSize: 15, marginBottom: 28, marginTop: 0 }}>
+                Select your preferences and draw a spiral from the center outward
+              </p>
 
-              {/* Horizontal controls UNDER the title, only in machine view */}
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                <div className={styles.controlsBar}>
+              {/* White card containing controls + canvas */}
+              <div className={styles.drawingCard}>
+                {/* Controls inside card */}
+                <div className={styles.controlsBar} style={{ border: "none", boxShadow: "none", background: "transparent", marginBottom: 0 }}>
                   <div className={styles.controlsGroup}>
                     <span className={styles.controlsGroupLabel}>Side</span>
                     <button
@@ -493,9 +497,12 @@ export default function MachinePage() {
                     >Non-Dominant</button>
                   </div>
                 </div>
+
+                <div className={styles.cardDivider} />
+
+                <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
               </div>
 
-              <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
               <MiniSpiralHistory savedDrawings={savedDrawings} />
 
               <div className={styles.buttonContainer}>

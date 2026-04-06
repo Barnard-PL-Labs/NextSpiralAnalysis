@@ -2,100 +2,106 @@
 
 /* ---------- Page shell ---------- */
 .mainContainer {
-  background: linear-gradient(
-    -45deg,
-    #c4e4f8 5%,
-    #7b8bc4 20%,
-    #6b5b9d 40%,
-    #2e2b7a 80%
-  ) !important;
+  background: var(--color-bg);
   overflow-x: hidden;
   margin-top: 60px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: calc(100vh - 150px);
-  padding-bottom: 50px;
+  min-height: calc(100vh - 60px);
+  padding-bottom: 60px;
 }
 
 .directionsContainer {
   width: 90%;
-  max-width: 900px;
+  max-width: 860px;
   margin: 40px auto;
-  padding: 40px 30px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-  color: #000000;
+  padding: 48px 40px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-primary);
   box-sizing: border-box;
 }
 
 /* ---------- Headings / text ---------- */
 .directionsHeader {
-  font-size: 2.2em;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #000000;
-  margin-bottom: 25px;
+  color: var(--color-text-primary);
+  margin-bottom: 32px;
   text-align: center;
-  text-decoration: underline;
 }
 
 .subHeader {
-  font-size: 1.8em;
-  font-weight: 600;
-  color: #00aeef;
-  margin-bottom: 15px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 14px;
 }
 
-.highlight { color: #6b5b9d; }
+.highlight { color: var(--color-accent); font-weight: 600; }
 
 .textBlock { margin-bottom: 20px; }
 
 .intro {
-  font-size: 1.2em;
-  color: #000000;
-  margin-top: 25px;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-top: 16px;
+  line-height: 1.7;
 }
 
 /* Optional wrapper classes used in JSX */
-.section { margin-bottom: 28px; }
+.section { margin-bottom: 32px; }
 .analysisIntro { display: block; }
 
-/* ---------- Callouts (no left stripe) ---------- */
+/* ---------- Callouts ---------- */
 .keyPoints {
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 16px;
+  background: var(--color-surface-2);
+  padding: 20px 24px;
+  border-radius: var(--radius-sm);
   margin-bottom: 20px;
+  border: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
 
-  /* removed the old cyan left bar */
-  border-left: none;
-  border: 1px solid #e6e6e6;
+.keyPoints h4 {
+  color: var(--color-text-primary);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.keyPoints ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.keyPoints li {
+  padding: 3px 0;
 }
 
 .note {
-  background-color: #f5f5f5;
-  padding: 15px 20px;
-  border-radius: 8px;
-  color: #666;
-  font-size: 0.95em;
+  background: var(--color-surface-2);
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
   margin-bottom: 20px;
-
-  /* removed cyan bar */
-  border-left: none;
-  border: 1px solid #e6e6e6;
+  border: 1px solid var(--color-border);
 }
 
 .warning {
   margin-top: 20px;
-  padding: 15px 20px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  color: #333;
-
-  /* removed red bar; keep subtle border */
-  border-left: none;
-  border: 1px solid #f0b8be;
+  padding: 14px 20px;
+  background: rgba(220, 38, 38, 0.04);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  font-size: 0.875rem;
 }
 
 /* ---------- Lists ---------- */
@@ -106,70 +112,58 @@
   margin: 0;
 }
 
-/* ===== How to Use: numbered circle badges (ring colored, inside transparent) ===== */
+/* How to Use: numbered steps */
 .directionsList {
   counter-reset: step;
 }
 
 .directionsList li {
   position: relative;
-  background: #f5f5f5;
-  margin-bottom: 15px;
-  padding: 15px 20px 15px 66px; /* space for badge */
-  border-radius: 8px;
-  color: #000000;
-
-  /* removed old cyan left bar */
-  border-left: none;
-  border: 1px solid #e6e6e6;
-
-  transition: background-color 0.2s;
+  background: var(--color-surface-2);
+  margin-bottom: 10px;
+  padding: 14px 20px 14px 60px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  transition: background 0.15s;
 }
 
-.directionsList li:hover { background-color: #e8e8e8; }
+.directionsList li:hover { background: var(--color-border); }
 
 .directionsList li::before {
   content: counter(step);
   counter-increment: step;
-
   position: absolute;
-  left: 18px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-
-  /* colored ring, transparent interior */
-  border: 3px solid #00aeef;   /* ring color */
+  border: 2px solid var(--color-accent);
   background: transparent;
-
-  /* number inherits normal text color */
-  color: #000;
-
+  color: var(--color-accent);
   display: grid;
   place-items: center;
-  font-weight: 800;
-  font-size: 14px;
-  line-height: 1;
+  font-weight: 700;
+  font-size: 12px;
 }
 
-/* ===== Key Metrics: plain cards (no dots, no badges) ===== */
+/* Key Metrics: plain cards */
 .metricsList li {
-  font-size: 1.1em;
-  background: #f5f5f5;
-  margin-bottom: 15px;
-  padding: 15px 20px;
-  border-radius: 8px;
-  color: #000000;
-
-  /* remove any bullets/strips/badges */
-  border-left: none;
-  border: 1px solid #e6e6e6;
+  font-size: 0.9rem;
+  background: var(--color-surface-2);
+  margin-bottom: 10px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  line-height: 1.6;
   position: relative;
+  transition: background 0.15s;
 }
 
 .metricsList li::before { content: none; }
-
-.metricsList li:hover { background-color: #e8e8e8; }
+.metricsList li:hover { background: var(--color-border); }

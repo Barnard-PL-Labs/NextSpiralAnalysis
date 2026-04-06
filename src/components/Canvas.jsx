@@ -9,17 +9,33 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    margin: "20px auto",
+    margin: "0 auto",
     width: "100%",
+    position: "relative",
   },
   spiralCanvas: {
-    border: "2px solid black",
+    border: "1.5px solid #d0d7e6",
     backgroundColor: "white",
     cursor: "crosshair",
     touchAction: "none",
     WebkitTouchCallout: "none",
     WebkitUserSelect: "none",
     userSelect: "none",
+    display: "block",
+  },
+  startHint: {
+    position: "absolute",
+    top: "16px",
+    left: "12px",
+    background: "rgba(255,255,255,0.92)",
+    border: "1px solid #e2e8f0",
+    borderRadius: "20px",
+    padding: "5px 14px",
+    fontSize: "13px",
+    color: "#64748b",
+    pointerEvents: "none",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+    whiteSpace: "nowrap",
   },
 };
 
@@ -30,7 +46,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [localDrawData, setLocalDrawData] = useState([]);
   const [startStamp, setStartStamp] = useState(null); // use event.timeStamp origin
-  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [backgroundImage] = useState(null);
 
   const pointBufferRef = useRef([]);
   const renderBufferRef = useRef([]);
@@ -53,12 +69,25 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     const { width, height } = ctx.canvas;
     const cx = width / 2, cy = height / 2, s = 10;
     ctx.save();
+
+    // Dashed vertical center line
+    ctx.setLineDash([6, 6]);
     ctx.beginPath();
-    ctx.strokeStyle = "#888";
+    ctx.strokeStyle = "#d0d7e6";
+    ctx.lineWidth = 1;
+    ctx.moveTo(cx, 0);
+    ctx.lineTo(cx, height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Center cross
+    ctx.beginPath();
+    ctx.strokeStyle = "#94a3b8";
     ctx.lineWidth = 1.5;
     ctx.moveTo(cx - s, cy); ctx.lineTo(cx + s, cy);
     ctx.moveTo(cx, cy - s); ctx.lineTo(cx, cy + s);
     ctx.stroke();
+
     ctx.restore();
   };
 
@@ -199,6 +228,9 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
         onPointerUp={stopDrawing}
         onPointerLeave={stopDrawing}
       />
+      {localDrawData.length === 0 && (
+        <div style={styles.startHint}>Start from the center</div>
+      )}
     </div>
   );
 });

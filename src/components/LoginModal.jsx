@@ -176,7 +176,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                         style={{
                           background: "none",
                           border: "none",
-                          color: "#00AEEF",
+                          color: "var(--color-accent)",
                           cursor: "pointer",
                           fontSize: "0.9em",
                           padding: 0,
@@ -195,7 +195,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                           style={{
                             background: "none",
                             border: "none",
-                            color: "#00AEEF",
+                            color: "var(--color-accent)",
                             cursor: "pointer",
                             fontSize: "0.9em",
                             padding: 0,

@@ -149,6 +149,33 @@ header a {
   text-decoration: none;
 }
 
+/* ── Header mobile dropdown ── */
+.mobile-dropdown {
+  position: fixed;
+  top: 75px;
+  left: 0;
+  width: 100%;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  z-index: 99999;
+}
+
+.mobile-nav-item {
+  padding: 12px 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.15s, color 0.15s;
+  font-family: var(--font-sans);
+}
+
+.mobile-nav-item:hover {
+  background: var(--color-surface-2);
+  color: var(--color-accent);
+}
+
 .attractiveContent {
   position: absolute;
   top: 50%;

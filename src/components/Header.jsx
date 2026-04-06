@@ -82,8 +82,24 @@ export default function Header() {
               </>
             ) : (
               <li>
-                <button onClick={() => setLoginOpen(true)}>
-                  <span>Login</span>
+                <button
+                  onClick={() => setLoginOpen(true)}
+                  style={{
+                    background: "transparent",
+                    border: "1.5px solid #cbd5e1",
+                    borderRadius: "8px",
+                    padding: "7px 18px",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "var(--color-text-primary)",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "var(--color-text-primary)"; }}
+                >
+                  Sign In
                 </button>
               </li>
             )}
@@ -105,11 +121,11 @@ export default function Header() {
       </header>
 
       {isMobile && dropdownOpen && (
-        <div className="fixed top-[75px] left-0 w-full bg-white shadow-lg z-[99999] border-b border-gray-200">
+        <div className="mobile-dropdown">
           <nav className="flex flex-col w-full py-4">
             {navLinks.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setDropdownOpen(false)}>
-                <div className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-accent hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                <div className="mobile-nav-item">
                   {item.label}
                 </div>
               </Link>
@@ -117,19 +133,19 @@ export default function Header() {
             {user ? (
               <>
                 <Link href="/dashBoard" onClick={() => setDropdownOpen(false)}>
-                  <div className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-accent hover:bg-gray-50 transition-colors border-b border-gray-100">
+                  <div className="mobile-nav-item">
                     {getFirstName(user.email)}
                   </div>
                 </Link>
                 <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="w-full text-left">
-                  <div className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-accent hover:bg-gray-50 transition-colors">
+                  <div className="mobile-nav-item">
                     Logout
                   </div>
                 </button>
               </>
             ) : (
               <button onClick={() => { setLoginOpen(true); setDropdownOpen(false); }} className="w-full text-left">
-                <div className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-accent hover:bg-gray-50 transition-colors">
+                <div className="mobile-nav-item">
                   Login
                 </div>
               </button>

@@ -22,19 +22,19 @@
 }
 
 .spiralSidebar::-webkit-scrollbar-thumb {
-  background: #7eafe5;
+  background: var(--color-accent);
   border-radius: 4px;
 }
 
 .spiralSidebar::-webkit-scrollbar-thumb:hover {
-  background: #5cbeff;
+  background: var(--color-accent-hover);
 }
 
 .spiralCard {
   width: 100%;
   height: 120px;
-  background-color: white;
-  border: 2px solid #ddd;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px;
   margin-bottom: 10px;
@@ -44,7 +44,7 @@
 .spiralTitle {
   font-size: 11px;
   font-weight: bold;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
   text-align: center;
 }
@@ -59,7 +59,7 @@
   display: flex;
   gap: 40px;
   padding: 20px 20px 20px 5px;
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 8px;
   margin-top: 5px;
   overflow-x: auto;
@@ -72,8 +72,8 @@
 .dashboardHorizontalCard {
   width: 270px; /* Increased from 250px */
   height: 240px; /* Increased from 220px */
-  background-color: white;
-  border: 2px solid #adb8ed;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -83,7 +83,7 @@
 .dashboardHorizontalTitle {
   font-size: 12px;
   font-weight: bold;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 6px;
   text-align: center;
 }
@@ -102,11 +102,11 @@
 }
 
 .dashboardHorizontalSidebar::-webkit-scrollbar-thumb {
-  background: #7eafe5;
+  background: var(--color-accent);
   border-radius: 4px;
 }
 
 .dashboardHorizontalSidebar::-webkit-scrollbar-thumb:hover {
-  background: #5cbeff;
+  background: var(--color-accent-hover);
 }
  

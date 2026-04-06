@@ -21,8 +21,11 @@
 
 .machineContainer {
   text-align: center;
-  margin-top: 24px;
+  margin-top: 40px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loadingContainer {
@@ -731,10 +734,10 @@
 .handButton {
   padding: 9px 20px;
   background-color: var(--color-surface);
-  border: 1.5px solid var(--color-accent);
-  color: var(--color-accent);
+  border: 1.5px solid #cbd5e1;
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: 500;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 13px;
@@ -744,19 +747,19 @@
 
 .handButton:hover {
   background-color: var(--color-surface-2);
-  transform: translateY(-1px);
+  border-color: var(--color-text-secondary);
 }
 
 .handButtonActive {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
+  background-color: #0f172a;
+  border-color: #0f172a;
   color: white;
   box-shadow: var(--shadow-card);
 }
 
 .handButtonActive:hover {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
+  background-color: #1e293b;
+  border-color: #1e293b;
   color: white;
   box-shadow: var(--shadow-card);
 }
@@ -834,7 +837,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-accent);
   white-space: nowrap;
 }
 
@@ -847,10 +850,10 @@
 .handLRBadge {
   padding: 9px 0;
   background-color: var(--color-surface);
-  border: 1.5px solid var(--color-accent);
-  color: var(--color-accent);
+  border: 1.5px solid #cbd5e1;
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-weight: 700;
+  font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 15px;
@@ -862,16 +865,38 @@
 
 .handLRBadge:hover {
   background-color: var(--color-surface-2);
-  transform: translateY(-1px);
+  border-color: var(--color-text-secondary);
 }
 
 .handLRBadgeSelected,
 .handLRBadgeSelected:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
+  background-color: #0f172a;
+  border-color: #0f172a;
   color: white;
   box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
+  transform: none;
+}
+
+/* Drawing card — white container around controls + canvas */
+.drawingCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  padding: 20px 24px 24px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 580px;
+  width: 95%;
+  margin: 0 auto;
+}
+
+.cardDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border);
+  margin: 16px 0;
 }
 
 
