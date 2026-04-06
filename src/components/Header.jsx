@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
 import LoginModal from "@/components/LoginModal";
@@ -50,74 +49,68 @@ export default function Header() {
   return (
     <div>
       <header className="heading fixed top-0 left-0 w-full z-50">
-        <Link href="/">
-          <h1 id="projectName" className="flex items-center space-x-2 ml-6">
-            <Image
-              src="/Icons/generated-icon-removebg.png"
-              width={45}
-              height={45}
-              className="w-12 h-12"
-              alt="Logo"
-              priority
-            />
-            <span className="text-2xl font-bold">Spiral Analysis</span>
-          </h1>
-        </Link>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Left: brand + nav links */}
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}>
+                Spiral Analysis
+              </span>
+            </Link>
 
-        {isClient && !isMobile && (
-          <ul className="navItems">
-            {navLinks.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href}><span>{item.label}</span></Link>
-              </li>
-            ))}
-            {user ? (
-              <>
-                <li><Link href="/dashBoard"><span>{getFirstName(user.email)}</span></Link></li>
-                <li>
-                  <button onClick={handleLogout} className="logoutBtn">
-                    <span>Logout</span>
+            {isClient && !isMobile && (
+              <nav style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+                {navLinks.filter(item => item.label !== "Home").map((item) => (
+                  <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-text-secondary)", transition: "color 0.2s ease" }}
+                      onMouseEnter={e => e.currentTarget.style.color = "#4f46e5"}
+                      onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-secondary)"}
+                    >{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+            )}
+          </div>
+
+          {/* Right: user / sign in */}
+          {isClient && !isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {user ? (
+                <>
+                  <Link href="/dashBoard" style={{ textDecoration: "none" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-text-secondary)", transition: "color 0.2s ease" }}
+                      onMouseEnter={e => e.currentTarget.style.color = "#4f46e5"}
+                      onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-secondary)"}
+                    >{getFirstName(user.email)}</span>
+                  </Link>
+                  <button onClick={handleLogout}
+                    style={{ background: "transparent", border: "1.5px solid #e2e8f0", borderRadius: "8px", padding: "6px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-text-secondary)", transition: "all 0.2s ease" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; e.currentTarget.style.background = "#eef2ff"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "var(--color-text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    Logout
                   </button>
-                </li>
-              </>
-            ) : (
-              <li>
+                </>
+              ) : (
                 <button
                   onClick={() => setLoginOpen(true)}
-                  style={{
-                    background: "transparent",
-                    border: "1.5px solid #cbd5e1",
-                    borderRadius: "8px",
-                    padding: "7px 18px",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    color: "var(--color-text-primary)",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "var(--color-text-primary)"; }}
+                  style={{ background: "transparent", border: "1.5px solid #e2e8f0", borderRadius: "8px", padding: "6px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-text-secondary)", transition: "all 0.2s ease" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; e.currentTarget.style.background = "#eef2ff"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "var(--color-text-secondary)"; e.currentTarget.style.background = "transparent"; }}
                 >
                   Sign In
                 </button>
-              </li>
-            )}
-          </ul>
-        )}
+              )}
+            </div>
+          )}
 
-        {isMobile && (
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="absolute top-6 right-6 z-50"
-          >
-            <FontAwesomeIcon
-              icon={dropdownOpen ? faTimes : faBars}
-              className="text-2xl"
-              style={{ color: "var(--color-text-primary)" }}
-            />
-          </button>
-        )}
+          {/* Mobile hamburger */}
+          {isMobile && (
+            <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px" }}>
+              <FontAwesomeIcon icon={dropdownOpen ? faTimes : faBars} style={{ fontSize: "18px", color: "var(--color-text-primary)" }} />
+            </button>
+          )}
+        </div>
       </header>
 
       {isMobile && dropdownOpen && (
@@ -125,29 +118,21 @@ export default function Header() {
           <nav className="flex flex-col w-full py-4">
             {navLinks.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setDropdownOpen(false)}>
-                <div className="mobile-nav-item">
-                  {item.label}
-                </div>
+                <div className="mobile-nav-item">{item.label}</div>
               </Link>
             ))}
             {user ? (
               <>
                 <Link href="/dashBoard" onClick={() => setDropdownOpen(false)}>
-                  <div className="mobile-nav-item">
-                    {getFirstName(user.email)}
-                  </div>
+                  <div className="mobile-nav-item">{getFirstName(user.email)}</div>
                 </Link>
                 <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="w-full text-left">
-                  <div className="mobile-nav-item">
-                    Logout
-                  </div>
+                  <div className="mobile-nav-item">Logout</div>
                 </button>
               </>
             ) : (
               <button onClick={() => { setLoginOpen(true); setDropdownOpen(false); }} className="w-full text-left">
-                <div className="mobile-nav-item">
-                  Login
-                </div>
+                <div className="mobile-nav-item">Login</div>
               </button>
             )}
           </nav>

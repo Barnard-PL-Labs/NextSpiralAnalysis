@@ -28,7 +28,7 @@ const styles = {
   startHint: {
     position: "absolute",
     top: "16px",
-    left: "12px",
+    left: "16px",
     background: "rgba(238, 242, 255, 0.95)",
     border: "1px solid #c7d2fe",
     borderRadius: "6px",
