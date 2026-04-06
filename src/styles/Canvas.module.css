@@ -735,17 +735,17 @@
 
 /* outlined by default, filled when active */
 .handButton {
-  padding: 9px 20px;
+  padding: 8px 16px;
   background-color: var(--color-surface);
   border: 1.5px solid #cbd5e1;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-weight: 500;
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   transition: all 0.2s ease-in-out;
-  min-width: 130px;
+  min-width: 44px;
 }
 
 .handButton:hover {
@@ -851,17 +851,17 @@
 }
 
 .handLRBadge {
-  padding: 9px 0;
+  padding: 8px 16px;
   background-color: var(--color-surface);
   border: 1.5px solid #cbd5e1;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   transition: all 0.2s ease-in-out;
-  width: 64px;
+  min-width: 44px;
   text-align: center;
   outline: none;
 }
