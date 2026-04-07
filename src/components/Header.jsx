@@ -41,7 +41,8 @@ export default function Header() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Spiral Analysis", href: "/machine" },
+    { label: "Take the Test", href: "/machine" },
+    { label: "Results", href: "/result" },
     ...(!researcherMode ? [{ label: "Learn More", href: "/instruction" }] : []),
     { label: "About Us", href: "/info" }
   ];
@@ -81,7 +82,7 @@ export default function Header() {
                     <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-text-secondary)", transition: "color 0.2s ease" }}
                       onMouseEnter={e => e.currentTarget.style.color = "#4f46e5"}
                       onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-secondary)"}
-                    >{getFirstName(user.email)}</span>
+                    >{getFirstName(profiles.username)}</span>
                   </Link>
                   <button onClick={handleLogout}
                     style={{ background: "transparent", border: "1.5px solid #e2e8f0", borderRadius: "8px", padding: "6px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-text-secondary)", transition: "all 0.2s ease" }}

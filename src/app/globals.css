@@ -63,7 +63,7 @@ h1 {
   width: 100%;
   top: 0;
   left: 0;
-  height: 75px;
+  height: 64px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -81,7 +81,7 @@ header a {
 /* ── Header mobile dropdown ── */
 .mobile-dropdown {
   position: fixed;
-  top: 75px;
+  top: 64px;
   left: 0;
   width: 100%;
   background: var(--color-surface);
