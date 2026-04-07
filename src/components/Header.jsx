@@ -16,6 +16,7 @@ export default function Header() {
   const [isClient, setIsClient] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [profileUsername, setProfileUsername] = useState("");
 
   useEffect(() => {
     setIsClient(true);
@@ -28,6 +29,25 @@ export default function Header() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const fetchProfileUsername = async () => {
+      if (!user?.id) {
+        setProfileUsername("");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setProfileUsername(profile?.username || "");
+    };
+
+    fetchProfileUsername();
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -82,7 +102,7 @@ export default function Header() {
                     <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-text-secondary)", transition: "color 0.2s ease" }}
                       onMouseEnter={e => e.currentTarget.style.color = "#4f46e5"}
                       onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-secondary)"}
-                    >{getFirstName(profiles.username)}</span>
+                    >{profileUsername || getFirstName(user.email)}</span>
                   </Link>
                   <button onClick={handleLogout}
                     style={{ background: "transparent", border: "1.5px solid #e2e8f0", borderRadius: "8px", padding: "6px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-text-secondary)", transition: "all 0.2s ease" }}
@@ -125,7 +145,7 @@ export default function Header() {
             {user ? (
               <>
                 <Link href="/dashBoard" onClick={() => setDropdownOpen(false)}>
-                  <div className="mobile-nav-item">{getFirstName(user.email)}</div>
+                  <div className="mobile-nav-item">{profileUsername || getFirstName(user.email)}</div>
                 </Link>
                 <button onClick={() => { handleLogout(); setDropdownOpen(false); }} className="w-full text-left">
                   <div className="mobile-nav-item">Logout</div>
