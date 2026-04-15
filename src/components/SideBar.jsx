@@ -15,7 +15,7 @@ const Sidebar = ({ onSettingsClick, isOpen, onToggle }) => {
     <div className={styles.sidebarContainer}>
       <aside className={`${styles.sidebar} ${!open ? styles.collapsed : ''}`}>
         <div className={styles.toggleButton}>
-          <Hamburger toggled={open} toggle={toggle} />
+          <Hamburger toggled={open} toggle={toggle} size={20} />
         </div>
         <nav>
           <ul className={styles.navItems}>

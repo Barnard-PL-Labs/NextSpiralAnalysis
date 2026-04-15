@@ -43,7 +43,7 @@ export default function Header() {
         .eq("id", user.id)
         .maybeSingle();
 
-      setProfileUsername(profile?.username || "");
+      setProfileUsername(profile?.username || getFirstName(user.email));
     };
 
     fetchProfileUsername();

@@ -10,12 +10,14 @@
   color: var(--color-accent);
   display: flex;
   justify-content: flex-start;
-  padding: 6px 5px 2px;
+  padding: 8px 0 4px;
+  margin-left: -1px;
 }
 
 .sidebar.collapsed .toggleButton {
-  justify-content: center;
-  padding: 6px 0 2px;
+  justify-content: flex-start;
+  padding: 8px 0 4px;
+  margin-left: -1px;
 }
 
 .sidebar {
@@ -54,7 +56,7 @@
   align-items: center;
   color: var(--color-text-primary);
   text-decoration: none;
-  padding: 12px 16px;
+  padding: 0;
   transition: all 0.2s ease;
 }
 
@@ -89,7 +91,7 @@
 }
 
 .collapsedItem {
-  justify-content: center;
-  padding: 12px 0;
+  justify-content: flex-start;
+  padding: 12px 14px;
 }
 

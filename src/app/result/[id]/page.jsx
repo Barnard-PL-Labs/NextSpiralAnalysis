@@ -93,8 +93,6 @@ const Segmented = ({ value, onChange }) => (
       { key: "charts", label: "Charts" },
     ].map(({ key, label }) => {
       const selected = value === key;
-      const baseBg = "rgba(255,255,255,0.1)";
-      const selBg = "rgba(255,255,255,0.3)";
       return (
         <button
           key={key}
@@ -102,20 +100,20 @@ const Segmented = ({ value, onChange }) => (
           aria-selected={selected}
           onClick={() => onChange(key)}
           onMouseEnter={(e) => {
-            if (!selected) e.currentTarget.style.background = "rgba(255,255,255,0.2)";
+            if (!selected) e.currentTarget.style.background = "rgba(79,70,229,0.15)";
           }}
           onMouseLeave={(e) => {
-            if (!selected) e.currentTarget.style.background = baseBg;
+            if (!selected) e.currentTarget.style.background = "rgba(79,70,229,0.08)";
           }}
           style={{
             padding: "5px 10px",
-            background: selected ? selBg : baseBg,
-            color: "white",
+            background: selected ? "#4f46e5" : "rgba(79,70,229,0.08)",
+            color: selected ? "white" : "#4f46e5",
             borderRadius: "4px",
             fontSize: "14px",
             fontWeight: 700,
             cursor: "pointer",
-            border: selected ? "2px solid white" : "2px solid transparent",
+            border: selected ? "2px solid #4f46e5" : "2px solid rgba(79,70,229,0.3)",
             transition: "all 0.2s ease",
             minWidth: 90,
           }}
@@ -786,15 +784,19 @@ export default function UnifiedResultPage() {
                     )
                   ).map((resultStatus, index) => {
                     let displayContent = `#${index + 1}`;
-                    let backgroundColor = "rgba(255, 165, 0, 0.3)";
+                    let backgroundColor = "rgba(217,119,6,0.15)";
+                    let textColor = "#92400e";
                     if (resultStatus?.error) {
                       displayContent = `#${index + 1}: Failed`;
-                      backgroundColor = "rgba(255,100,100,0.2)";
+                      backgroundColor = "rgba(220,38,38,0.12)";
+                      textColor = "#991b1b";
                     } else if (resultStatus?.status === 'timeout') {
                       displayContent = `#${index + 1}: Timeout`;
-                      backgroundColor = "rgba(255,100,100,0.2)";
+                      backgroundColor = "rgba(220,38,38,0.12)";
+                      textColor = "#991b1b";
                     } else if (resultStatus && !resultStatus.status) {
-                      backgroundColor = "rgba(255,255,255,0.1)";
+                      backgroundColor = "rgba(79,70,229,0.08)";
+                      textColor = "#3730a3";
                     }
                     return (
                       <span
@@ -804,20 +806,22 @@ export default function UnifiedResultPage() {
                           padding: "5px 10px",
                           background:
                             selectedDrawingIndex === index
-                              ? "rgba(255,255,255,0.3)"
+                              ? "#4f46e5"
                               : backgroundColor,
+                          color: selectedDrawingIndex === index ? "white" : textColor,
                           borderRadius: "4px",
                           fontSize: "14px",
+                          fontWeight: 600,
                           cursor: "pointer",
                           border:
                             selectedDrawingIndex === index
-                              ? "2px solid white"
+                              ? "2px solid #4f46e5"
                               : "2px solid transparent",
                           transition: "all 0.2s ease",
                         }}
                         onMouseEnter={(e) => {
                           if (selectedDrawingIndex !== index) {
-                            e.currentTarget.style.background = "rgba(255,255,255,0.2)";
+                            e.currentTarget.style.background = "rgba(79,70,229,0.15)";
                           }
                         }}
                         onMouseLeave={(e) => {
@@ -832,61 +836,66 @@ export default function UnifiedResultPage() {
                   })}
                 </div>
                 {areAllAnalysesCompleted() && (
-                  <div style={{ textAlign: "center", marginTop: "20px" }}>
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "12px",
+                    marginTop: "20px",
+                    paddingTop: "16px",
+                    borderTop: "1px solid rgba(199,210,254,0.5)",
+                  }}>
                     <button
                       onClick={downloadResults}
                       style={{
-                        backgroundColor: "#4a90e2",
+                        backgroundColor: "#4f46e5",
                         color: "white",
                         border: "none",
-                        padding: "10px 20px",
-                        borderRadius: "6px",
+                        padding: "8px 18px",
+                        borderRadius: "8px",
                         fontSize: "14px",
-                        fontWeight: "500",
+                        fontWeight: 600,
                         cursor: "pointer",
                         transition: "background-color 0.2s ease",
                         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                         display: "flex",
                         alignItems: "center",
                         gap: "8px",
-                        margin: "0 auto",
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#357abd"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#4a90e2"; }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#4338ca"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#4f46e5"; }}
                     >
-                      <FaDownload size={16} />
+                      <FaDownload size={14} />
                       Download Results
                     </button>
-                    <div style={{ marginTop: "10px" }}>
-                      <button
-                        onClick={() => setShowFeedbackModal(true)}
-                        style={{
-                          backgroundColor: "#a8c8e8",
-                          color: "navy",
-                          border: "none",
-                          padding: "8px 16px",
-                          borderRadius: "20px",
-                          fontSize: "12px",
-                          marginTop: "10px",
-                          marginBottom: "-25px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#8bb8d8";
-                          e.currentTarget.style.transform = "translateY(-1px)";
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.backgroundColor = "#a8c8e8";
-                          e.currentTarget.style.transform = "translateY(0)";
-                        }}
-                      >
-                        <FaComment size={12} style={{ marginRight: "6px", verticalAlign: "middle", display: "inline-block" }} />
-                        Feedback
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setShowFeedbackModal(true)}
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#4f46e5",
+                        border: "1.5px solid rgba(79,70,229,0.4)",
+                        padding: "8px 18px",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(79,70,229,0.08)";
+                        e.currentTarget.style.borderColor = "#4f46e5";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.borderColor = "rgba(79,70,229,0.4)";
+                      }}
+                    >
+                      <FaComment size={13} />
+                      Feedback
+                    </button>
                   </div>
                 )}
               </div>

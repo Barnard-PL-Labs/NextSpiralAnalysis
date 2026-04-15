@@ -39,15 +39,16 @@ export default function SettingsPopup({ isOpen, onClose }) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data?.user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) {
         router.push("/login");
       } else {
-        setUser(data.user);
+        setUser(user);
         const { data: profile } = await supabase
           .from("profiles")
           .select("username, bio")
-          .eq("id", data.user.id)
+          .eq("id", user.id)
           .maybeSingle();
         if (profile) {
           setProfileUsername(profile.username || "");

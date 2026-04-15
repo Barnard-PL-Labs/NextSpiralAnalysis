@@ -180,7 +180,7 @@ const Dashboard = () => {
       <div className={styles.content}>
         <div className={styles.welcomeContainer}>
           <h1 className={styles.welcome}>
-            Welcome back{username ? `, ${username}` : ""}!
+            {username ? `Welcome back, ${username}!` : "Welcome back!"}
           </h1>
         </div>
 
@@ -199,39 +199,27 @@ const Dashboard = () => {
           <>
             <div className={styles.latestResultContainer}>
               <div className={styles.latestResultBox}>
-                <h2 style={{ fontWeight: "bold" , fontSize: "1.5rem" }}>
-                  Latest Result
-                </h2>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-                <div className={styles.drawingCountBadge}>
-                  {entries[0].all_drawings.length}
-                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
+                <p className={styles.latestResultLabel}>Latest Result</p>
+                <p className={styles.latestResultTitle}>
+                  {new Date(entries[0].created_at).toLocaleString()}
+                </p>
+                <div className={styles.metaRow}>
+                  <div className={styles.drawingCountBadge}>
+                    {entries[0].all_drawings.length}
+                    {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
                   </div>
                   {entries[0].hand_used && (
-                    <div style={{
-                      backgroundColor: "var(--color-accent)",
-                      color: "white",
-                      padding: "6px 12px",
-                      borderRadius: "var(--radius-lg)",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      textTransform: "capitalize",
-                      boxShadow: "var(--shadow-card)",
-                      marginTop: "15px",
-                      marginBottom: "8px"
-                    }}>
+                    <div className={styles.handBadge}>
                       {entries[0].hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
                     </div>
                   )}
                 </div>
-                <p className={styles.dosScoreText}>
-                  <strong> <u> Average DOS Score</u>:  </strong>
-                  {entries[0].average_DOS || "N/A"}
-                </p>
-                <p>
-                  <strong><u>Analyzed on</u>:</strong>{" "}
-                  {new Date(entries[0].created_at).toLocaleString()}
-                </p>
+                <div className={styles.statRow}>
+                  <div className={styles.statItem}>
+                    <span className={styles.statLabel}>Avg DOS Score</span>
+                    <span className={styles.dosValue}>{entries[0].average_DOS || "N/A"}</span>
+                  </div>
+                </div>
                 <div className={styles.scatterPlot}>
                   <HorizontalSpiralHistory savedDrawings={entries[0].all_drawings}/>
                 </div>
@@ -270,29 +258,17 @@ const Dashboard = () => {
                   </div>
                   {activeIndex === index && (
                     <div className={styles.accordionContent}>
-                       <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-                       <div className={styles.drawingCountBadge}>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                        <div className={styles.drawingCountBadge}>
                           {entry.all_drawings.length}
                           {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                         </div>
-                         {entry.hand_used && (
-                           <div style={{
-                             backgroundColor: "#4a148c",
-                             color: "white",
-                             padding: "6px 12px",
-                             borderRadius: "20px",
-                             fontSize: "14px",
-                             fontWeight: "600",
-                             textTransform: "capitalize",
-                             boxShadow: "0 2px 8px rgba(74, 20, 140, 0.3)",
-                             border: "2px solid rgba(255, 255, 255, 0.2)",
-                             marginTop: "15px",
-                             marginBottom: "8px"
-                           }}>
-                             {entry.hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
-                           </div>
-                         )}
-                       </div>
+                        </div>
+                        {entry.hand_used && (
+                          <div className={styles.handBadge}>
+                            {entry.hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+                          </div>
+                        )}
+                      </div>
                       <div className={styles.scatterPlot}>
                         <HorizontalSpiralHistory savedDrawings={entry.all_drawings} />
                       </div>
