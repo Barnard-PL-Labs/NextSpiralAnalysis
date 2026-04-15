@@ -106,10 +106,10 @@ const Segmented = ({ value, onChange }) => (
             if (!selected) e.currentTarget.style.background = "rgba(79,70,229,0.08)";
           }}
           style={{
-            padding: "5px 10px",
+            padding: "6px 20px",
             background: selected ? "#4f46e5" : "rgba(79,70,229,0.08)",
             color: selected ? "white" : "#4f46e5",
-            borderRadius: "4px",
+            borderRadius: "999px",
             fontSize: "14px",
             fontWeight: 700,
             cursor: "pointer",
@@ -489,7 +489,7 @@ export default function UnifiedResultPage() {
   const [pData, setPData] = useState([]);
   const [analysisHistory, setAnalysisHistory] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("summary"); // Summary by default
+  const [activeTab, setActiveTab] = useState("charts"); // Summary by default
   const [liveAnalysisState, setLiveAnalysisState] = useState({
     sessionActive: false,
     isSessionComplete: false,
@@ -743,17 +743,21 @@ export default function UnifiedResultPage() {
     <div className={styles.pageWrapper}>
       <Header showVideo={false} />
       <div className={styles.container}>
-        <div className={styles.title}>
+        <div className={styles.title} style={{ background: "transparent", border: "none", boxShadow: "none", backdropFilter: "none", WebkitBackdropFilter: "none", marginBottom: 8, paddingBottom: 0 }}>
           <h2>Analysis Results</h2>
+          {getDOSScore() && (
+            <p style={{ fontSize: "1rem", fontWeight: 500, color: "var(--color-text-secondary)", marginTop: 6 }}>
+              Average DOS Score: <span style={{ fontWeight: 700, color: "#4f46e5" }}>{getDOSScore()}</span>
+            </p>
+          )}
           {getProgressDisplay()}
-          {getDOSScore() && <p>Average DOS Score: {getDOSScore()}</p>}
           {error && <p style={{ color: "red" }}>{String(error)}</p>}
         </div>
 
         {/* Toggle */}
-<div style={{ display: "flex", justifyContent: "center", marginBottom: 24, paddingBottom: 8 }}>
-  <Segmented value={activeTab} onChange={setActiveTab} />
-</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+          <Segmented value={activeTab} onChange={setActiveTab} />
+        </div>
 
 
         {/* ======= SUMMARY TAB (styling-only changes) ======= */}
@@ -768,13 +772,14 @@ export default function UnifiedResultPage() {
           <>
             {(analysisHistory || liveAnalysisState.sessionActive) && drawings.length > 0 && (
               <div className={styles.title}>
-                <h3>Individual Drawings:</h3>
+                <h3 style={{ marginBottom: "16px", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-accent)" }}>Individual Drawings</h3>
                 <div
                   style={{
                     display: "flex",
-                    gap: "10px",
+                    gap: "8px",
                     justifyContent: "center",
                     flexWrap: "wrap",
+                    marginBottom: "24px",
                   }}
                 >
                   {(analysisHistory?.individual_results ||
@@ -835,14 +840,78 @@ export default function UnifiedResultPage() {
                     );
                   })}
                 </div>
+                {/* Chart grid inside the card */}
+                <div style={{ borderTop: "1px solid rgba(199,210,254,0.5)", paddingTop: "24px" }}>
+                  <div className={styles.chartGrid}>
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>Spiral XY Plot</h3>
+                      <div className={styles.chartContainer}>
+                        <LineGraph data={drawData} />
+                      </div>
+                      <div style={{ marginTop: "10px", textAlign: "center", color: "black" }}>
+                        {(() => {
+                          const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
+                          if (!cur) return <>Pending<AnimatedEllipsis /></>;
+                          if (cur.error) return "DOS Score: Failed";
+                          if (cur.status === 'timeout') return "DOS Score: Timeout";
+                          if (cur.status === 'processing' || cur.status === 'pending') return <>Pending<AnimatedEllipsis /></>;
+                          const dos = Number(cur.DOS);
+                          return Number.isNaN(dos) ? "DOS Score: N/A" : `DOS Score: ${dos.toFixed(4)}`;
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>Speed vs. Time</h3>
+                      <div className={styles.chartContainer}>
+                        <SpeedTimeChart speedData={speedData} />
+                      </div>
+                    </div>
+
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>3D Spiral View</h3>
+                      <div className={styles.chartContainer}>
+                        <SpiralPlot data={drawData} />
+                      </div>
+                    </div>
+
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>Pressure vs Time</h3>
+                      <div className={styles.chartContainer}>
+                        <PTChart data={drawData} />
+                      </div>
+                    </div>
+
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>Tremor Axes</h3>
+                      <div className={styles.chartContainer}>
+                        {loadingResult ? <p>Loading tremor data...</p> : <TremorPolarPlot result={result} />}
+                      </div>
+                    </div>
+
+                    <div className={styles.graphCard} style={{ position: "relative" }}>
+                      <h3>Pressure vs X</h3>
+                      <div className={styles.chartContainer}>
+                        <PressureVsX
+                          data={drawData}
+                          bins={60}
+                          minPerBin={12}
+                          samplePoints={500}
+                          splitByQuadrant={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {areAllAnalysesCompleted() && (
                   <div style={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     gap: "12px",
-                    marginTop: "20px",
-                    paddingTop: "16px",
+                    marginTop: "24px",
+                    paddingTop: "20px",
                     borderTop: "1px solid rgba(199,210,254,0.5)",
                   }}>
                     <button
@@ -900,68 +969,6 @@ export default function UnifiedResultPage() {
                 )}
               </div>
             )}
-
-            {/* CHART GRID — UNCHANGED */}
-            <div className={styles.chartGrid}>
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>Spiral XY Plot</h3>
-                <div className={styles.chartContainer}>
-                  <LineGraph data={drawData} />
-                </div>
-                <div style={{ marginTop: "10px", textAlign: "center", color: "black" }}>
-                  {(() => {
-                    const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
-                    if (!cur) return <>Pending<AnimatedEllipsis /></>;
-                    if (cur.error) return "DOS Score: Failed";
-                    if (cur.status === 'timeout') return "DOS Score: Timeout";
-                    if (cur.status === 'processing' || cur.status === 'pending') return <>Pending<AnimatedEllipsis /></>;
-                    const dos = Number(cur.DOS);
-                    return Number.isNaN(dos) ? "DOS Score: N/A" : `DOS Score: ${dos.toFixed(4)}`;
-                  })()}
-                </div>
-              </div>
-
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>Speed vs. Time</h3>
-                <div className={styles.chartContainer}>
-                  <SpeedTimeChart speedData={speedData} />
-                </div>
-              </div>
-
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>3D Spiral View</h3>
-                <div className={styles.chartContainer}>
-                  <SpiralPlot data={drawData} />
-                </div>
-              </div>
-
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>Pressure vs Time</h3>
-                <div className={styles.chartContainer}>
-                  <PTChart data={drawData} />
-                </div>
-              </div>
-
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>Tremor Axes</h3>
-                <div className={styles.chartContainer}>
-                  {loadingResult ? <p>Loading tremor data...</p> : <TremorPolarPlot result={result} />}
-                </div>
-              </div>
-
-              <div className={styles.graphCard} style={{ position: "relative" }}>
-                <h3>Pressure vs X</h3>
-                <div className={styles.chartContainer}>
-                 <PressureVsX
-  data={drawData}
-  bins={60}
-  minPerBin={12}
-  samplePoints={500}
-  splitByQuadrant={false}
-/>
-                </div>
-              </div>
-            </div>
           </>
         )}
       </div>

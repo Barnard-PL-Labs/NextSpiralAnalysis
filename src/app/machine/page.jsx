@@ -330,13 +330,7 @@ export default function MachinePage() {
         <FaHandPaper className={styles.cardIcon} />
       </div>
       <h1 className={styles.cardTitle}>Spiral Drawing Assessment</h1>
-      <p className={styles.cardSubtitle}>Patient Information &amp; Setup</p>
-    </div>
-
-    {/* Pre-Test sub-header */}
-    <div className={styles.preTestHeader}>
-      <h2 className={styles.preTestTitle}>Pre-Test Information</h2>
-      <p className={styles.preTestDescription}>Please provide the following information to begin the assessment</p>
+      <p className={styles.cardSubtitle}>Please provide the following information to begin the assessment</p>
     </div>
 
     {/* Dominance */}
@@ -362,8 +356,6 @@ export default function MachinePage() {
         </button>
       </div>
     </div>
-
-    <div className={styles.selectionDivider} />
 
     {/* Hand side */}
     <div className={styles.selectionGroup}>
@@ -394,53 +386,52 @@ export default function MachinePage() {
     <div className={styles.selectionDivider} />
 
     {/* Demographics toggle */}
-    <div className={styles.demographicsRow} onClick={() => setShowDemographics(prev => !prev)}>
+    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
       <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
       <span className={styles.demographicsLabel}>Include optional demographics</span>
     </div>
 
     {/* Inline demographics panel */}
-    {showDemographics && (
-      <div className={styles.demographicsPanel}>
+    <div className={`${styles.demographicsPanel} ${showDemographics ? styles.demographicsPanelOpen : ""}`}>
+      <div className={styles.demographicsPanelInner}>
         <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Name</label>
+          <label className={styles.demographicsFieldLabel}>Name:</label>
           <input
             type="text"
             value={demographics.name}
             onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
             className={styles.demographicsInput}
-            placeholder="Enter name"
+            placeholder=""
           />
         </div>
         <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Age</label>
+          <label className={styles.demographicsFieldLabel}>Age:</label>
           <input
             type="number"
             value={demographics.age}
             onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
             className={styles.demographicsInput}
-            placeholder="Enter age"
+            placeholder=""
             min="0"
             max="120"
           />
         </div>
         <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Gender</label>
-          <div className={styles.sexButtonsRow}>
-            <button
-              type="button"
-              onClick={() => setDemographics({ ...demographics, sex: "M" })}
-              className={styles.sexButton + (demographics.sex === "M" ? " " + styles.sexButtonActive : "")}
-            >Male</button>
-            <button
-              type="button"
-              onClick={() => setDemographics({ ...demographics, sex: "F" })}
-              className={styles.sexButton + (demographics.sex === "F" ? " " + styles.sexButtonActive : "")}
-            >Female</button>
-          </div>
+          <label className={styles.demographicsFieldLabel}>Gender:</label>
+          <select
+            value={demographics.sex}
+            onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
+            className={styles.demographicsInput}
+            style={{ paddingRight: "6px" }}
+          >
+            <option value="">Select</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
         </div>
       </div>
-    )}
+    </div>
 
     {/* Continue button */}
     <button
@@ -501,28 +492,27 @@ export default function MachinePage() {
 
                 <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
 
-                <div className={styles.cardDivider} />
+              </div>
 
-                {/* Action buttons inside card */}
-                <div className={styles.actionButtonRow}>
-                  <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
-                    Clear
+              {/* Action buttons outside card */}
+              <div className={styles.actionButtonRow} style={{ marginTop: "14px" }}>
+                <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
+                  Clear
+                </button>
+                <button onClick={clearAllDrawings} className={styles.clearButton}>
+                  Clear All
+                </button>
+                {!userFinished && savedDrawings.length > 0 && (
+                  <button className={styles.button} onClick={handleFinishEarly}>
+                    Finish Analysis
+                    <span className={styles.countBadge}>{savedDrawings.length}</span>
                   </button>
-                  <button onClick={clearAllDrawings} className={styles.clearButton}>
-                    Clear All
+                )}
+                {!userFinished && savedDrawings.length < 15 && (
+                  <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing}>
+                    Save
                   </button>
-                  {!userFinished && savedDrawings.length > 0 && (
-                    <button className={styles.button} onClick={handleFinishEarly}>
-                      Finish Analysis
-                      <span className={styles.countBadge}>{savedDrawings.length}</span>
-                    </button>
-                  )}
-                  {!userFinished && savedDrawings.length < 15 && (
-                    <button className={styles.button} onClick={saveAndAnalyzeCurrentDrawing}>
-                      Save
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
 
               <MiniSpiralHistory savedDrawings={savedDrawings} />

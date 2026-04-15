@@ -170,7 +170,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                     />
                   )}
                   {!signupMode && (
-                    <div style={{ textAlign: "right", marginBottom: "10px" }}>
+                    <div style={{ textAlign: "right", marginTop: "-6px", marginBottom: "4px" }}>
                       <button
                         onClick={() => setIsForgot(!isForgot)}
                         style={{
@@ -178,7 +178,7 @@ export default function LoginModal({ isOpen, closeModal }) {
                           border: "none",
                           color: "var(--color-accent)",
                           cursor: "pointer",
-                          fontSize: "0.9em",
+                          fontSize: "0.78em",
                           padding: 0,
                         }}
                       >

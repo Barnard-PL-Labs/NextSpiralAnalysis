@@ -7,42 +7,42 @@
   min-height: 100vh;
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
-  padding-top: 92px;
+  padding-top: 80px;
   padding-bottom: 48px;
   color: var(--color-text-primary);
 }
 
 .title {
   text-align: center;
-  margin-bottom: 28px;
-  padding: 28px 32px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(199, 210, 254, 0.55);
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(199, 210, 254, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .title h2 {
-  margin: 0 0 12px;
-  font-size: 2rem;
+  margin: 0 0 8px;
+  font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
 
 .title h3 {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin: 0 0 18px;
+  margin: 0 0 14px;
 }
 
 .title p {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   margin: 0;
@@ -51,31 +51,30 @@
 .chartGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
+  gap: 16px;
   align-items: stretch;
 }
 
 .graphCard {
-  background: rgba(255, 255, 255, 0.92);
-  padding: 18px 18px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(199, 210, 254, 0.55);
-  box-shadow: 0 6px 28px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  min-height: 380px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 16px 16px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 210, 254, 0.5);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  min-height: 360px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .graphCard h3 {
   text-align: left;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: var(--color-text-primary);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .chartContainer {
@@ -85,9 +84,9 @@
   overflow: hidden;
   flex: 1;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(255, 255, 255, 0.98));
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  border-radius: 14px;
-  padding: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 10px;
+  padding: 8px;
 }
 
 .chartContainer > div {
@@ -98,37 +97,37 @@
 @media (max-width: 900px) {
   .container {
     width: min(100%, calc(100% - 32px));
-    padding-top: 80px;
+    padding-top: 72px;
   }
 
   .title {
-    padding: 24px 20px;
-    margin-bottom: 22px;
+    padding: 20px 18px;
+    margin-bottom: 16px;
   }
 
   .chartGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 }
 
 @media (max-width: 520px) {
   .container {
     width: min(100%, calc(100% - 24px));
-    padding-bottom: 32px;
+    padding-bottom: 28px;
   }
 
   .title {
-    padding: 20px 16px;
+    padding: 16px 14px;
   }
 
   .title h2 {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   .graphCard {
-    min-height: 340px;
-    padding: 16px 16px 14px;
+    min-height: 320px;
+    padding: 14px 14px 12px;
   }
 
   .chartGrid {

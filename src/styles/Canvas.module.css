@@ -191,20 +191,6 @@
   font-weight: 500;
 }
 
-.saveButton {
-  padding: 10px 35px;
-  background-color: #6fadebfa;
-  border: 2px solid rgba(0, 174, 239, 0.5);
-  color: rgb(255, 255, 255);
-  font-family: Arial, sans-serif;
-  font-weight: normal;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease-in-out;
-  margin-bottom: 10px;
-}
-
 .clearButton {
   padding: 10px 20px;
   background-color: transparent;
@@ -247,10 +233,6 @@
   border-color: #cbd5e1;
 }
 
-.saveButton:hover {
-  background-color: #0081b3;
-}
-
 .countBadge {
   background: var(--color-accent);
   color: white;
@@ -264,11 +246,6 @@
   font-weight: 600;
 }
 
-.saveButton:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-  border-color: #999999;
-}
 
 @keyframes spin {
   to {
@@ -570,6 +547,12 @@
   border: none;
 }
 
+.demographicsRowOpen {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
 .demographicsRow:hover {
   background: var(--color-border);
 }
@@ -588,28 +571,42 @@
   color: var(--color-text-primary);
 }
 
-/* Inline demographics panel */
+/* Inline demographics panel — unfurl */
 .demographicsPanel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.3s ease;
+  opacity: 0;
+  background: var(--color-surface-2);
+  border: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.demographicsPanelOpen {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.demographicsPanelInner {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 12px;
-  padding: 20px;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: 16px 20px 20px;
 }
 
 .demographicsField {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
 }
 
 .demographicsFieldLabel {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-primary);
+  min-width: 60px;
+  flex-shrink: 0;
 }
 
 .demographicsInput {
@@ -624,6 +621,7 @@
   width: 100%;
   box-sizing: border-box;
 }
+
 
 .demographicsInput:focus {
   outline: none;
@@ -906,6 +904,27 @@
   max-width: 580px;
   width: 95%;
   margin: 0 auto;
+}
+
+.saveButton {
+  padding: 10px 20px;
+  background-color: #0b1220;
+  border: 1.5px solid #0b1220;
+  color: white;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+  min-width: 120px;
+}
+
+.saveButton:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
 }
 
 .cardDivider {
