@@ -88,7 +88,7 @@ export default function MachinePage() {
     const sessionKey = "anonymous_session_id";
     const timestampKey = "anonymous_session_timestamp";
     const now = Date.now();
-    const MAX_SESSION_AGE_MS = 1 * 60 * 1000; // 1 minute
+    const MAX_SESSION_AGE_MS = 30 * 60 * 1000; // 30 minutes
     const lastTimestamp = parseInt(localStorage.getItem(timestampKey), 10);
     const isExpired = isNaN(lastTimestamp) || now - lastTimestamp > MAX_SESSION_AGE_MS;
     if (isExpired) {
