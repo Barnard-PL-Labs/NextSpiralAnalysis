@@ -28,29 +28,8 @@ export default function MachinePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Reset hand selection on mount
     setSelectedHand(null);
     localStorage.removeItem("selectedHand");
-
-    const originalFrom = supabase.from;
-    supabase.from = function (table) {
-      const queryBuilder = originalFrom.call(this, table);
-      if (table === "api_results") {
-        const originalEq = queryBuilder.eq;
-        queryBuilder.eq = function (column, value) {
-          if (column === "drawing_id" && typeof value === "string" && value.includes("anon_")) {
-            console.error("Problematic api_results query with anon_ drawing_id");
-            console.trace();
-            debugger;
-          }
-          return originalEq.call(this, column, value);
-        };
-      }
-      return queryBuilder;
-    };
-    return () => {
-      supabase.from = originalFrom;
-    };
   }, []);
 
   // ——— Leave-page warnings (no autosave) ———

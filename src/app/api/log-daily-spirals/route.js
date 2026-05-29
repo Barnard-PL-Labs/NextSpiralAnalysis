@@ -20,9 +20,9 @@ export async function POST(req) {
     const today = new Date().toISOString().split("T")[0];
 
     // Count spirals created today
-    const { data: spirals, error: countError } = await supabase
+    const { count: spiralCount, error: countError } = await supabase
       .from("drawings")
-      .select("id", { count: "exact", head: true })
+      .select("*", { count: "exact", head: true })
       .gte("created_at", `${today}T00:00:00Z`)
       .lt("created_at", `${today}T23:59:59.999Z`);
 
@@ -33,8 +33,6 @@ export async function POST(req) {
         { status: 500 }
       );
     }
-
-    const spiralCount = spirals?.length || 0;
 
     // Log the count to spiral_daily_logs
     const { data: logData, error: logError } = await supabase
