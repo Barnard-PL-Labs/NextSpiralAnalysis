@@ -11,7 +11,7 @@ import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useResearcherMode } from "@/lib/researcherModeContext";
 
 export default function Header() {
-  const { user, username: profileUsername } = useAuth();
+  const { user, username: profileUsername, logout } = useAuth();
   const router = useRouter();
   const { researcherMode } = useResearcherMode();
   const [isLoginOpen, setLoginOpen] = useState(false);
@@ -32,7 +32,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logout();
     router.push("/");
   };
 
