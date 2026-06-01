@@ -4,8 +4,25 @@ import { supabase } from "./supabaseClient";
 
 const AuthContext = createContext();
 
+const getFirstName = (email) => {
+  if (!email) return "";
+  const part = email.split("@")[0].split(".")[0];
+  return part.charAt(0).toUpperCase() + part.slice(1);
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [username, setUsername] = useState("");
+
+  const fetchUsername = async (u) => {
+    if (!u) { setUsername(""); return; }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", u.id)
+      .maybeSingle();
+    setUsername(profile?.username || getFirstName(u.email));
+  };
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -13,25 +30,28 @@ export const AuthProvider = ({ children }) => {
       if (error) {
         console.error("Error fetching session:", error);
       } else {
-        setUser(data?.session?.user || null);
-        console.log("Initial session:", data?.session);
+        const u = data?.session?.user || null;
+        setUser(u);
+        fetchUsername(u);
       }
     };
 
     fetchSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
-      if (event === "SIGNED_IN" && session?.user) {
+      const u = session?.user || null;
+      setUser(u);
+      fetchUsername(u);
+      if (event === "SIGNED_IN" && u) {
         const { data: existing } = await supabase
           .from("profiles")
           .select("id")
-          .eq("id", session.user.id)
+          .eq("id", u.id)
           .maybeSingle();
         if (!existing) {
           await supabase.from("profiles").insert({
-            id: session.user.id,
-            username: session.user.email?.split("@")[0] || "",
+            id: u.id,
+            username: u.email?.split("@")[0] || "",
             created_at: new Date().toISOString(),
           });
         }
@@ -43,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, username }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
