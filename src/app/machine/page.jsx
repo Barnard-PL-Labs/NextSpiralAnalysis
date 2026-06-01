@@ -8,7 +8,6 @@ import Tutorial from "@/components/Tutorial";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
-import backgroundStyles from "@/styles/Background.module.css";
 import { FaHandPaper } from "react-icons/fa";
 
 export default function MachinePage() {
@@ -24,12 +23,15 @@ export default function MachinePage() {
   const [showDemographics, setShowDemographics] = useState(false);
   const [demographics, setDemographics] = useState({ name: "", age: "", sex: "" });
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     setSelectedHand(null);
     localStorage.removeItem("selectedHand");
+    localStorage.removeItem("anonymous_session_id");
+    localStorage.removeItem("anonymous_session_timestamp");
   }, []);
 
   // ——— Leave-page warnings (no autosave) ———
@@ -92,7 +94,7 @@ export default function MachinePage() {
     const lastTimestamp = parseInt(localStorage.getItem(timestampKey), 10);
     const isExpired = isNaN(lastTimestamp) || now - lastTimestamp > MAX_SESSION_AGE_MS;
     if (isExpired) {
-      const newSessionId = `anon_${now}_${Math.random().toString(36).substr(2, 9)}`;
+      const newSessionId = `anon_${now}_${Math.random().toString(36).substring(2, 11)}`;
       localStorage.setItem(sessionKey, newSessionId);
       localStorage.setItem(timestampKey, now.toString());
       return newSessionId;
@@ -141,21 +143,32 @@ export default function MachinePage() {
     setSavedDrawings((prev) => [...prev, labeled]);
 
     setIsAnalyzing(true);
+    setIsSaving(true);
     const sessionId = getOrCreateSessionId();
 
     try {
+      console.log("[1/3] Saving drawing to Supabase...", { sessionId, points: drawingPoints.length });
       const drawingId = await saveSingleDrawingToDatabase(drawingPoints, sessionId);
+      console.log("[1/3] Drawing saved:", drawingId);
+      setIsSaving(false);
+
+      console.log("[2/3] Sending to analysis API...");
       const result = await backgroundAnalysis(drawingPoints);
       if (result === null || result === "error") throw new Error("Analysis failed to produce valid results");
+      console.log("[2/3] Analysis returned:", result);
+
+      console.log("[3/3] Saving result to Supabase...");
       await saveSingleAnalysisResult(drawingId, result, sessionId);
+      console.log("[3/3] Result saved. Pipeline complete.");
     } catch (error) {
       console.error("Drawing analysis failed:", error);
+      setIsSaving(false);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const backgroundAnalysis = async (drawingData, drawingIndex = null) => {
+  const backgroundAnalysis = async (drawingData) => {
     const TIMEOUT_MS = 70000;
     try {
       const timeoutPromise = new Promise((_, reject) =>
@@ -488,7 +501,7 @@ export default function MachinePage() {
                   </button>
                 )}
                 {!userFinished && savedDrawings.length < 15 && (
-                  <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing}>
+                  <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing} disabled={isSaving}>
                     Save
                   </button>
                 )}
