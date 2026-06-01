@@ -161,7 +161,7 @@ const Dashboard = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [viewAll]);
+  }, [viewAll, user]);
 
   const handleAccordionClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);

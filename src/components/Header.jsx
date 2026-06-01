@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
 import LoginModal from "@/components/LoginModal";
@@ -11,6 +12,7 @@ import { useResearcherMode } from "@/lib/researcherModeContext";
 
 export default function Header() {
   const { user } = useAuth();
+  const router = useRouter();
   const { researcherMode } = useResearcherMode();
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -51,6 +53,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    router.push("/");
   };
 
   const getFirstName = (email) => {
