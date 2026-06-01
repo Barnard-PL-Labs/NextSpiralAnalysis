@@ -21,11 +21,9 @@ const SUPERUSER_EMAILS = (
   .filter((email) => email !== "");
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, username } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
-  const [userEmail, setUserEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -107,22 +105,8 @@ const Dashboard = () => {
         setLoading(false);
         return;
       }
-      const getFirstName = (email) => {
-        const emailPart = email.split("@")[0];
-        return (
-          emailPart.split(".")[0].charAt(0).toUpperCase() +
-          emailPart.split(".")[0].slice(1)
-        );
-      };
 
-      setUsername(getFirstName(user.email));
-      setUserEmail(user.email);
-
-      const { data: profile } = await supabase.from("profiles").select("avatar_path").eq("id", user.id).maybeSingle();
-      if (profile?.avatar_path) {
-        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_path, 3600);
-        if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
-      }
+      const isSuperuser = SUPERUSER_EMAILS.includes(user.email.toLowerCase());
 
       let query = supabase
         .from("api_results")
@@ -132,12 +116,19 @@ const Dashboard = () => {
         `)
         .order("created_at", { ascending: false });
 
-      const isSuperuser = SUPERUSER_EMAILS.includes(user.email.toLowerCase());
       if (!isSuperuser || !viewAll) {
         query = query.eq("user_id", user.id);
       }
 
-      const { data, error } = await query;
+      const [{ data: profile }, { data, error }] = await Promise.all([
+        supabase.from("profiles").select("avatar_path").eq("id", user.id).maybeSingle(),
+        query,
+      ]);
+
+      if (profile?.avatar_path) {
+        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_path, 3600);
+        if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      }
 
       if (!error && data) {
         const groupedData = groupResultsBySession(data);
@@ -169,7 +160,7 @@ const Dashboard = () => {
 
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
-  const isSuperuser = SUPERUSER_EMAILS.includes(userEmail.toLowerCase());
+  const isSuperuser = SUPERUSER_EMAILS.includes(user?.email?.toLowerCase() ?? "");
 
   return (
     <div className={styles.pageContainer}>

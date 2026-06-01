@@ -217,7 +217,6 @@ export default function MachinePage() {
       .single();
 
     if (error) throw error;
-    if (pendingDemographics) localStorage.removeItem("pendingDemographics");
     return savedDrawing.id;
   };
 
@@ -246,6 +245,7 @@ export default function MachinePage() {
       return;
     }
     setUserFinished(true);
+    localStorage.removeItem("pendingDemographics");
     const sessionId = getOrCreateSessionId();
     const isAuthenticated = user?.id;
     const params = new URLSearchParams({ session: sessionId, anon: (!isAuthenticated).toString() });

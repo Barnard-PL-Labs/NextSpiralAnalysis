@@ -11,14 +11,13 @@ import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useResearcherMode } from "@/lib/researcherModeContext";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, username: profileUsername } = useAuth();
   const router = useRouter();
   const { researcherMode } = useResearcherMode();
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [profileUsername, setProfileUsername] = useState("");
 
   useEffect(() => {
     setIsClient(true);
@@ -32,34 +31,9 @@ export default function Header() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchProfileUsername = async () => {
-      if (!user?.id) {
-        setProfileUsername("");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      setProfileUsername(profile?.username || getFirstName(user.email));
-    };
-
-    fetchProfileUsername();
-  }, [user?.id]);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/");
-  };
-
-  const getFirstName = (email) => {
-    if (!email) return '';
-    const emailPart = email.split('@')[0];
-    return emailPart.split('.')[0].charAt(0).toUpperCase() + emailPart.split('.')[0].slice(1);
   };
 
   const navLinks = [
