@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/lib/authProvider";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
 import Pagination from "../../components/Pagination";
@@ -20,6 +21,7 @@ const SUPERUSER_EMAILS = (
   .filter((email) => email !== "");
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
@@ -101,14 +103,10 @@ const Dashboard = () => {
 
     const fetchData = async () => {
       setLoading(true);
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.user) {
+      if (!user) {
         setLoading(false);
         return;
       }
-
-      const user = session.user;
       const getFirstName = (email) => {
         const emailPart = email.split("@")[0];
         return (
