@@ -63,7 +63,11 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user, username }}>{children}</AuthContext.Provider>;
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  return <AuthContext.Provider value={{ user, username, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
