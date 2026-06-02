@@ -3,17 +3,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/lib/authProvider";
 import { FaUser, FaCog, FaFlask, FaBrain, FaIdCard } from "react-icons/fa";
 import { useResearcherMode } from "@/lib/researcherModeContext";
 import styles from "../styles/Settings.module.css";
 
 export default function SettingsPopup({ isOpen, onClose }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState(null);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -38,29 +39,21 @@ export default function SettingsPopup({ isOpen, onClose }) {
   const { researcherMode, toggleResearcherMode } = useResearcherMode();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user) {
-        router.push("/login");
-      } else {
-        setUser(user);
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username, bio")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profile) {
-          setProfileUsername(profile.username || "");
-          setProfileBio(profile.bio || "");
-        }
+    const fetchProfile = async () => {
+      if (!user) { router.push("/login"); return; }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username, bio")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile) {
+        setProfileUsername(profile.username || "");
+        setProfileBio(profile.bio || "");
       }
     };
 
-    if (isOpen) {
-      fetchUser();
-    }
-  }, [isOpen, router]);
+    if (isOpen) fetchProfile();
+  }, [isOpen, user, router]);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
