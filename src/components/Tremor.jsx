@@ -172,13 +172,14 @@ const TremorPolarPlot = ({ result }) => {
             showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
+                "<b>Axis " + (index + 1) + "</b><br>" +
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
-                "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
-                "<b>Axis</b> " + (index + 1) + "<br>" +
+                "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
+                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
               "<extra></extra>",
             hoverlabel: {
               bgcolor: axisColors[index % axisColors.length],
-              font: { color: "white" }
+              font: { color: "white" },
             },
           },
             // Negative direction arrow - multiple points
@@ -194,13 +195,14 @@ const TremorPolarPlot = ({ result }) => {
             showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
+                "<b>Axis " + (index + 1) + "</b><br>" +
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
-                "<b>Power</b>: " + powers[index].toFixed(3) + "<br>" +
-                "<b>Axis</b> " + (index + 1) + "<br>" +
+                "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
+                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
               "<extra></extra>",
             hoverlabel: {
               bgcolor: axisColors[index % axisColors.length],
-              font: { color: "white" }
+              font: { color: "white" },
             },
           }
           ];
@@ -263,6 +265,7 @@ const TremorPolarPlot = ({ result }) => {
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
+    hoverlabel: { borderradius: 8 },
   };
 
   // Clinical sections for carousel
