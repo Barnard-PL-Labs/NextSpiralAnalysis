@@ -515,5 +515,8 @@ export default function MachinePage() {
 
       {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} forceShow={true} />}
     </>
+    
   );
 }
+
+//hi 
