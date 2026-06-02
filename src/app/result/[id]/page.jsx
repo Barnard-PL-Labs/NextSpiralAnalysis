@@ -166,22 +166,30 @@ const KPI = ({ label, value, sub, tone = "neutral" }) => {
   );
 };
 
-const LrBadge = ({ side }) => (
-  <span
-    style={{
-      fontSize: 11,
-      fontWeight: 800,
-      padding: "3px 8px",
-      borderRadius: 999,
-      border: "1px solid #d1d5db",
-      background: "white",
-      color: "#111",
-      letterSpacing: 0.3,
-    }}
-  >
-    {side}
-  </span>
-);
+const LR_COLORS = {
+  L: { bg: "rgba(15,118,110,0.1)", border: "rgba(15,118,110,0.5)", color: "#0f766e" },
+  R: { bg: "rgba(29,78,216,0.1)", border: "rgba(29,78,216,0.5)", color: "#1d4ed8" },
+};
+
+const LrBadge = ({ side }) => {
+  const c = LR_COLORS[side] ?? { bg: "white", border: "#d1d5db", color: "#111" };
+  return (
+    <span
+      style={{
+        fontSize: 11,
+        fontWeight: 800,
+        padding: "3px 8px",
+        borderRadius: 999,
+        border: `1px solid ${c.border}`,
+        background: c.bg,
+        color: c.color,
+        letterSpacing: 0.3,
+      }}
+    >
+      {side}
+    </span>
+  );
+};
 
 /* ---------- Tremor Axes overlay (Summary-only, styling-only) ---------- */
 
@@ -420,7 +428,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
           <KPI label="Avg DOS (Overall)" value={formatNum(overallAvg, 2)} />
 
           {/* Left / Right compact rows */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
             <div style={{ display: "grid", gap: 8, minWidth: 220 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <LrBadge side="L" />
@@ -439,6 +447,8 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTremor, 2)}</div>
               </div>
             </div>
+
+            <div style={{ width: 1, background: "#a6afbc", alignSelf: "stretch", margin: "0 10px" }} />
 
             <div style={{ display: "grid", gap: 8, minWidth: 220 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -840,6 +850,28 @@ export default function UnifiedResultPage() {
                     );
                   })}
                 </div>
+
+                {/* DOS score for selected drawing */}
+                {(() => {
+                  const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
+                  let dosText, dosColor;
+                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; }
+                  else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; }
+                  else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; }
+                  else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; }
+                  else {
+                    const dos = Number(cur.DOS);
+                    dosText = Number.isNaN(dos) ? "N/A" : dos.toFixed(4);
+                    dosColor = "#0b1220";
+                  }
+                  return (
+                    <div style={{ textAlign: "center", marginBottom: 20 }}>
+                      <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>DOS Score: Drawing #{selectedDrawingIndex + 1}</span>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{dosText}</div>
+                    </div>
+                  );
+                })()}
+
                 {/* Chart grid inside the card */}
                 <div style={{ borderTop: "1px solid rgba(199,210,254,0.5)", paddingTop: "24px" }}>
                   <div className={styles.chartGrid}>
@@ -847,17 +879,6 @@ export default function UnifiedResultPage() {
                       <h3>Spiral XY Plot</h3>
                       <div className={styles.chartContainer}>
                         <LineGraph data={drawData} />
-                      </div>
-                      <div style={{ marginTop: "10px", textAlign: "center", color: "black" }}>
-                        {(() => {
-                          const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
-                          if (!cur) return <>Pending<AnimatedEllipsis /></>;
-                          if (cur.error) return "DOS Score: Failed";
-                          if (cur.status === 'timeout') return "DOS Score: Timeout";
-                          if (cur.status === 'processing' || cur.status === 'pending') return <>Pending<AnimatedEllipsis /></>;
-                          const dos = Number(cur.DOS);
-                          return Number.isNaN(dos) ? "DOS Score: N/A" : `DOS Score: ${dos.toFixed(4)}`;
-                        })()}
                       </div>
                     </div>
 
