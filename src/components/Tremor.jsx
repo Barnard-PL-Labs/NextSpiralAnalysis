@@ -343,79 +343,14 @@ const TremorPolarPlot = ({ result }) => {
       }}
     >
       {hasAxes ? (
-        <>
-          {/* Left Side - Bigger Polar Plot */}
-          <div style={{ flex: "0.6", minHeight: "140px", height: "100%" }}>
+        <div style={{ width: "100%", height: "100%", minHeight: "140px" }}>
           <Plot
             data={plotData}
             layout={layout}
             config={{ displayModeBar: false, responsive: true }}
-              style={{ width: "100%", height: "100%", minHeight: "140px" }}
+            style={{ width: "100%", height: "100%", minHeight: "140px" }}
           />
-          </div>
-
-          {/* Right Side - Clinical Information Carousel */}
-{/* Right Side - Clinical Information */}
-<div
-  style={{
-    flex: "0.6",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    minWidth: "100px",
-    maxWidth: "180px",
-  }}
->
-  <div
-    style={{
-      padding: "12px",
-      backgroundColor: "rgba(0,0,0,0.05)",
-      borderRadius: "8px",
-    }}
-  >
-    <h4
-      style={{
-        margin: "0 0 8px 0",
-        color: clinicalMetrics.color,
-        fontSize: "11px",
-        fontWeight: "bold",
-        textAlign: "center",
-      }}
-    >
-      {clinicalMetrics.title}
-    </h4>
-    <div
-      style={{
-        backgroundColor: clinicalMetrics.bgColor,
-        padding: "12px",
-        borderRadius: "6px",
-        border: `2px solid ${clinicalMetrics.borderColor}`,
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}
-    >
-      {clinicalMetrics.data.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
-            {item.label}:
-          </span>
-          <span style={{ color: "#333", fontSize: "12px", fontWeight: "bold" }}>
-            {item.value}
-          </span>
         </div>
-      ))}
-    </div>
-  </div>
-</div>
-        </>
       ) : (
         <div
           style={{
