@@ -21,7 +21,8 @@ export default function MachinePage() {
   const [selectedHand, setSelectedHand] = useState(null); // 'dominant' | 'non-dominant'
   const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' | 'R'
   const [showDemographics, setShowDemographics] = useState(false);
-  const [demographics, setDemographics] = useState({ name: "", age: "", sex: "" });
+  const [showStudyDemographics, setShowStudyDemographics] = useState(false);
+  const [demographics, setDemographics] = useState({ name: "", age: "", sex: "", studyId: "" });
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
@@ -208,6 +209,7 @@ export default function MachinePage() {
           user_name: parsed.name || null,
           user_age: parsed.age ? parseInt(parsed.age) : null,
           user_sex: parsed.sex || null,
+          study_id: parsed.studyId || null,
         };
       } catch {}
     }
@@ -280,7 +282,7 @@ export default function MachinePage() {
   };
 
   const handleContinue = () => {
-    if (showDemographics && (demographics.name || demographics.age || demographics.sex)) {
+    if (showDemographics && (demographics.name || demographics.age || demographics.sex || demographics.studyId)) {
       localStorage.setItem("pendingDemographics", JSON.stringify(demographics));
       localStorage.setItem("userDemographics", JSON.stringify(demographics));
     }
@@ -386,42 +388,113 @@ export default function MachinePage() {
     {/* Inline demographics panel */}
     <div className={`${styles.demographicsPanel} ${showDemographics ? styles.demographicsPanelOpen : ""}`}>
       <div className={styles.demographicsPanelInner}>
-        <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Name:</label>
+
+        {/* Clinical study toggle — top of panel */}
+        <div
+          className={styles.demographicsField}
+          style={{ cursor: "pointer" }}
+          onClick={() => setShowStudyDemographics(prev => !prev)}
+        >
           <input
-            type="text"
-            value={demographics.name}
-            onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
-            className={styles.demographicsInput}
-            placeholder=""
+            type="checkbox"
+            className={styles.demographicsCheckbox}
+            checked={showStudyDemographics}
+            readOnly
+            onChange={() => {}}
+            style={{ marginRight: "8px" }}
           />
+          <label className={styles.demographicsFieldLabel} style={{ cursor: "pointer" }}>Clinical study</label>
         </div>
-        <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Age:</label>
-          <input
-            type="number"
-            value={demographics.age}
-            onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
-            className={styles.demographicsInput}
-            placeholder=""
-            min="0"
-            max="120"
-          />
-        </div>
-        <div className={styles.demographicsField}>
-          <label className={styles.demographicsFieldLabel}>Gender:</label>
-          <select
-            value={demographics.sex}
-            onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
-            className={styles.demographicsInput}
-            style={{ paddingRight: "6px" }}
-          >
-            <option value="">Select</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-            <option value="O">Other</option>
-          </select>
-        </div>
+
+        {showStudyDemographics ? (
+          <>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Study name:</label>
+              <input
+                type="text"
+                value={demographics.studyId}
+                onChange={(e) => setDemographics({ ...demographics, studyId: e.target.value })}
+                className={styles.demographicsInput}
+                placeholder=""
+              />
+            </div>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Patient ID:</label>
+              <input
+                type="text"
+                value={demographics.name}
+                onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
+                className={styles.demographicsInput}
+                placeholder=""
+              />
+            </div>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Gender:</label>
+              <select
+                value={demographics.sex}
+                onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
+                className={styles.demographicsInput}
+                style={{ paddingRight: "6px" }}
+              >
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Age:</label>
+              <input
+                type="number"
+                value={demographics.age}
+                onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
+                className={styles.demographicsInput}
+                placeholder=""
+                min="0"
+                max="120"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Name:</label>
+              <input
+                type="text"
+                value={demographics.name}
+                onChange={(e) => setDemographics({ ...demographics, name: e.target.value })}
+                className={styles.demographicsInput}
+                placeholder=""
+              />
+            </div>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Age:</label>
+              <input
+                type="number"
+                value={demographics.age}
+                onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
+                className={styles.demographicsInput}
+                placeholder=""
+                min="0"
+                max="120"
+              />
+            </div>
+            <div className={styles.demographicsField}>
+              <label className={styles.demographicsFieldLabel}>Gender:</label>
+              <select
+                value={demographics.sex}
+                onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
+                className={styles.demographicsInput}
+                style={{ paddingRight: "6px" }}
+              >
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+          </>
+        )}
       </div>
     </div>
 
