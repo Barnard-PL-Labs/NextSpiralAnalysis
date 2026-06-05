@@ -69,6 +69,10 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     drawCenterCross(ctx);
+
+    const preventZoom = (e) => { if (e.touches.length > 1) e.preventDefault(); };
+    canvas.addEventListener("touchmove", preventZoom, { passive: false });
+    return () => canvas.removeEventListener("touchmove", preventZoom);
   }, []);
 
   const drawCenterCross = (ctx) => {
