@@ -46,6 +46,11 @@ const processTremorData = (result) => {
   }
 
   // Extract amplitude data
+  console.log("[Tremor] raw amplitude fields:", {
+    "max amp. (cm)": result["max amp. (cm)"],
+    "mean amp. (cm)": result["mean amp. (cm)"],
+    "std of amp.": result["std of amp."],
+  });
   const maxAmplitude = parseFloat(result["max amp. (cm)"]) || 0;
   const meanAmplitude = parseFloat(result["mean amp. (cm)"]) || 0;
   const stdAmplitude = parseFloat(result["std of amp."]) || 0;

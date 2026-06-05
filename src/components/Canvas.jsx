@@ -48,8 +48,12 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [localDrawData, setLocalDrawData] = useState([]);
-  const [startStamp, setStartStamp] = useState(null); // use event.timeStamp origin
   const [backgroundImage] = useState(null);
+
+  // Ref-based: no re-render needed, always in sync with event handlers
+  const startStampRef = useRef(null);
+  // Set to true the first time pointerrawupdate fires; tells pointermove to skip data collection
+  const supportsRawUpdateRef = useRef(false);
 
   const pointBufferRef = useRef([]);
   const renderBufferRef = useRef([]);
@@ -134,8 +138,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     if (localDrawData.length > 0) clearCanvas();
 
     setIsDrawing(true);
-    // Use the event timestamp as a monotonic origin for this stroke
-    setStartStamp(e.timeStamp);
+    startStampRef.current = e.timeStamp;
 
     pointBufferRef.current = [];
     renderBufferRef.current = [];
@@ -163,35 +166,54 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     }
   }, [localDrawData, renderLoop]);
 
-  // High-rate input handler: coalesced + rawupdate
-  const handleInput = useCallback((event) => {
+  // Chromium only: pointerrawupdate fires at the raw device rate (120Hz+ on iPad/Wacom).
+  // This handler owns data collection on Chromium and sets supportsRawUpdateRef so that
+  // onPointerMove knows to skip data collection (avoiding duplicates).
+  const handleRawUpdate = useCallback((event) => {
     if (!isDrawing) return;
+    supportsRawUpdateRef.current = true;
 
     const samples = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
     for (const e of samples) {
       const { x, y, pressure } = getPointerData(e);
-      const relT = startStamp != null ? (e.timeStamp - startStamp) : 0;
-
-      const newPoint = {
+      const relT = startStampRef.current != null ? (e.timeStamp - startStampRef.current) : 0;
+      pointBufferRef.current.push({
         n: pointBufferRef.current.length + 1,
         x: +x.toFixed(4),
         y: +y.toFixed(4),
         p: Math.round((pressure ?? 0.5) * 1000),
-        t: Math.max(0, Math.round(relT)), // ms, non-decreasing
-      };
-      pointBufferRef.current.push(newPoint);
+        t: Math.max(0, Math.round(relT)),
+      });
       renderBufferRef.current.push({ x, y });
     }
-  }, [isDrawing, startStamp]);
+  }, [isDrawing]);
 
-  // Add pointerrawupdate for Chromium/Android/Windows (Safari ignores this)
+  // Fallback for Safari/Firefox (no pointerrawupdate). On Chromium this is a no-op
+  // because supportsRawUpdateRef is true by the time pointermove fires.
+  const handlePointerMove = useCallback((event) => {
+    if (!isDrawing || supportsRawUpdateRef.current) return;
+
+    const samples = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
+    for (const e of samples) {
+      const { x, y, pressure } = getPointerData(e);
+      const relT = startStampRef.current != null ? (e.timeStamp - startStampRef.current) : 0;
+      pointBufferRef.current.push({
+        n: pointBufferRef.current.length + 1,
+        x: +x.toFixed(4),
+        y: +y.toFixed(4),
+        p: Math.round((pressure ?? 0.5) * 1000),
+        t: Math.max(0, Math.round(relT)),
+      });
+      renderBufferRef.current.push({ x, y });
+    }
+  }, [isDrawing]);
+
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
-    const onRaw = (e) => handleInput(e);
-    c.addEventListener("pointerrawupdate", onRaw, { passive: true });
-    return () => c.removeEventListener("pointerrawupdate", onRaw);
-  }, [handleInput]);
+    c.addEventListener("pointerrawupdate", handleRawUpdate, { passive: true });
+    return () => c.removeEventListener("pointerrawupdate", handleRawUpdate);
+  }, [handleRawUpdate]);
 
   const stopDrawing = useCallback(() => {
     if (!isDrawing) return;
@@ -200,7 +222,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
     }
-    setDrawData([...pointBufferRef.current]);
+setDrawData([...pointBufferRef.current]);
     setLocalDrawData([...pointBufferRef.current]);
   }, [isDrawing, setDrawData]);
 
@@ -212,7 +234,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     renderBufferRef.current = [];
     setLocalDrawData([]);
     setDrawData([]);
-    setStartStamp(null);
+    startStampRef.current = null;
     drawCenterCross(ctx);
     if (backgroundImage) drawBackgroundImage(ctx, backgroundImage);
   }, [backgroundImage, setDrawData]);
@@ -227,7 +249,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
         height={500}
         style={styles.spiralCanvas}
         onPointerDown={startDrawing}
-        onPointerMove={handleInput}
+        onPointerMove={handlePointerMove}
         onPointerUp={stopDrawing}
         onPointerLeave={stopDrawing}
       />
