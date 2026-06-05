@@ -71,7 +71,10 @@ export default function MachinePage() {
   useEffect(() => {
     const meta = document.querySelector("meta[name='viewport']");
     const original = meta?.getAttribute("content");
-    meta?.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
+    meta?.setAttribute("content", "width=device-width, initial-scale=1");
+    requestAnimationFrame(() => {
+      meta?.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
+    });
 
     const originalTouchAction = document.body.style.touchAction;
     document.body.style.touchAction = "pan-x pan-y";
