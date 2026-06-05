@@ -26,14 +26,6 @@ export async function POST(req) {
       serializedSize: JSON.stringify(body.drawData).length,
     });
 
-    // API expects coordinates in normalized 0-1 space (1 unit = canvas width)
-    const CANVAS_SIZE = 500;
-    const normalizedData = body.drawData.map(pt => ({
-      ...pt,
-      x: +(pt.x / CANVAS_SIZE).toFixed(6),
-      y: +(pt.y / CANVAS_SIZE).toFixed(6),
-    }));
-
     try {
       const externalResponse = await fetch(
         "https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral",
@@ -43,7 +35,7 @@ export async function POST(req) {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify(normalizedData),
+          body: JSON.stringify(body.drawData),
         }
       );
 
