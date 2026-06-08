@@ -57,14 +57,9 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
   const [localDrawData, setLocalDrawData] = useState([]);
   const [backgroundImage] = useState(null);
   const [canvasSize, setCanvasSize] = useState(getCanvasSize);
-<<<<<<< HEAD
 
-  // Ref-based: no re-render needed, always in sync with event handlers
   const startStampRef = useRef(null);
-  // Set to true the first time pointerrawupdate fires; tells pointermove to skip data collection
   const supportsRawUpdateRef = useRef(false);
-=======
->>>>>>> a02d92b602550e0623ae23e957dc16e975b77f23
 
   const pointBufferRef = useRef([]);
   const renderBufferRef = useRef([]);
