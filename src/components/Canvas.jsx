@@ -42,6 +42,13 @@ const styles = {
   },
 };
 
+const BASE_CANVAS_SIZE = 10 * 264 / 2.54;
+const getCanvasSize = () => {
+  if (typeof window === "undefined") return 500;
+  const dpr = window.devicePixelRatio || 1;
+  return Math.round(BASE_CANVAS_SIZE / dpr);
+};
+
 const Canvas = forwardRef(({ setDrawData }, ref) => {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
@@ -49,15 +56,22 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [localDrawData, setLocalDrawData] = useState([]);
   const [backgroundImage] = useState(null);
+  const [canvasSize, setCanvasSize] = useState(getCanvasSize);
 
-  // Ref-based: no re-render needed, always in sync with event handlers
   const startStampRef = useRef(null);
-  // Set to true the first time pointerrawupdate fires; tells pointermove to skip data collection
   const supportsRawUpdateRef = useRef(false);
 
   const pointBufferRef = useRef([]);
   const renderBufferRef = useRef([]);
   const animationFrameIdRef = useRef(null);
+
+  useEffect(() => {
+    const updateCanvasSize = () => setCanvasSize(getCanvasSize());
+
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
+    return () => window.removeEventListener("resize", updateCanvasSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -69,7 +83,11 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     drawCenterCross(ctx);
-  }, []);
+
+    const preventZoom = (e) => { if (e.touches.length > 1) e.preventDefault(); };
+    canvas.addEventListener("touchmove", preventZoom, { passive: false });
+    return () => canvas.removeEventListener("touchmove", preventZoom);
+  }, [canvasSize]);
 
   const drawCenterCross = (ctx) => {
     if (!ctx) return;
@@ -245,9 +263,13 @@ setDrawData([...pointBufferRef.current]);
     <div style={styles.canvasContainer}>
       <canvas
         ref={canvasRef}
-        width={500}
-        height={500}
-        style={styles.spiralCanvas}
+        width={canvasSize}
+        height={canvasSize}
+        style={{
+          ...styles.spiralCanvas,
+          width: `${canvasSize}px`,
+          height: `${canvasSize}px`,
+        }}
         onPointerDown={startDrawing}
         onPointerMove={handlePointerMove}
         onPointerUp={stopDrawing}
@@ -259,6 +281,5 @@ setDrawData([...pointBufferRef.current]);
     </div>
   );
 });
-
 Canvas.displayName = "Canvas";
 export default Canvas;
