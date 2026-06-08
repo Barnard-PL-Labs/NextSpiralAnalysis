@@ -281,6 +281,5 @@ setDrawData([...pointBufferRef.current]);
     </div>
   );
 });
-gi
 Canvas.displayName = "Canvas";
 export default Canvas;
