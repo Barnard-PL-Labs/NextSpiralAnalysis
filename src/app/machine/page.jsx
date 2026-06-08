@@ -30,9 +30,12 @@ export default function MachinePage() {
 
   useEffect(() => {
     setSelectedHand(null);
+    setIsSaving(false);
+    setIsAnalyzing(false);
     localStorage.removeItem("selectedHand");
     localStorage.removeItem("anonymous_session_id");
     localStorage.removeItem("anonymous_session_timestamp");
+    console.log("[device] devicePixelRatio:", window.devicePixelRatio);
   }, []);
 
   // ——— Leave-page warnings (no autosave) ———
@@ -198,6 +201,7 @@ export default function MachinePage() {
     const isAuthenticated = user?.id;
     const email = isAuthenticated ? user.email || "anonymous@example.com" : "anonymous@example.com";
     const username = isAuthenticated ? email.split("@")[0] : `anonymous_${sessionId.slice(-8)}`;
+    
 
     // Include pending demographics if any
     const pendingDemographics = localStorage.getItem("pendingDemographics");
