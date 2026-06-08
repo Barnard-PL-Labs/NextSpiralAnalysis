@@ -28,11 +28,41 @@ export default function MachinePage() {
   const { user } = useAuth();
   const router = useRouter();
 
+  
   useEffect(() => {
     setSelectedHand(null);
     localStorage.removeItem("selectedHand");
     localStorage.removeItem("anonymous_session_id");
     localStorage.removeItem("anonymous_session_timestamp");
+  }, []);
+
+  useEffect(() => {
+    const meta = document.querySelector("meta[name='viewport']");
+    const original = meta?.getAttribute("content");
+    meta?.setAttribute("content", "width=device-width, initial-scale=1");
+    requestAnimationFrame(() => {
+      meta?.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
+    });
+
+    const originalTouchAction = document.body.style.touchAction;
+    document.body.style.touchAction = "pan-x pan-y";
+
+    const preventZoom = (e) => { if (e.touches.length > 1) e.preventDefault(); };
+    const preventGesture = (e) => e.preventDefault();
+
+    document.addEventListener("touchstart", preventZoom, { passive: false });
+    document.addEventListener("touchmove", preventZoom, { passive: false });
+    document.addEventListener("gesturestart", preventGesture, { passive: false });
+    document.addEventListener("gesturechange", preventGesture, { passive: false });
+
+    return () => {
+      if (original) meta?.setAttribute("content", original);
+      document.body.style.touchAction = originalTouchAction;
+      document.removeEventListener("touchstart", preventZoom);
+      document.removeEventListener("touchmove", preventZoom);
+      document.removeEventListener("gesturestart", preventGesture);
+      document.removeEventListener("gesturechange", preventGesture);
+    };
   }, []);
 
   // ——— Leave-page warnings (no autosave) ———
