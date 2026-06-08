@@ -854,20 +854,24 @@ export default function UnifiedResultPage() {
                 {/* DOS score for selected drawing */}
                 {(() => {
                   const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
-                  let dosText, dosColor;
-                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; }
-                  else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; }
-                  else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; }
-                  else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; }
+                  let dosText, dosColor, tightnessText;
+                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…" }
+                  else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; tightnessText = "Failed"}
+                  else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; tightnessText = "Timeout"}
+                  else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"}
                   else {
                     const dos = Number(cur.DOS);
+                    const tightness = Number(cur.Tightness);
                     dosText = Number.isNaN(dos) ? "N/A" : dos.toFixed(4);
+                    tightnessText = Number.isNaN(tightness) ? "N/A" : tightness.toFixed(4);
                     dosColor = "#0b1220";
                   }
                   return (
                     <div style={{ textAlign: "center", marginBottom: 20 }}>
                       <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>DOS Score: Drawing #{selectedDrawingIndex + 1}</span>
                       <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{dosText}</div>
+                      <span style={{ fontSize: 14, color: "#111", opacity: 0.65  }}>Tightness (cycle/cm):</span>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{tightnessText} </div>
                     </div>
                   );
                 })()}
