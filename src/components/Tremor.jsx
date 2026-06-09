@@ -135,8 +135,10 @@ const TremorPolarPlot = ({ result }) => {
           showlegend: false,
           hoverinfo: "skip",
         },
-        // Add bidirectional arrows for each axis (two traces per axis)
-        ...axes.flatMap((axis, index) => {
+        // Only show the dominant (highest-power) axis for a single drawing.
+        // Secondary axes in one spiral are unreliable — too short a signal for
+        // meaningful multi-axis decomposition.
+        ...axes.slice(0, 1).flatMap((axis, index) => {
           
           
           // Check for overlapping directions with previous axes (including opposite directions)
@@ -177,7 +179,6 @@ const TremorPolarPlot = ({ result }) => {
             showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
-                "<b>Axis " + (index + 1) + "</b><br>" +
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
                 "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
@@ -200,7 +201,7 @@ const TremorPolarPlot = ({ result }) => {
             showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
               hovertemplate:
-                "<b>Axis " + (index + 1) + "</b><br>" +
+                "<b><u>Dominant Axis</u></b><br>" +
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
                 "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
@@ -215,7 +216,6 @@ const TremorPolarPlot = ({ result }) => {
       ]
     : [];
 
-  console.log(`Number of axes: ${axes.length}`);
   
 
   // Clinical metrics
@@ -271,6 +271,7 @@ const TremorPolarPlot = ({ result }) => {
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
     hoverlabel: { borderradius: 8 },
+    dragmode: false,
   };
 
   // Clinical sections for carousel
