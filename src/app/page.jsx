@@ -102,7 +102,7 @@ export default function Home() {
                 }}
               >
                 <Link href="/machine">
-                  <button className="indexButton">GET STARTED</button>
+                  <button className="indexButton" style={{ border: "2px solid transparent" }}>GET STARTED</button>
                 </Link>
                 <Link href="/instruction">
                   <button
