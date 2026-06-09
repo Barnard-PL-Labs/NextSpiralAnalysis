@@ -152,8 +152,18 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
   }, []);
 
   const startDrawing = useCallback((e) => {
-    // If a previous stroke exists, clear before starting a new one
-    if (localDrawData.length > 0) clearCanvas();
+    // If a previous stroke exists, clear the visual canvas and buffers before starting a new one
+    // but do NOT clear the parent's draw data — that only updates when a stroke completes
+    if (localDrawData.length > 0) {
+      const ctx = ctxRef.current;
+      if (ctx) {
+        ctx.clearRect(0, 0, CSS_SIZE, CSS_SIZE);
+        drawCenterCross(ctx);
+      }
+      pointBufferRef.current = [];
+      renderBufferRef.current = [];
+      setLocalDrawData([]);
+    }
 
     setIsDrawing(true);
     startStampRef.current = e.timeStamp;
@@ -240,16 +250,8 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
     }
-    // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
-    // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
-    const scale = 200 / getPhysicalCssPpi();
-    const scaledPoints = pointBufferRef.current.map((pt) => ({
-      ...pt,
-      x: +(pt.x * scale).toFixed(4),
-      y: +(pt.y * scale).toFixed(4),
-    }));
-    setDrawData(scaledPoints);
-    setLocalDrawData(scaledPoints);
+    setDrawData([...pointBufferRef.current]);
+    setLocalDrawData([...pointBufferRef.current]);
   }, [isDrawing, setDrawData]);
 
   const clearCanvas = useCallback(() => {
