@@ -234,13 +234,24 @@ export default function MachinePage() {
   const backgroundAnalysis = async (drawingData) => {
     const TIMEOUT_MS = 70000;
     try {
+      // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
+      // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
+      const isIpad = /iPad/.test(navigator.userAgent) ||
+        (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      const cssPpi = isIpad ? Math.round(264 / (window.devicePixelRatio || 1)) : 96;
+      const scale = 200 / cssPpi;
+      const scaledData = drawingData.map((pt) => ({
+        ...pt,
+        x: +(pt.x * scale).toFixed(4),
+        y: +(pt.y * scale).toFixed(4),
+      }));
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Analysis timeout: API did not respond within 70 seconds")), TIMEOUT_MS)
       );
       const fetchPromise = fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ drawData: drawingData }),
+        body: JSON.stringify({ drawData: scaledData }),
       });
       const response = await Promise.race([fetchPromise, timeoutPromise]);
       const responseText = await response.text();
