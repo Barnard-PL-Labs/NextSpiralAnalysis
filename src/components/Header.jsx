@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
-import { supabase } from "@/lib/supabaseClient";
 import LoginModal from "@/components/LoginModal";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,7 +48,10 @@ export default function Header() {
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Left: brand + nav links */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-            <Link href="/" style={{ textDecoration: "none" }}>
+            <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "7px" }}>
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M50 50 Q54 34 66 32 Q82 30 84 50 Q86 72 64 78 Q38 84 28 60 Q16 32 42 18 Q72 4 90 28" stroke="#7c3aed" strokeWidth="7" strokeLinecap="round" fill="none"/>
+              </svg>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}>
                 Spiral Analysis
               </span>
@@ -91,9 +93,9 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setLoginOpen(true)}
-                  style={{ background: "transparent", border: "1.5px solid #e2e8f0", borderRadius: "8px", padding: "6px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-text-secondary)", transition: "all 0.2s ease" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; e.currentTarget.style.background = "#eef2ff"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "var(--color-text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+                  style={{ background: "#4f46e5", border: "1.5px solid #4f46e5", borderRadius: "8px", padding: "3px 14px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "13px", fontWeight: 600, color: "white", transition: "all 0.2s ease" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#4338ca"; e.currentTarget.style.borderColor = "#4338ca"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#4f46e5"; e.currentTarget.style.borderColor = "#4f46e5"; }}
                 >
                   Sign In
                 </button>

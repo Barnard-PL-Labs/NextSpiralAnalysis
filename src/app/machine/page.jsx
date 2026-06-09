@@ -594,24 +594,28 @@ export default function MachinePage() {
               </div>
 
               {/* Action buttons outside card */}
-              <div className={styles.actionButtonRow} style={{ marginTop: "14px" }}>
-                <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
-                  Clear
-                </button>
-                <button onClick={clearAllDrawings} className={styles.clearButton}>
-                  Clear All
-                </button>
-                {!userFinished && savedDrawings.length > 0 && (
-                  <button className={styles.button} onClick={handleFinishEarly}>
-                    Finish Analysis
-                    <span className={styles.countBadge}>{savedDrawings.length}</span>
+              <div className={styles.actionButtonRow} style={{ marginTop: "20px" }}>
+                <div style={{ display: "flex", gap: 14 }}>
+                  <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
+                    Clear
                   </button>
-                )}
-                {!userFinished && savedDrawings.length < 15 && (
-                  <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing} disabled={isSaving}>
-                    Save
+                  <button onClick={clearAllDrawings} className={styles.clearButton}>
+                    Clear All
                   </button>
-                )}
+                </div>
+                <div style={{ display: "flex", gap: 14 }}>
+                  {!userFinished && savedDrawings.length > 0 && (
+                    <button className={styles.button} onClick={handleFinishEarly}>
+                      Finish Analysis
+                      <span className={styles.countBadge}>{savedDrawings.length}</span>
+                    </button>
+                  )}
+                  {!userFinished && savedDrawings.length < 15 && (
+                    <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing} disabled={isSaving}>
+                      Save
+                    </button>
+                  )}
+                </div>
               </div>
 
               <MiniSpiralHistory savedDrawings={savedDrawings} />

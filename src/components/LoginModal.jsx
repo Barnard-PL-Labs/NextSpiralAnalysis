@@ -15,8 +15,6 @@ export default function LoginModal({ isOpen, closeModal }) {
   const [isForgot, setIsForgot] = useState(false);
   const [signupMode, setSignupMode] = useState(false);
   const router = useRouter();
-  const imageSource = "/Icons/generated-icon-removebg.png";
-
   const handleCreateAccount = async () => {
     if (password != confirmPassword) {
       setMessage("Passwords don't match!");
@@ -107,14 +105,10 @@ export default function LoginModal({ isOpen, closeModal }) {
               </button>
 
               <div className="modal-header">
-                <Image
-                  src={imageSource}
-                  width={50}
-                  height={50}
-                  alt="Logo"
-                  priority
-                />
-                <h2>Spiral Analysis</h2>
+                <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M50 50 Q54 34 66 32 Q82 30 84 50 Q86 72 64 78 Q38 84 28 60 Q16 32 42 18 Q72 4 90 28" stroke="#7c3aed" strokeWidth="7" strokeLinecap="round" fill="none"/>
+                </svg>
+                <h2 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "1.15rem", letterSpacing: "-0.01em", color: "var(--color-text-primary)", margin: 0 }}>Spiral Analysis</h2>
               </div>
 
               <h2 className="modal-title">

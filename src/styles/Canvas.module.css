@@ -192,45 +192,47 @@
 }
 
 .clearButton {
-  padding: 10px 20px;
-  background-color: transparent;
-  border: 1.5px solid #e2e8f0;
-  color: var(--color-text-secondary);
+  padding: 7px 14px;
+  background-color: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #dc2626;
   font-family: var(--font-sans);
   font-weight: 500;
   border-radius: var(--radius-md);
+  box-shadow: 0 1px 5px rgba(220, 38, 38, 0.15);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
   transition: all 0.2s ease-in-out;
-  min-width: 120px;
+  min-width: 90px;
 }
 
 .clearButton:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
+  background-color: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.6);
 }
 
 .clearCurrentButton {
-  padding: 10px 20px;
-  background-color: transparent;
-  border: 1.5px solid #e2e8f0;
-  color: var(--color-text-secondary);
+  padding: 7px 14px;
+  background-color: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.35);
+  box-shadow: 0 1px 5px rgba(79, 70, 229, 0.15);
+  color: #4f46e5;
   font-family: var(--font-sans);
   font-weight: 500;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
   transition: all 0.2s ease-in-out;
-  min-width: 120px;
+  min-width: 75px;
 }
 
 .clearCurrentButton:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
+  background-color: rgba(79, 70, 229, 0.15);
+  border-color: rgba(79, 70, 229, 0.6);
 }
 
 .countBadge {
@@ -484,7 +486,8 @@
   justify-content: center;
   padding: 14px 16px;
   background: var(--color-surface);
-  border: 2px solid var(--color-border);
+  border: 1px solid #cbd5e1;
+  box-shadow:0 1px 6px rgba(0, 0, 0, 0.178);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-weight: 500;
@@ -739,7 +742,8 @@
 .handButton {
   padding: 8px 16px;
   background-color: var(--color-surface);
-  border: 1.5px solid #cbd5e1;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-weight: 600;
@@ -860,7 +864,8 @@
 .handLRBadge {
   padding: 8px 16px;
   background-color: var(--color-surface);
-  border: 1.5px solid #cbd5e1;
+  border: 1px solid #cbd5e1;
+  box-shadow:0 1px 6px rgba(0, 0, 0, 0.178);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-weight: 600;
@@ -937,7 +942,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 40px;
   flex-wrap: wrap;
 }
 

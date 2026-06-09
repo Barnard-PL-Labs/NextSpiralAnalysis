@@ -241,7 +241,8 @@ input {
 .modal-form input {
   padding: 11px 13px;
   border-radius: 10px;
-  border: 1.5px solid var(--color-border);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
   outline: none;
   background: rgba(248, 250, 252, 0.8);
   color: var(--color-text-primary);
@@ -259,7 +260,7 @@ input {
 .btn-primary {
   background: #0b1220;
   color: white;
-  border: none;
+  border: 1px solid #cbd5e1;
   padding: 11px;
   border-radius: 10px;
   cursor: pointer;
@@ -267,7 +268,7 @@ input {
   font-weight: 600;
   font-family: var(--font-sans);
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
 }
 
 .btn-primary:hover {
@@ -279,7 +280,8 @@ input {
 .btn-secondary {
   background: transparent;
   color: var(--color-text-secondary);
-  border: 1.5px solid var(--color-border);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
   padding: 10px 15px;
   border-radius: 10px;
   cursor: pointer;
