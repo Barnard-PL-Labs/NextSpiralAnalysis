@@ -455,7 +455,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTremor, 2)}</div>
                 
                 <div style={{ width: 8 }} />
-                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycle/cm)</div>
+                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycles)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTightness, 2)}</div>
               </div>
             </div>
@@ -479,7 +479,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTremor, 2)}</div>
                 <div style={{ width: 8 }} />
-                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycle/cm)</div>
+                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycles)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTightness, 2)}</div>
               </div>
             </div>
@@ -888,7 +888,7 @@ export default function UnifiedResultPage() {
                         <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{dosText}</div>
                       </div>
                       <div style={{ textAlign: "center" }}>
-                        <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>Tightness (cycle/cm):</span>
+                        <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>Tightness (cycles):</span>
                         <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{tightnessText}</div>
                       </div>
                     </div>

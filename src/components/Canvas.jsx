@@ -240,8 +240,16 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
     }
-setDrawData([...pointBufferRef.current]);
-    setLocalDrawData([...pointBufferRef.current]);
+    // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
+    // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
+    const scale = 200 / getPhysicalCssPpi();
+    const scaledPoints = pointBufferRef.current.map((pt) => ({
+      ...pt,
+      x: +(pt.x * scale).toFixed(4),
+      y: +(pt.y * scale).toFixed(4),
+    }));
+    setDrawData(scaledPoints);
+    setLocalDrawData(scaledPoints);
   }, [isDrawing, setDrawData]);
 
   const clearCanvas = useCallback(() => {
