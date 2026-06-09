@@ -271,6 +271,7 @@ const TremorPolarPlot = ({ result }) => {
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
     hoverlabel: { borderradius: 8 },
+    dragmode: false,
   };
 
   // Clinical sections for carousel

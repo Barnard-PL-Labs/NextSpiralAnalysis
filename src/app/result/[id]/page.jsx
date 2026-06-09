@@ -293,6 +293,7 @@ const TremorAxesSplit = ({ drawings, typedResults }) => {
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
+    dragmode: false,
   });
 
   return (
