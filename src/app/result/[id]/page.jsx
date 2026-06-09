@@ -73,6 +73,12 @@ const pickTremorHz = (r) => {
   return null;
 };
 
+const pickTightness = (r) => {
+  if (!r) return null;
+  if (r["Tightness"] !== null && r["Tightness"] !== undefined) return r["Tightness"];
+  return null;
+};
+
 /* ---------- UI atoms (Summary only) ---------- */
 
 const Segmented = ({ value, onChange }) => (
@@ -399,7 +405,8 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
     const arr = idxs.map((i) => typedResults[i]).filter(Boolean);
     const avgDOS = avg(arr.map((r) => r.DOS ?? null));
     const avgTremor = avg(arr.map((r) => pickTremorHz(r)));
-    return { count: idxs.length, completed: arr.length, avgDOS, avgTremor };
+    const avgTightness = avg(arr.map((r) => pickTightness(r)))
+    return { count: idxs.length, completed: arr.length, avgDOS, avgTremor, avgTightness };
   };
 
   const Ls = perHandStats(groups.L);
@@ -446,6 +453,10 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ width: 8 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTremor, 2)}</div>
+                
+                <div style={{ width: 8 }} />
+                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycle/cm)</div>
+                <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTightness, 2)}</div>
               </div>
             </div>
 
@@ -467,6 +478,9 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ width: 8 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTremor, 2)}</div>
+                <div style={{ width: 8 }} />
+                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycle/cm)</div>
+                <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTightness, 2)}</div>
               </div>
             </div>
           </div>
@@ -868,11 +882,15 @@ export default function UnifiedResultPage() {
                     dosColor = "#0b1220";
                   }
                   return (
-                    <div style={{ textAlign: "center", marginBottom: 20 }}>
-                      <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>DOS Score: Drawing #{selectedDrawingIndex + 1}</span>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{dosText}</div>
-                      <span style={{ fontSize: 14, color: "#111", opacity: 0.65  }}>Tightness (cycle/cm):</span>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{tightnessText} </div>
+                    <div style={{ display: "flex", justifyContent: "center", gap: 32, marginBottom: 20 }}>
+                      <div style={{ textAlign: "center" }}>
+                        <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>DOS Score: Drawing #{selectedDrawingIndex + 1}</span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{dosText}</div>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>Tightness (cycle/cm):</span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{tightnessText}</div>
+                      </div>
                     </div>
                   );
                 })()}
