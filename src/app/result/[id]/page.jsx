@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
 import Header from "@/components/Header";
 import styles from "@/styles/Result.module.css";
-import LineGraph from "@/components/LineGraph";
 import { SpeedTimeChart, calculateSpeed } from "@/components/ST";
 import SpiralPlot from "@/components/NewTimeTrace";
 import { CanIAvoidBugByThis, PTChart } from "@/components/PressureTime";
@@ -15,6 +14,7 @@ import { Line3DPlot, processData } from "@/components/Angle";
 import { FaDownload, FaComment, FaHandPaper } from "react-icons/fa";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { PressureVsX } from '@/components/PressureVsX';
+import LineGraph from "@/components/LineGraph";
 
 
 /* Plotly for Summary-only Tremor Axes overlay (styling-only use) */
@@ -945,6 +945,7 @@ export default function UnifiedResultPage() {
                         />
                       </div>
                     </div>
+
                   </div>
                 </div>
 

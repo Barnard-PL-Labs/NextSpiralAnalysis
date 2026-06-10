@@ -10,12 +10,12 @@ export default function LineGraph({ data }) {
                     margin={{ top: 20, right: 30, bottom: 30, left: 20 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="gray"/>
-                    
+
 
                     <XAxis type="number" dataKey="x">
                         <Label value="X Coordinate (px)" offset={-20} position="insideBottom" fill="black" />
                     </XAxis>
-                    
+
 
                     <YAxis type="number" dataKey="y" reversed={true}>
                          <Label value="Y Coordinate (px)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle'}} fill="black" />
@@ -37,12 +37,12 @@ export default function LineGraph({ data }) {
                         labelFormatter={() => ''}
                     />
 
-                    <Line 
-                        type="monotone" 
-                        dataKey="y" 
-                        name="Y Coordinate" 
-                        stroke="#8884d8" 
-                        dot={false} 
+                    <Line
+                        type="monotone"
+                        dataKey="y"
+                        name="Y Coordinate"
+                        stroke="#8884d8"
+                        dot={false}
                     />
                 </LineChart>
             </ResponsiveContainer>

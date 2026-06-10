@@ -26,6 +26,23 @@ export async function POST(req) {
       serializedSize: JSON.stringify(body.drawData).length,
     });
 
+    // === COORDINATE DIAGNOSTICS ===
+    const pts = body.drawData;
+    const xs = pts.map(p => p.x);
+    const ys = pts.map(p => p.y);
+    const ts = pts.map(p => p.t);
+    const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+    const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
+    const radii = pts.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
+    console.log("=== COORDINATE DIAGNOSTICS ===");
+    console.log("X range:", Math.min(...xs).toFixed(1), "→", Math.max(...xs).toFixed(1), "  span:", (Math.max(...xs) - Math.min(...xs)).toFixed(1), "px");
+    console.log("Y range:", Math.min(...ys).toFixed(1), "→", Math.max(...ys).toFixed(1), "  span:", (Math.max(...ys) - Math.min(...ys)).toFixed(1), "px");
+    console.log("Centroid:", meanX.toFixed(1), ",", meanY.toFixed(1), "  (should be near canvas center)");
+    console.log("Radial range:", Math.min(...radii).toFixed(1), "→", Math.max(...radii).toFixed(1), "px  (inner → outer loop radius)");
+    console.log("Drawing duration:", (Math.max(...ts) - Math.min(...ts)), "ms");
+    console.log("Pressure range:", Math.min(...pts.map(p => p.p)), "→", Math.max(...pts.map(p => p.p)), "  (0–1000 scale)");
+    console.log("==============================");
+
     try {
       const externalResponse = await fetch(
         "https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral",
