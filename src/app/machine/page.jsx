@@ -232,6 +232,25 @@ export default function MachinePage() {
   };
 
   const backgroundAnalysis = async (drawingData) => {
+    // === CLIENT-SIDE COORDINATE DIAGNOSTICS ===
+    const xs = drawingData.map(p => p.x);
+    const ys = drawingData.map(p => p.y);
+    const ts = drawingData.map(p => p.t);
+    const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+    const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
+    const radii = drawingData.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
+    console.log("=== COORDINATE DIAGNOSTICS (client) ===");
+    console.log("Point count:", drawingData.length);
+    console.log("X range:", Math.min(...xs).toFixed(1), "→", Math.max(...xs).toFixed(1), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(1), "px");
+    console.log("Y range:", Math.min(...ys).toFixed(1), "→", Math.max(...ys).toFixed(1), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(1), "px");
+    console.log("Centroid:", meanX.toFixed(1), ",", meanY.toFixed(1));
+    console.log("Radial range:", Math.min(...radii).toFixed(1), "→", Math.max(...radii).toFixed(1), "px");
+    console.log("Drawing duration:", Math.max(...ts) - Math.min(...ts), "ms");
+    console.log("Pressure range:", Math.min(...drawingData.map(p => p.p)), "→", Math.max(...drawingData.map(p => p.p)));
+    console.log("devicePixelRatio:", window.devicePixelRatio);
+    console.log("canvas CSS size (estimated):", Math.round(10 * 264 / 2.54 / window.devicePixelRatio), "px");
+    console.log("========================================");
+
     const TIMEOUT_MS = 70000;
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
