@@ -207,9 +207,8 @@ export default function MachinePage() {
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
       // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
-      const isIpad = /iPad/.test(navigator.userAgent) ||
-        (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-      const cssPpi = isIpad ? Math.round(264 / (window.devicePixelRatio || 1)) : 96;
+      // cssPpi is derived from the same BASE_CANVAS_SIZE assumption as Canvas.jsx (264 physical PPI / dpr).
+      const cssPpi = 264 / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi;
       const scaledData = drawingData.map((pt) => ({
         ...pt,

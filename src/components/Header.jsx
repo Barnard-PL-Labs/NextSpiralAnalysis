@@ -37,7 +37,7 @@ export default function Header() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Take the Test", href: "/machine" },
+    { label: "Spiral Analysis", href: "/machine" },
     ...(!researcherMode ? [{ label: "Learn More", href: "/instruction" }] : []),
     { label: "About Us", href: "/info" }
   ];
