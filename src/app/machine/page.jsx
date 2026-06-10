@@ -244,6 +244,7 @@ export default function MachinePage() {
         x: +(pt.x * scale).toFixed(4),
         y: +(pt.y * scale).toFixed(4),
       }));
+      console.log("[scale] cssPpi:", cssPpi, "scale:", scale, "firstPoint:", scaledData[0], "lastPoint:", scaledData[scaledData.length - 1]);
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Analysis timeout: API did not respond within 70 seconds")), TIMEOUT_MS)
       );
