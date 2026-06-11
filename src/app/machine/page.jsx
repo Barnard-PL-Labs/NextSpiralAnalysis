@@ -221,12 +221,14 @@ export default function MachinePage() {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
       // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
       // cssPpi is derived from the same BASE_CANVAS_SIZE assumption as Canvas.jsx (264 physical PPI / dpr).
+      if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = 264 / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi;
+      const firstY = drawingData[0].y;
       const scaledData = drawingData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
-        y: +(pt.y * scale).toFixed(4),
+        y: +((pt.y - firstY) * scale + 1200).toFixed(4),
       }));
       console.log("[scale] cssPpi:", cssPpi, "scale:", scale, "firstPoint:", scaledData[0], "lastPoint:", scaledData[scaledData.length - 1]);
 
