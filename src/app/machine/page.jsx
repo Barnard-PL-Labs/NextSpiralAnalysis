@@ -12,6 +12,8 @@ import { FaHandPaper } from "react-icons/fa";
 
 export default function MachinePage() {
   const canvasRef = useRef();
+  const drawingIdMap = useRef({}); // localId -> drawingId, updated synchronously (avoids React state timing issues)
+  const removedLocalIds = useRef(new Set()); // localIds removed by user before pipeline completes
   const [savedDrawings, setSavedDrawings] = useState([]); // stores {points, handSide, handUsed}
   const [currentDrawing, setCurrentDrawing] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -169,7 +171,9 @@ export default function MachinePage() {
     setCurrentDrawing([]);
 
     // Store with L/R + dominance label for UI
+    const localId = Date.now().toString();
     const labeled = {
+      localId,
       points: drawingPoints,
       handSide: selectedHandSide,          // 'L' | 'R'
       handUsed: selectedHand || null,      // 'dominant' | 'non-dominant' | null
@@ -184,6 +188,13 @@ export default function MachinePage() {
       console.log("[1/3] Saving drawing to Supabase...", { sessionId, points: drawingPoints.length });
       const drawingId = await saveSingleDrawingToDatabase(drawingPoints, sessionId);
       console.log("[1/3] Drawing saved:", drawingId);
+      drawingIdMap.current[localId] = drawingId;
+      // If user deleted this drawing while we were saving, clean it up and bail
+      if (removedLocalIds.current.has(localId)) {
+        await supabase.from("drawings").delete().eq("id", drawingId);
+        return;
+      }
+      setSavedDrawings((prev) => prev.map(d => d.localId === localId ? { ...d, drawingId } : d));
       setIsSaving(false);
 
       console.log("[2/3] Sending to analysis API...");
@@ -191,6 +202,8 @@ export default function MachinePage() {
       if (result === null || result === "error") throw new Error("Analysis failed to produce valid results");
       console.log("[2/3] Analysis returned:", result);
 
+      // Skip save if user removed this drawing during the analysis
+      if (removedLocalIds.current.has(localId)) return;
       console.log("[3/3] Saving result to Supabase...");
       await saveSingleAnalysisResult(drawingId, result, sessionId);
       console.log("[3/3] Result saved. Pipeline complete.");
@@ -203,25 +216,6 @@ export default function MachinePage() {
   };
 
   const backgroundAnalysis = async (drawingData) => {
-    // === CLIENT-SIDE COORDINATE DIAGNOSTICS ===
-    const xs = drawingData.map(p => p.x);
-    const ys = drawingData.map(p => p.y);
-    const ts = drawingData.map(p => p.t);
-    const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
-    const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
-    const radii = drawingData.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
-    console.log("=== COORDINATE DIAGNOSTICS (client) ===");
-    console.log("Point count:", drawingData.length);
-    console.log("X range:", Math.min(...xs).toFixed(1), "→", Math.max(...xs).toFixed(1), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(1), "px");
-    console.log("Y range:", Math.min(...ys).toFixed(1), "→", Math.max(...ys).toFixed(1), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(1), "px");
-    console.log("Centroid:", meanX.toFixed(1), ",", meanY.toFixed(1));
-    console.log("Radial range:", Math.min(...radii).toFixed(1), "→", Math.max(...radii).toFixed(1), "px");
-    console.log("Drawing duration:", Math.max(...ts) - Math.min(...ts), "ms");
-    console.log("Pressure range:", Math.min(...drawingData.map(p => p.p)), "→", Math.max(...drawingData.map(p => p.p)));
-    console.log("devicePixelRatio:", window.devicePixelRatio);
-    console.log("canvas CSS size (estimated):", Math.round(10 * 264 / 2.54 / window.devicePixelRatio), "px");
-    console.log("========================================");
-
     const TIMEOUT_MS = 70000;
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
@@ -235,6 +229,24 @@ export default function MachinePage() {
         y: +(pt.y * scale).toFixed(4),
       }));
       console.log("[scale] cssPpi:", cssPpi, "scale:", scale, "firstPoint:", scaledData[0], "lastPoint:", scaledData[scaledData.length - 1]);
+
+      // === CLIENT-SIDE COORDINATE DIAGNOSTICS (post-scale — these are the values sent to the API) ===
+      const xs = scaledData.map(p => p.x);
+      const ys = scaledData.map(p => p.y);
+      const ts = scaledData.map(p => p.t);
+      const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+      const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const radii = scaledData.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
+      console.log("=== COORDINATE DIAGNOSTICS (client, post-scale) ===");
+      console.log("Point count:", scaledData.length);
+      console.log("X range:", Math.min(...xs).toFixed(2), "→", Math.max(...xs).toFixed(2), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(2), "digitizer units");
+      console.log("Y range:", Math.min(...ys).toFixed(2), "→", Math.max(...ys).toFixed(2), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(2), "digitizer units");
+      console.log("Centroid:", meanX.toFixed(2), ",", meanY.toFixed(2));
+      console.log("Radial range:", Math.min(...radii).toFixed(2), "→", Math.max(...radii).toFixed(2), "digitizer units");
+      console.log("Drawing duration:", Math.max(...ts) - Math.min(...ts), "ms");
+      console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
+      console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
+      console.log("====================================================");
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Analysis timeout: API did not respond within 70 seconds")), TIMEOUT_MS)
       );
@@ -351,6 +363,24 @@ export default function MachinePage() {
       localStorage.setItem("userDemographics", JSON.stringify(demographics));
     }
     setIsConfirmed(true);
+  };
+
+  const removeDrawing = async (index) => {
+    const drawing = savedDrawings[index];
+    if (!drawing) return;
+    setSavedDrawings((prev) => prev.filter((_, i) => i !== index));
+    if (drawing.localId) removedLocalIds.current.add(drawing.localId);
+    const drawingId = drawing.drawingId ?? drawingIdMap.current[drawing.localId];
+    if (!drawingId) return;
+    const res = await fetch("/api/delete-drawing", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drawingId }),
+    });
+    if (!res.ok) {
+      const json = await res.json();
+      console.error("[remove] Failed to delete drawing from database:", json);
+    }
   };
 
   const clearAllDrawings = () => {
@@ -648,7 +678,7 @@ export default function MachinePage() {
                 </div>
               </div>
 
-              <MiniSpiralHistory savedDrawings={savedDrawings} />
+              <MiniSpiralHistory savedDrawings={savedDrawings} onRemove={!userFinished ? removeDrawing : undefined} />
             </>
           )}
         </div>
