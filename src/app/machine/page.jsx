@@ -18,6 +18,7 @@ export default function MachinePage() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [userFinished, setUserFinished] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
+  const currentSessionIdRef = useRef(null);
   const [selectedHand, setSelectedHand] = useState(null); // 'dominant' | 'non-dominant'
   const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' | 'R'
   const [showDemographics, setShowDemographics] = useState(false);
@@ -167,11 +168,12 @@ export default function MachinePage() {
   };
 
   const getOrCreateSessionId = () => {
-    if (currentSessionId) return currentSessionId;
+    if (currentSessionIdRef.current) return currentSessionIdRef.current;
     const isAuthenticated = user?.id;
     const sessionId = isAuthenticated
       ? `session_${Date.now()}_${user.id}`
       : getOrCreateAnonymousSession();
+    currentSessionIdRef.current = sessionId;
     setCurrentSessionId(sessionId);
     return sessionId;
   };
@@ -224,7 +226,7 @@ export default function MachinePage() {
       await saveSingleAnalysisResult(drawingId, result, sessionId);
       console.log("[3/3] Result saved. Pipeline complete.");
     } catch (error) {
-      console.error("Drawing analysis failed:", error);
+      console.error("Drawing analysis failed:", error?.message || error?.details || JSON.stringify(error) || error);
       setIsSaving(false);
     } finally {
       setIsAnalyzing(false);
@@ -363,11 +365,15 @@ export default function MachinePage() {
     setIsConfirmed(true);
   };
 
-  const clearAllDrawings = () => {
+  const clearAllDrawings = async () => {
     const ok = window.confirm(
       "Are you sure you want to clear all your drawings? This will also reset your hand selection."
     );
     if (!ok) return;
+
+    const sessionId = currentSessionIdRef.current;
+    console.log("Clearing session:", sessionId);
+
     setCurrentDrawing([]);
     setSavedDrawings([]);
     setUserFinished(false);
@@ -378,11 +384,19 @@ export default function MachinePage() {
     setShowDemographics(false);
     localStorage.removeItem("selectedHand");
     localStorage.removeItem("selectedHandSide");
-    //get session id 
 
-    const { error } = supabase.from('drawings').delete().in('session_id', currentSessionId).select()
-    // delete from drawing table via session_id, then make sure to delete related api_results
-
+    if (sessionId) {
+      const { data: selectData } = await supabase.from('drawings').select("id, session_id").eq('session_id', sessionId);
+      console.log("Rows visible before delete:", selectData);
+      const { data: drawingData, error: drawingsError } = await supabase.from('drawings').delete().eq('session_id', sessionId).select("id, created_at");
+      console.log("Deleted drawings count:", drawingData?.length ?? 0);
+      drawingData?.forEach((d) => console.log("Deleted drawing id:", d.id));
+      console.log("Drawing error: ", drawingsError);
+      const { data: resultsData, error: resultsError } = await supabase.from('api_results').delete().eq('session_id', sessionId).select("*");
+      console.log("API result data: ", resultsData);
+      console.log("API result error: ", resultsError);
+    }
+  // delete from drawing table via session_id, then make sure to delete related api_results
     if (canvasRef.current?.clearCanvas) canvasRef.current.clearCanvas();
   };
 
