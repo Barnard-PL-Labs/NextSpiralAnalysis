@@ -379,8 +379,8 @@ export default function MachinePage() {
     localStorage.removeItem("selectedHand");
     localStorage.removeItem("selectedHandSide");
     //get session id 
-    
-    const { error } = await supabase.from('drawings').delete().in('session_id', 'hi')
+
+    const { error } = supabase.from('drawings').delete().in('session_id', currentSessionId).select()
     // delete from drawing table via session_id, then make sure to delete related api_results
 
     if (canvasRef.current?.clearCanvas) canvasRef.current.clearCanvas();
