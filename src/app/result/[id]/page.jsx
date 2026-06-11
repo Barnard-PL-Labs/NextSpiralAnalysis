@@ -493,7 +493,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
   );
 }
 
-/* ---------- MAIN PAGE (unchanged logic) ---------- */
+/* ---------- MAIN PAGE ---------- */
 
 export default function UnifiedResultPage() {
   const router = useRouter();
