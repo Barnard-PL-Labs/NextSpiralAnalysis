@@ -18,7 +18,6 @@ export default function MachinePage() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [userFinished, setUserFinished] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
-  const currentSessionIdRef = useRef(null);
   const [selectedHand, setSelectedHand] = useState(null); // 'dominant' | 'non-dominant'
   const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' | 'R'
   const [showDemographics, setShowDemographics] = useState(false);
@@ -168,12 +167,11 @@ export default function MachinePage() {
   };
 
   const getOrCreateSessionId = () => {
-    if (currentSessionIdRef.current) return currentSessionIdRef.current;
+    if (currentSessionId) return currentSessionId;
     const isAuthenticated = user?.id;
     const sessionId = isAuthenticated
       ? `session_${Date.now()}_${user.id}`
       : getOrCreateAnonymousSession();
-    currentSessionIdRef.current = sessionId;
     setCurrentSessionId(sessionId);
     return sessionId;
   };
@@ -371,7 +369,7 @@ export default function MachinePage() {
     );
     if (!ok) return;
 
-    const sessionId = currentSessionIdRef.current;
+    const sessionId = currentSessionId;
     console.log("Clearing session:", sessionId);
 
     setCurrentDrawing([]);
