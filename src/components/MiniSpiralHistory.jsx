@@ -8,13 +8,13 @@ import styles from "@/styles/MiniSpiralHistory.module.css";
  *  - Array of point arrays (legacy)
  *  - Array of objects: { points: [...], handSide: 'L'|'R', handUsed?: 'dominant'|'non-dominant' }
  */
-const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = true }) => {
+const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = true, onRemove }) => {
   if (!savedDrawings || savedDrawings.length === 0) return null;
 
   const getPoints = (drawing) => (Array.isArray(drawing) ? drawing : drawing?.points || []);
   const getSide = (drawing) => (Array.isArray(drawing) ? drawing?.handSide : drawing?.handSide);
 
-  const SidebarSpiralCard = ({ drawing, index }) => {
+  const SidebarSpiralCard = ({ drawing, index, onRemove }) => {
     const pts = getPoints(drawing);
     if (!pts || pts.length === 0) return null;
 
@@ -31,6 +31,11 @@ const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = t
 
     return (
       <div className={styles.spiralCard}>
+        {onRemove && (
+          <button className={styles.removeBtn} onClick={() => onRemove(index)} aria-label="Remove spiral">
+            ×
+          </button>
+        )}
         {/* Title row with centered text and side-specific hand icon */}
         <div
           className={styles.spiralTitle}
@@ -121,7 +126,7 @@ const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = t
     return (
       <div className={styles.spiralSidebar}>
         {savedDrawings.map((drawing, index) => (
-          <SidebarSpiralCard key={index} drawing={drawing} index={index} />
+          <SidebarSpiralCard key={index} drawing={drawing} index={index} onRemove={onRemove} />
         ))}
       </div>
     );
