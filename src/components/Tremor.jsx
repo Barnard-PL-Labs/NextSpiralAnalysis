@@ -55,11 +55,11 @@ const processTremorData = (result) => {
   const meanAmplitude = parseFloat(result["mean amp. (cm)"]) || 0;
   const stdAmplitude = parseFloat(result["std of amp."]) || 0;
 
-  // Convert amplitude to mm for clinical readability
+  // Convert amplitude from cm to mm
   const amplitudeData = {
-    max: maxAmplitude * 10000,
-    mean: meanAmplitude * 10000,
-    std: stdAmplitude * 10000,
+    max: maxAmplitude * 10,
+    mean: meanAmplitude * 10,
+    std: stdAmplitude * 10,
   };
   
   return { axes, powers, polarities, frequencies, amplitudeData };
@@ -181,7 +181,7 @@ const TremorPolarPlot = ({ result }) => {
               hovertemplate:
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
-                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
+                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
               "<extra></extra>",
             hoverlabel: {
               bgcolor: axisColors[index % axisColors.length],
@@ -204,7 +204,7 @@ const TremorPolarPlot = ({ result }) => {
                 "<b><u>Dominant Axis</u></b><br>" +
                 "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
                 "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
-                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " μm<br>" +
+                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
               "<extra></extra>",
             hoverlabel: {
               bgcolor: axisColors[index % axisColors.length],
@@ -332,7 +332,7 @@ const TremorPolarPlot = ({ result }) => {
       label: "Frequency", 
       value: isNaN(dominantFrequency) ? "N/A" : `${dominantFrequency.toFixed(1)} Hz` 
     },
-    { label: "Amplitude", value: `${amplitudeData.mean.toFixed(1)} μm` },
+    { label: "Amplitude", value: `${amplitudeData.mean.toFixed(1)} mm` },
   ],
 };
 
