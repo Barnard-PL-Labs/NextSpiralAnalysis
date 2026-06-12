@@ -247,21 +247,20 @@ export default function MachinePage() {
   const backgroundAnalysis = async (drawingData) => {
     const TIMEOUT_MS = 70000;
     try {
-      // Scale x/y from CSS pixels to the original tablet's native 25-DPI units.
-      // The MATLAB pipeline applies *8 to all coordinates (dataconvert.m), making the
-      // effective resolution 25*8 = 200 DPI, and then /200*2.54 converts to cm correctly.
-      // DataAnaly.m also does y2 = 2400 - y*8, which is calibrated to a 25-DPI tablet
-      // whose full height in the *8 scale equals 2400. Sending at 200 DPI makes y*8
-      // reach 6296, producing negative y2 and breaking all spiral metrics.
-      // cssPpi is derived from the same BASE_CANVAS_SIZE assumption as Canvas.jsx (264 physical PPI / dpr).
+      // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
+      // pre-divided by 8 to compensate for dataconvert.m's hardcoded *8 factor
+      // (a legacy Wacom tablet calibration that inflates all coordinates 8×).
+      // After dataconvert multiplies by 8, effective scale = 200/cssPpi as intended.
+      // y-center is 150 (= 1200/8) so after ×8 it maps to 1200, the center of
+      // MATLAB's hardcoded 2400-unit canvas height used in the y-flip (y2 = 2400 - y).
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = 264 / (window.devicePixelRatio || 1);
-      const scale = 25 / cssPpi;
+      const scale = 200 / cssPpi / 8;
       const firstY = drawingData[0].y;
       const scaledData = drawingData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
-        y: +((pt.y - firstY) * scale + 1200).toFixed(4),
+        y: +((pt.y - firstY) * scale + 150).toFixed(4),
       }));
       console.log("[scale] cssPpi:", cssPpi, "scale:", scale, "firstPoint:", scaledData[0], "lastPoint:", scaledData[scaledData.length - 1]);
 
