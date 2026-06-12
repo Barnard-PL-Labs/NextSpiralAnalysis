@@ -365,9 +365,6 @@ export default function MachinePage() {
     setIsConfirmed(true);
   };
 
-<<<<<<< HEAD
-  const clearAllDrawings = async () => {
-=======
   const removeDrawing = async (index) => {
     const drawing = savedDrawings[index];
     if (!drawing) return;
@@ -385,9 +382,8 @@ export default function MachinePage() {
       console.error("[remove] Failed to delete drawing from database:", json);
     }
   };
-
-  const clearAllDrawings = () => {
->>>>>>> a7cb2aa7a8d440d247711ea15c20fb9d09b48b2f
+//hi
+  const clearAllDrawings = async () => {
     const ok = window.confirm(
       "Are you sure you want to clear all your drawings? This will also reset your hand selection."
     );
