@@ -247,11 +247,15 @@ export default function MachinePage() {
   const backgroundAnalysis = async (drawingData) => {
     const TIMEOUT_MS = 70000;
     try {
-      // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch)
-      // so the MATLAB backend's /200*2.54 conversion produces correct cm values.
+      // Scale x/y from CSS pixels to the original tablet's native 25-DPI units.
+      // The MATLAB pipeline applies *8 to all coordinates (dataconvert.m), making the
+      // effective resolution 25*8 = 200 DPI, and then /200*2.54 converts to cm correctly.
+      // DataAnaly.m also does y2 = 2400 - y*8, which is calibrated to a 25-DPI tablet
+      // whose full height in the *8 scale equals 2400. Sending at 200 DPI makes y*8
+      // reach 6296, producing negative y2 and breaking all spiral metrics.
       // cssPpi is derived from the same BASE_CANVAS_SIZE assumption as Canvas.jsx (264 physical PPI / dpr).
       const cssPpi = 264 / (window.devicePixelRatio || 1);
-      const scale = 200 / cssPpi;
+      const scale = 25 / cssPpi;
       const scaledData = drawingData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
@@ -268,10 +272,10 @@ export default function MachinePage() {
       const radii = scaledData.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
       console.log("=== COORDINATE DIAGNOSTICS (client, post-scale) ===");
       console.log("Point count:", scaledData.length);
-      console.log("X range:", Math.min(...xs).toFixed(2), "→", Math.max(...xs).toFixed(2), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(2), "digitizer units");
-      console.log("Y range:", Math.min(...ys).toFixed(2), "→", Math.max(...ys).toFixed(2), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(2), "digitizer units");
+      console.log("X range:", Math.min(...xs).toFixed(2), "→", Math.max(...xs).toFixed(2), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(2), "25-DPI units (×8→200 DPI in MATLAB)");
+      console.log("Y range:", Math.min(...ys).toFixed(2), "→", Math.max(...ys).toFixed(2), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(2), "25-DPI units");
       console.log("Centroid:", meanX.toFixed(2), ",", meanY.toFixed(2));
-      console.log("Radial range:", Math.min(...radii).toFixed(2), "→", Math.max(...radii).toFixed(2), "digitizer units");
+      console.log("Radial range:", Math.min(...radii).toFixed(2), "→", Math.max(...radii).toFixed(2), "25-DPI units");
       console.log("Drawing duration:", Math.max(...ts) - Math.min(...ts), "ms");
       console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
       console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
