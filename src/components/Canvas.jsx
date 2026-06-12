@@ -157,7 +157,7 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
     if (localDrawData.length > 0) {
       const ctx = ctxRef.current;
       if (ctx) {
-        ctx.clearRect(0, 0, CSS_SIZE, CSS_SIZE);
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
         drawCenterCross(ctx);
       }
       pointBufferRef.current = [];
