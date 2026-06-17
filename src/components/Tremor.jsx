@@ -2,6 +2,40 @@ import { sum } from "d3";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
+// Draws a filled arrowhead triangle at (R, thetaDeg) pointing outward.
+// Returns a scatterpolar trace with fill:"toself".
+// Coordinate system: clockwise from north (matches angularaxis rotation=90, direction="clockwise").
+const arrowheadTrace = (R, thetaDeg, len, halfWidth, color) => {
+  const θ = (thetaDeg * Math.PI) / 180;
+  // Cartesian tip and base in our polar system (x=R·sinθ, y=R·cosθ)
+  const tipX = R * Math.sin(θ),           tipY = R * Math.cos(θ);
+  const baseX = (R - len) * Math.sin(θ),  baseY = (R - len) * Math.cos(θ);
+  const perpX = Math.cos(θ),              perpY = -Math.sin(θ);
+  const lX = baseX + halfWidth * perpX,   lY = baseY + halfWidth * perpY;
+  const rX = baseX - halfWidth * perpX,   rY = baseY - halfWidth * perpY;
+
+  const toPolar = (x, y) => {
+    const r = Math.sqrt(x * x + y * y);
+    const t = ((Math.atan2(x, y) * 180) / Math.PI + 360) % 360;
+    return { r, t };
+  };
+  const tip  = toPolar(tipX,  tipY);
+  const left = toPolar(lX,    lY);
+  const rght = toPolar(rX,    rY);
+
+  return {
+    type: "scatterpolar",
+    mode: "lines",
+    r:     [tip.r, left.r, rght.r, tip.r],
+    theta: [tip.t, left.t, rght.t, tip.t],
+    fill: "toself",
+    fillcolor: color,
+    line: { color, width: 0 },
+    showlegend: false,
+    hoverinfo: "skip",
+  };
+};
+
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -163,54 +197,51 @@ const TremorPolarPlot = ({ result }) => {
           
           // Create multiple points along the line for proper rendering
           const numPoints = 10;
-          const linePoints = Array.from({length: numPoints}, (_, i) => (maxPower * 1.4 * i) / (numPoints - 1));
+          const linePoints = Array.from({length: numPoints}, (_, i) => (maxPower * 0.98 * i) / (numPoints - 1));
           
+          const tipR = maxPower * 1.1;
+          const color = axisColors[index % axisColors.length];
+          const hoverPos =
+            "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
+            "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
+            "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
+            "<extra></extra>";
+          const hoverNeg =
+            "<b><u>Dominant Axis</u></b><br>" +
+            "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
+            "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
+            "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
+            "<extra></extra>";
+
           return [
-            // Positive direction arrow - multiple points
-          {
-            type: "scatterpolar",
-            mode: "lines",
+            // Positive direction line
+            {
+              type: "scatterpolar",
+              mode: "lines",
               r: linePoints,
               theta: Array(numPoints).fill(adjustedAxis),
-            line: {
-              color: axisColors[index % axisColors.length],
-              width: 3,
-            },
-            showlegend: false,
+              line: { color, width: 3 },
+              showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
-              hovertemplate:
-                "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
-                "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
-                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
-              "<extra></extra>",
-            hoverlabel: {
-              bgcolor: axisColors[index % axisColors.length],
-              font: { color: "white" },
+              hovertemplate: hoverPos,
+              hoverlabel: { bgcolor: color, font: { color: "white" } },
             },
-          },
-            // Negative direction arrow - multiple points
-          {
-            type: "scatterpolar",
-            mode: "lines",
+            // Positive arrowhead
+            arrowheadTrace(tipR, adjustedAxis, tipR * 0.12, tipR * 0.07, color),
+            // Negative direction line
+            {
+              type: "scatterpolar",
+              mode: "lines",
               r: linePoints,
               theta: Array(numPoints).fill(adjustedAxis + 180),
-            line: {
-              color: axisColors[index % axisColors.length],
-              width: 3,
-            },
-            showlegend: false,
+              line: { color, width: 3 },
+              showlegend: false,
               customdata: Array(numPoints).fill([powers[index], index + 1]),
-              hovertemplate:
-                "<b><u>Dominant Axis</u></b><br>" +
-                "<b>Direction</b>: " + adjustedAxis.toFixed(0) + "°<br>" +
-                "<b>Frequency</b>: " + (isNaN(frequencies[index]) ? "N/A" : frequencies[index].toFixed(1) + " Hz") + "<br>" +
-                "<b>Amplitude</b>: " + amplitudeData.mean.toFixed(1) + " mm<br>" +
-              "<extra></extra>",
-            hoverlabel: {
-              bgcolor: axisColors[index % axisColors.length],
-              font: { color: "white" },
+              hovertemplate: hoverNeg,
+              hoverlabel: { bgcolor: color, font: { color: "white" } },
             },
-          }
+            // Negative arrowhead
+            arrowheadTrace(tipR, adjustedAxis + 180, tipR * 0.12, tipR * 0.07, color),
           ];
         }),
       ]
