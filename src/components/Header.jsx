@@ -34,7 +34,7 @@ export default function Header() {
     await logout();
     router.push("/");
   };
-
+//hi
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Spiral Analysis", href: "/machine" },
