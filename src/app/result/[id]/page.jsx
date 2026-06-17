@@ -199,6 +199,33 @@ const LrBadge = ({ side }) => {
 
 /* ---------- Tremor Axes overlay (Summary-only, styling-only) ---------- */
 
+function arrowheadTrace(R, thetaDeg, len, halfWidth, color) {
+  const θ = (thetaDeg * Math.PI) / 180;
+  const tipX = R * Math.sin(θ),          tipY = R * Math.cos(θ);
+  const baseX = (R - len) * Math.sin(θ), baseY = (R - len) * Math.cos(θ);
+  const perpX = Math.cos(θ),             perpY = -Math.sin(θ);
+  const lX = baseX + halfWidth * perpX,  lY = baseY + halfWidth * perpY;
+  const rX = baseX - halfWidth * perpX,  rY = baseY - halfWidth * perpY;
+  const toPolar = (x, y) => ({
+    r: Math.sqrt(x * x + y * y),
+    t: ((Math.atan2(x, y) * 180) / Math.PI + 360) % 360,
+  });
+  const tip  = toPolar(tipX, tipY);
+  const left = toPolar(lX,   lY);
+  const rght = toPolar(rX,   rY);
+  return {
+    type: "scatterpolar",
+    mode: "lines",
+    r:     [tip.r, left.r, rght.r, tip.r],
+    theta: [tip.t, left.t, rght.t, tip.t],
+    fill: "toself",
+    fillcolor: color,
+    line: { color, width: 0 },
+    showlegend: false,
+    hoverinfo: "skip",
+  };
+}
+
 function normalizePowers(powers) {
   const valid = powers.filter((p) => Number.isFinite(p));
   const pMax = valid.length ? Math.max(...valid) : 1;
@@ -229,28 +256,29 @@ function buildAxesTraces(anglesDeg, powers, color) {
     const rLen = scaled[i];
 
     const numPoints = 14;
-    const linePoints = Array.from({ length: numPoints }, (_, j) => rLen * (j / (numPoints - 1)));
+    const arrowLen = rLen * 0.12;
+    const arrowHalf = rLen * 0.07;
+    const lineEnd = rLen * 0.88; // stop line where arrowhead base begins
+    const linePoints = Array.from({ length: numPoints }, (_, j) => lineEnd * (j / (numPoints - 1)));
+    const hover = `Axis ${i + 1}<br>Dir: ${theta.toFixed(0)}°<br>Rel Pow: ${formatNum(powers[i] ?? 0.6, 2)}<extra></extra>`;
 
-    // + direction
+    // + direction line + arrowhead
     traces.push({
-      type: "scatterpolar",
-      mode: "lines",
-      r: linePoints,
-      theta: Array(numPoints).fill(theta),
+      type: "scatterpolar", mode: "lines",
+      r: linePoints, theta: Array(numPoints).fill(theta),
       line: { color, width: 3 },
-      hovertemplate: `Axis ${i + 1}<br>Dir: ${theta.toFixed(0)}°<br>Rel Pow: ${formatNum(powers[i] ?? 0.6, 2)}<extra></extra>`,
-      showlegend: false,
+      hovertemplate: hover, showlegend: false,
     });
-    // - direction
+    traces.push(arrowheadTrace(rLen, theta, arrowLen, arrowHalf, color));
+
+    // - direction line + arrowhead
     traces.push({
-      type: "scatterpolar",
-      mode: "lines",
-      r: linePoints,
-      theta: Array(numPoints).fill(theta + 180),
+      type: "scatterpolar", mode: "lines",
+      r: linePoints, theta: Array(numPoints).fill(theta + 180),
       line: { color, width: 3 },
-      hovertemplate: `Axis ${i + 1}<br>Dir: ${(theta + 180).toFixed(0)}°<br>Rel Pow: ${formatNum(powers[i] ?? 0.6, 2)}<extra></extra>`,
-      showlegend: false,
+      hovertemplate: hover, showlegend: false,
     });
+    traces.push(arrowheadTrace(rLen, theta + 180, arrowLen, arrowHalf, color));
   });
 
   // center marker
