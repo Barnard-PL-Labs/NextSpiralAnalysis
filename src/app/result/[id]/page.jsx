@@ -899,7 +899,7 @@ export default function UnifiedResultPage() {
                 <div style={{ borderTop: "1px solid rgba(199,210,254,0.5)", paddingTop: "24px" }}>
                   <div className={styles.chartGrid}>
                     <div className={styles.graphCard} style={{ position: "relative" }}>
-                      <h3>Spiral XY Plot</h3>
+                      <h3>Original Spiral</h3>
                       <div className={styles.chartContainer}>
                         <LineGraph data={drawData} />
                       </div>
