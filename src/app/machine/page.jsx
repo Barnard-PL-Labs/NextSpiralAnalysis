@@ -10,6 +10,33 @@ import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
 import { FaHandPaper } from "react-icons/fa";
 
+function detectDevicePpi() {
+  if (typeof window === "undefined") return 264;
+  const dpr = window.devicePixelRatio || 1;
+  const width = window.screen.width * dpr;
+  const height = window.screen.height * dpr;
+  const maxDim = Math.max(width, height);
+  const minDim = Math.min(width, height);
+
+  console.log("MAX DIM", maxDim)
+  console.log("MIN DIM", minDim)
+  if (navigator.userAgent.includes("Macintosh")) {
+    if (maxDim === 2752 && minDim === 2064) return 264;
+    if (maxDim === 2360 && minDim === 1640) return 264;
+    if (maxDim === 2560 && minDim === 1600) {
+      console.log("laptop detected")
+      return 224;
+    }
+  }
+  if (navigator.userAgent.includes("Android")) {
+    if (maxDim === 2800 && minDim === 1752) return 266;
+    if (maxDim === 2560 && minDim === 1600) return 274;
+    if (maxDim === 2960 && minDim === 1848) return 239;
+  }
+  console.log("[device] unrecognized device, falling back to 264 PPI");
+  return 264;
+}
+
 export default function MachinePage() {
   const canvasRef = useRef();
   const drawingIdMap = useRef({}); // localId -> drawingId, updated synchronously (avoids React state timing issues)
@@ -27,6 +54,7 @@ export default function MachinePage() {
   const [demographics, setDemographics] = useState({ name: "", age: "", sex: "", studyId: "" });
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [devicePpi] = useState(detectDevicePpi);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -216,6 +244,7 @@ export default function MachinePage() {
   };
 
   const backgroundAnalysis = async (drawingData) => {
+    
     const TIMEOUT_MS = 70000;
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
@@ -224,8 +253,9 @@ export default function MachinePage() {
       // After dataconvert multiplies by 8, effective scale = 200/cssPpi as intended.
       // y-center is 150 (= 1200/8) so after ×8 it maps to 1200, the center of
       // MATLAB's hardcoded 2400-unit canvas height used in the y-flip (y2 = 2400 - y).
+      console.log("[device] using PPI:", devicePpi);
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
-      const cssPpi = 264 / (window.devicePixelRatio || 1);
+      const cssPpi = devicePpi / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi / 8;
       const firstY = drawingData[0].y;
       const scaledData = drawingData.map((pt) => ({
@@ -671,7 +701,7 @@ export default function MachinePage() {
 
                 <div className={styles.cardDivider} />
 
-                <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} />
+                <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} devicePpi={devicePpi} />
 
               </div>
 
@@ -712,4 +742,3 @@ export default function MachinePage() {
   );
 }
 
-//hi 
