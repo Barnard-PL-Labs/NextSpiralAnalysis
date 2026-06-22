@@ -79,6 +79,11 @@ const pickTightness = (r) => {
   return null;
 };
 
+const pickSecondOSM = (r) => {
+  if (!r) return null;
+  if (r["TIghtness"] !== null && r["2nd order sm"] !== undefined) return r["2nd order sm"];
+  return null;
+}
 /* ---------- UI atoms (Summary only) ---------- */
 
 const Segmented = ({ value, onChange }) => (
@@ -433,8 +438,9 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
     const arr = idxs.map((i) => typedResults[i]).filter(Boolean);
     const avgDOS = avg(arr.map((r) => r.DOS ?? null));
     const avgTremor = avg(arr.map((r) => pickTremorHz(r)));
-    const avgTightness = avg(arr.map((r) => pickTightness(r)))
-    return { count: idxs.length, completed: arr.length, avgDOS, avgTremor, avgTightness };
+    const avgTightness = avg(arr.map((r) => pickTightness(r)));
+    const avgSecondOSm = avg(arr.map((r) => pickSecondOSM(r)));
+    return { count: idxs.length, completed: arr.length, avgDOS, avgTremor, avgTightness, avgSecondOSm};
   };
 
   const Ls = perHandStats(groups.L);
@@ -478,14 +484,20 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ width: 26 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg DOS</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgDOS, 2)}</div>
-                <div style={{ width: 8 }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 8 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTremor, 2)}</div>
                 
                 <div style={{ width: 8 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycles)</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgTightness, 2)}</div>
-              </div>
+
+                <div style={{ width: 8 }} />
+                <div style={{ fontSize: 12, color: "#333" }}>Avg 2nd Order Sm</div>
+                <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Ls.avgSecondOSm, 2)}</div>
+                </div>
             </div>
 
             <div style={{ width: 1, background: "#a6afbc", alignSelf: "stretch", margin: "0 10px" }} />
@@ -503,13 +515,19 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
                 <div style={{ width: 26 }} />
                 <div style={{ fontSize: 12, color: "#333" }}>Avg DOS</div>
                 <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgDOS, 2)}</div>
-                <div style={{ width: 8 }} />
-                <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
-                <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTremor, 2)}</div>
-                <div style={{ width: 8 }} />
-                <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycles)</div>
-                <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTightness, 2)}</div>
               </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 8 }} />
+                  <div style={{ fontSize: 12, color: "#333" }}>Avg Tremor (Hz)</div>
+                  <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTremor, 2)}</div>
+                  <div style={{ width: 8 }} />
+                  <div style={{ fontSize: 12, color: "#333" }}>Avg Tightness (cycles)</div>
+                  <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgTightness, 2)}</div>
+                  <div style={{ width: 8 }} />
+                  <div style={{ fontSize: 12, color: "#333" }}>Avg 2nd Order Sm</div>
+                  <div style={{ fontWeight: 800, color: "#111" }}>{formatNum(Rs.avgSecondOSm, 2)}</div>
+              </div>
+              
             </div>
           </div>
         </div>
