@@ -526,6 +526,12 @@
   text-align: center;
 }
 
+.handOptionCardWithIcon {
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 12px 16px;
+}
+
 .handOptionCard:hover {
   border-color: var(--color-accent);
   background: var(--color-surface-2);
