@@ -17,9 +17,12 @@ function detectDevicePpi() {
   const height = window.screen.height * dpr;
   const maxDim = Math.max(width, height);
   const minDim = Math.min(width, height);
+  console.log("dimension: ", window.screen.width, " x ", window.screen.height)
 
+  //test it on diff devices, to check if the reported dimensions are only from the laptop
   console.log("MAX DIM", maxDim)
   console.log("MIN DIM", minDim)
+  console.log(navigator.userAgent)
   if (navigator.userAgent.includes("Macintosh")) {
     if (maxDim === 2752 && minDim === 2064) return 264;
     if (maxDim === 2360 && minDim === 1640) return 264;
