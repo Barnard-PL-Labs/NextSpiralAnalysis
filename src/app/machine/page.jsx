@@ -11,33 +11,28 @@ import { supabase } from "@/lib/supabaseClient";
 import { FaHandPaper } from "react-icons/fa";
 
 function detectDevicePpi() {
-  if (typeof window === "undefined") return 264;
+  if (typeof window === "undefined") return { ppi: 264, recognized: true };
   const dpr = window.devicePixelRatio || 1;
   const width = window.screen.width * dpr;
   const height = window.screen.height * dpr;
   const maxDim = Math.max(width, height);
   const minDim = Math.min(width, height);
-  console.log("dimension: ", window.screen.width, " x ", window.screen.height)
-
-  //test it on diff devices, to check if the reported dimensions are only from the laptop
-  console.log("MAX DIM", maxDim)
-  console.log("MIN DIM", minDim)
-  console.log(navigator.userAgent)
+  console.log("MAX DIM", maxDim, "MIN DIM", minDim, navigator.userAgent);
   if (navigator.userAgent.includes("Macintosh")) {
-    if (maxDim === 2752 && minDim === 2064) return 264;
-    if (maxDim === 2360 && minDim === 1640) return 264;
-    if (maxDim === 2560 && minDim === 1600) {
-      console.log("laptop detected")
-      return 224;
-    }
+    if (maxDim === 2420 && minDim === 1668) return { ppi: 264, recognized: true }; // iPad Pro 11" M4
+    if (maxDim === 2752 && minDim === 2064) return { ppi: 264, recognized: true }; // iPad Pro 13" M4
+    if (maxDim === 2388 && minDim === 1668) return { ppi: 264, recognized: true }; // iPad Pro 11" M1-M3
+    if (maxDim === 2360 && minDim === 1640) return { ppi: 264, recognized: true }; // iPad Air 11"
+    if (maxDim === 2732 && minDim === 2048) return { ppi: 264, recognized: true }; // iPad Air 13"
+    if (maxDim === 2560 && minDim === 1600) return { ppi: 224, recognized: true }; // MacBook
   }
   if (navigator.userAgent.includes("Android")) {
-    if (maxDim === 2800 && minDim === 1752) return 266;
-    if (maxDim === 2560 && minDim === 1600) return 274;
-    if (maxDim === 2960 && minDim === 1848) return 239;
+    if (maxDim === 2800 && minDim === 1752) return { ppi: 266, recognized: true };
+    if (maxDim === 2560 && minDim === 1600) return { ppi: 274, recognized: true };
+    if (maxDim === 2960 && minDim === 1848) return { ppi: 239, recognized: true };
   }
   console.log("[device] unrecognized device, falling back to 264 PPI");
-  return 264;
+  return { ppi: 264, recognized: false };
 }
 
 export default function MachinePage() {
@@ -57,7 +52,8 @@ export default function MachinePage() {
   const [demographics, setDemographics] = useState({ name: "", age: "", sex: "", studyId: "" });
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [devicePpi] = useState(detectDevicePpi);
+  const [{ ppi: devicePpi, recognized: deviceRecognized }] = useState(detectDevicePpi);
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -698,68 +694,121 @@ export default function MachinePage() {
               </p>
 
               {/* White card containing controls + canvas + action buttons */}
-              <div className={styles.drawingCard}>
+<div className={styles.drawingCard} style={!deviceRecognized && !warningAcknowledged ? {
+                border: "1.5px solid #fcd34d",
+                boxShadow: "0 0 0 3px rgba(251,191,36,0.15), 0 8px 32px rgba(99,102,241,0.08)",
+              } : {}}>
                 {/* Controls inside card */}
-                <div className={styles.controlsBar} style={{ border: "none", boxShadow: "none", background: "transparent", marginBottom: 0 }}>
+                <div className={styles.controlsBar}>
                   <div className={styles.controlsGroup}>
-                    <span className={styles.controlsGroupLabel}>Side</span>
-                    <button
-                      type="button"
-                      onClick={() => handleHandSideSelection("L")}
-                      aria-pressed={selectedHandSide === "L"}
-                      className={styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")}
-                    >L</button>
-                    <button
-                      type="button"
-                      onClick={() => handleHandSideSelection("R")}
-                      aria-pressed={selectedHandSide === "R"}
-                      className={styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")}
-                    >R</button>
+                    <span className={styles.controlsGroupLabel}>Hand</span>
+                    <div className={styles.segmentedPill}>
+                      <button
+                        type="button"
+                        onClick={() => handleHandSideSelection("L")}
+                        aria-pressed={selectedHandSide === "L"}
+                        className={styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")}
+                      >L</button>
+                      <button
+                        type="button"
+                        onClick={() => handleHandSideSelection("R")}
+                        aria-pressed={selectedHandSide === "R"}
+                        className={styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")}
+                      >R</button>
+                    </div>
                   </div>
                   <div className={styles.controlsGroup}>
                     <span className={styles.controlsGroupLabel}>Dominance</span>
-                    <button
-                      onClick={() => handleHandSelection("dominant")}
-                      aria-pressed={selectedHand === "dominant"}
-                      className={styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")}
-                    >Dominant</button>
-                    <button
-                      onClick={() => handleHandSelection("non-dominant")}
-                      aria-pressed={selectedHand === "non-dominant"}
-                      className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
-                    >Non-Dominant</button>
+                    <div className={styles.segmentedPill}>
+                      <button
+                        onClick={() => handleHandSelection("dominant")}
+                        aria-pressed={selectedHand === "dominant"}
+                        className={styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")}
+                      >Dom</button>
+                      <button
+                        onClick={() => handleHandSelection("non-dominant")}
+                        aria-pressed={selectedHand === "non-dominant"}
+                        className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
+                      >Non</button>
+                    </div>
                   </div>
                 </div>
 
-                <div className={styles.cardDivider} />
-
-                <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} devicePpi={devicePpi} />
-
-              </div>
-
-              {/* Action buttons outside card */}
-              <div className={styles.actionButtonRow} style={{ marginTop: "20px" }}>
-                <div style={{ display: "flex", gap: 14 }}>
-                  <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>
-                    Clear
-                  </button>
-                  <button onClick={clearAllDrawings} className={styles.clearButton}>
-                    Clear All
-                  </button>
-                </div>
-                <div style={{ display: "flex", gap: 14 }}>
-                  {!userFinished && savedDrawings.length > 0 && (
-                    <button className={styles.button} onClick={handleFinishEarly}>
-                      Finish Analysis
-                      <span className={styles.countBadge}>{savedDrawings.length}</span>
-                    </button>
+                <div style={{ position: "relative" }}>
+                  <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} devicePpi={devicePpi} />
+                  {!deviceRecognized && !warningAcknowledged && (
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "rgba(255,255,255,0.72)",
+                      backdropFilter: "blur(6px)",
+                      borderRadius: 8,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <div style={{
+                        background: "var(--color-surface)",
+                        border: "1px solid #fde68a",
+                        borderRadius: "var(--radius-md)",
+                        padding: "24px 28px",
+                        maxWidth: 320, width: "90%",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
+                        textAlign: "center",
+                      }}>
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 10,
+                          background: "#fef3c7",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          margin: "0 auto 14px",
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2.5L2 17h16L10 2.5z" fill="#fde68a" stroke="#d97706" strokeWidth="1.6" strokeLinejoin="round"/>
+                            <path d="M10 8.5v3.5" stroke="#d97706" strokeWidth="1.6" strokeLinecap="round"/>
+                            <circle cx="10" cy="14.5" r="0.85" fill="#d97706"/>
+                          </svg>
+                        </div>
+                        <div style={{ fontWeight: 600, fontSize: 14, color: "var(--color-text-primary)", marginBottom: 8 }}>
+                          Device Not Recognized
+                        </div>
+                        <p style={{ margin: "0 0 18px", fontSize: 12.5, color: "var(--color-text-secondary)", lineHeight: 1.6 }}>
+                          Screen density could not be verified. Results may be less accurate. Contact your study administrator if precision is required.
+                        </p>
+                        <button
+                          onClick={() => setWarningAcknowledged(true)}
+                          style={{
+                            width: "100%", padding: "8px 0", fontSize: 13, fontWeight: 600,
+                            background: "var(--color-accent)", color: "white",
+                            border: "none", borderRadius: "var(--radius-sm)",
+                            cursor: "pointer", fontFamily: "var(--font-sans)",
+                          }}
+                        >
+                          Acknowledge &amp; Continue
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  {!userFinished && savedDrawings.length < 15 && (
-                    <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing} disabled={isSaving}>
-                      Save
-                    </button>
-                  )}
                 </div>
+
+                <div className={styles.cardDivider} style={{ marginBottom: 0 }} />
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", paddingTop: 12 }}>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={clearCurrentDrawing} className={styles.clearCurrentButton}>Clear</button>
+                    <button onClick={clearAllDrawings} className={styles.clearButton}>Clear All</button>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {!userFinished && savedDrawings.length > 0 && (
+                      <button className={styles.button} onClick={handleFinishEarly}>
+                        Finish Analysis
+                        <span className={styles.countBadge}>{savedDrawings.length}</span>
+                      </button>
+                    )}
+                    {!userFinished && savedDrawings.length < 15 && (
+                      <button className={styles.saveButton} onClick={saveAndAnalyzeCurrentDrawing} disabled={isSaving}>
+                        Save
+                      </button>
+                    )}
+                  </div>
+                </div>
+
               </div>
 
               <MiniSpiralHistory savedDrawings={savedDrawings} onRemove={!userFinished ? removeDrawing : undefined} />
