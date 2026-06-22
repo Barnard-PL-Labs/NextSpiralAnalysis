@@ -505,19 +505,21 @@ export default function MachinePage() {
       <div className={styles.handOptionsGrid}>
         <button
           type="button"
-          className={styles.handOptionCard + (selectedHandSide === "L" ? " " + styles.handOptionCardActive : "")}
+          className={`${styles.handOptionCard} ${styles.handOptionCardWithIcon}${selectedHandSide === "L" ? " " + styles.handOptionCardActive : ""}`}
           onClick={() => handleHandSideSelection("L")}
           aria-pressed={selectedHandSide === "L"}
         >
-          Left Hand
+          <FaHandPaper style={{ fontSize: 88, color: selectedHandSide === "L" ? "#2563eb" : "#c8cdd6", transform: "scaleX(-1)" }} />
+          <span>Left Hand</span>
         </button>
         <button
           type="button"
-          className={styles.handOptionCard + (selectedHandSide === "R" ? " " + styles.handOptionCardActive : "")}
+          className={`${styles.handOptionCard} ${styles.handOptionCardWithIcon}${selectedHandSide === "R" ? " " + styles.handOptionCardActive : ""}`}
           onClick={() => handleHandSideSelection("R")}
           aria-pressed={selectedHandSide === "R"}
         >
-          Right Hand
+          <FaHandPaper style={{ fontSize: 88, color: selectedHandSide === "R" ? "#2563eb" : "#c8cdd6" }} />
+          <span>Right Hand</span>
         </button>
       </div>
     </div>
