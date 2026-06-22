@@ -916,7 +916,7 @@ export default function UnifiedResultPage() {
                 {(() => {
                   const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
                   let dosText, dosColor, tightnessText, SecondOSmText;
-                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…" }
+                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"; SecondOSmText = "Pending…" }
                   else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; tightnessText = "Failed"}
                   else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; tightnessText = "Timeout"}
                   else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"}
