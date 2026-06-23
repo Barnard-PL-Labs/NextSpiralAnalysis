@@ -27,8 +27,7 @@
   display: flex;
   flex-direction: column;
   color: #fefefe;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .continueButton {
@@ -46,8 +45,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 10;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .continueButton:hover {
@@ -73,8 +71,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 10;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .skipButton:hover {
@@ -98,8 +95,7 @@
 
 .placeholderContent {
   max-width: 600px;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
   margin-top: 30px;
 }
 
@@ -108,8 +104,7 @@
   font-weight: 600;
   margin-bottom: 20px;
   color: #f0f0f0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .placeholderContent p {
@@ -117,8 +112,7 @@
   font-size: 1.1em;
   line-height: 1.5;
   color: #fffcfc;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .whiteSquare {
@@ -201,7 +195,7 @@
   background-color: #6fadebfa;
   border: none;
   color: rgb(255, 255, 255);
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans);
   font-weight: normal;
   border-radius: 5px;
   cursor: default;

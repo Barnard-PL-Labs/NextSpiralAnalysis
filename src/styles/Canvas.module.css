@@ -162,7 +162,7 @@
 
 .button {
   padding: 7px 20px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
   background-size: 200% 200%;
   background-position: 0% 50%;
   border: none;
@@ -710,7 +710,7 @@
   width: 100%;
   margin-top: 20px;
   padding: 14px;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: linear-gradient(135deg, var(--color-accent), #9333ea);
   color: white;
   border: none;
   border-radius: var(--radius-sm);
