@@ -1,169 +1,367 @@
-/* Directions.module.css */
-
-/* ---------- Page shell ---------- */
+/* ── Page shell ──────────────────────────────────────────────────────────── */
 .mainContainer {
-  background: var(--color-bg);
-  overflow-x: hidden;
-  margin-top: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  background: #ffffff;
   min-height: calc(100vh - 60px);
-  padding-bottom: 60px;
+  margin-top: 64px;
+  padding: 0 32px 80px;
 }
 
-.directionsContainer {
-  width: 90%;
-  max-width: 860px;
-  margin: 40px auto;
-  padding: 48px 40px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  color: var(--color-text-primary);
-  box-sizing: border-box;
-}
-
-/* ---------- Headings / text ---------- */
-.directionsHeader {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 32px;
-  text-align: center;
-}
-
-.subHeader {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 14px;
-}
-
-.highlight { color: var(--color-accent); font-weight: 600; }
-
-.textBlock { margin-bottom: 20px; }
-
-.intro {
-  font-size: 0.95rem;
-  color: var(--color-text-secondary);
-  margin-top: 16px;
-  line-height: 1.7;
-}
-
-/* Optional wrapper classes used in JSX */
-.section { margin-bottom: 32px; }
-.analysisIntro { display: block; }
-
-/* ---------- Callouts ---------- */
-.keyPoints {
-  background: var(--color-surface-2);
-  padding: 20px 24px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 20px;
-  border: 1px solid var(--color-border);
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  line-height: 1.7;
-}
-
-.keyPoints h4 {
-  color: var(--color-text-primary);
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-
-.keyPoints ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.keyPoints li {
-  padding: 3px 0;
-}
-
-.note {
-  background: var(--color-surface-2);
-  padding: 14px 20px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: 20px;
-  border: 1px solid var(--color-border);
-}
-
-.warning {
-  margin-top: 20px;
-  padding: 14px 20px;
-  background: rgba(220, 38, 38, 0.04);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  font-size: 0.875rem;
-}
-
-/* ---------- Lists ---------- */
-.metricsList,
-.directionsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* How to Use: numbered steps */
-.directionsList {
-  counter-reset: step;
-}
-
-.directionsList li {
-  position: relative;
-  background: var(--color-surface-2);
-  margin-bottom: 10px;
-  padding: 14px 20px 14px 60px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  transition: background 0.15s;
-}
-
-.directionsList li:hover { background: var(--color-border); }
-
-.directionsList li::before {
-  content: counter(step);
-  counter-increment: step;
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--color-accent);
-  background: transparent;
-  color: var(--color-accent);
+.contentGrid {
+  max-width: 1080px;
+  margin: 0 auto;
   display: grid;
-  place-items: center;
-  font-weight: 700;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 56px;
+  align-items: start;
+  padding-top: 56px;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+.section {
+  padding-bottom: 35px;
+  border-bottom: 1px solid #E4E9EE;
+  margin-bottom: 35px;
+  scroll-margin-top: 80px;
+}
+
+.lastSection {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--color-blue-dark);
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.sectionH2 {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #0B1B2B;
+  margin: 0 0 20px;
+}
+
+.bodyText {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: #37485A;
+  margin: 0 0 14px;
+  max-width: 640px;
+}
+
+.bodyText strong {
+  color: #0B1B2B;
+  font-weight: 600;
+}
+
+/* ── Benefit cards ───────────────────────────────────────────────────────── */
+.cardGroupLabel {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  color: #6A7A8A;
+  text-transform: uppercase;
+  margin: 28px 0 12px;
+}
+
+.benefitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.benefitCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: white;
+  border: 1px solid #E4E9EE;
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: border-color 170ms ease, box-shadow 170ms ease;
+}
+
+.benefitCard:hover {
+  border-color: #b8d0f5;
+  box-shadow: 0 3px 14px rgba(47, 107, 216, 0.08);
+}
+
+.bullet {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--color-blue);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.benefitText {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #37485A;
+}
+
+/* ── Steps ───────────────────────────────────────────────────────────────── */
+.stepsContainer {
+  border: 1px solid #E4E9EE;
+  border-radius: 14px;
+  overflow: hidden;
+  max-width: 640px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  padding: 18px 22px;
+  transition: background 140ms ease;
+}
+
+.step:hover {
+  background: var(--color-blue-bg) !important;
+}
+
+.stepOdd  { background: white; }
+.stepEven { background: #F7F9FB; }
+
+.stepNum {
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
+  color: var(--color-blue);
+  width: 22px;
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
-/* Key Metrics: plain cards */
-.metricsList li {
-  font-size: 0.9rem;
-  background: var(--color-surface-2);
-  margin-bottom: 10px;
-  padding: 14px 20px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+.stepText {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 14.5px;
   line-height: 1.6;
-  position: relative;
-  transition: background 0.15s;
+  color: #37485A;
+  margin: 0;
 }
 
-.metricsList li::before { content: none; }
-.metricsList li:hover { background: var(--color-border); }
+.stepText strong {
+  color: #0B1B2B;
+  font-weight: 600;
+}
+
+/* ── Metrics list ────────────────────────────────────────────────────────── */
+.metricsList {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 0;
+  max-width: 640px;
+}
+
+.metricsList li {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #37485A;
+  margin-bottom: 10px;
+}
+
+.metricsList li strong {
+  color: #0B1B2B;
+  font-weight: 600;
+}
+
+.metricRange {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--color-blue-bg);
+  color: var(--color-blue-dark);
+  margin: 0 4px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ── Metrics intro ───────────────────────────────────────────────────────── */
+.metricsIntro {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6A7A8A;
+  margin: 0 0 18px;
+  max-width: 580px;
+}
+
+.metricsIntro strong {
+  color: #37485A;
+  font-weight: 600;
+}
+
+/* ── Metrics grid ────────────────────────────────────────────────────────── */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metricCard {
+  background: white;
+  border: 1px solid #E4E9EE;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 170ms ease, box-shadow 170ms ease;
+}
+
+.metricCard:hover {
+  border-color: #b8d0f5;
+  box-shadow: 0 3px 14px rgba(47, 107, 216, 0.08);
+}
+
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metricName {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #0B1B2B;
+}
+
+.pillBlue {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--color-blue-bg);
+  color: var(--color-blue-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pillGray {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: #EEF2F6;
+  color: #6A7A8A;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.metricBody {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #37485A;
+  margin: 0 0 12px;
+  flex: 1;
+}
+
+.metricFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #E4E9EE;
+}
+
+.metricRangeLabel {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #6A7A8A;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+/* ── TOC ─────────────────────────────────────────────────────────────────── */
+.toc {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+.tocLabel {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #6A7A8A;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-left: 1px solid #E4E9EE;
+}
+
+.tocItem {
+  display: block;
+  padding: 7px 0 7px 14px;
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13px;
+  color: #6A7A8A;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.tocItem:hover { color: var(--color-blue-dark); }
+
+.tocItemActive {
+  color: #37485A;
+  border-left-color: var(--color-blue);
+}
+
+/* ── Disclaimer ──────────────────────────────────────────────────────────── */
+.disclaimer {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.disclaimerIcon {
+  font-size: 16px;
+  color: #DC2626;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.disclaimerText {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #DC2626;
+  margin: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .mainContainer { padding: 0 20px 60px; }
+  .contentGrid { grid-template-columns: 1fr; gap: 0; }
+  .toc { display: none; }
+  .benefitGrid { grid-template-columns: 1fr; }
+  .metricsGrid { grid-template-columns: 1fr; }
+}

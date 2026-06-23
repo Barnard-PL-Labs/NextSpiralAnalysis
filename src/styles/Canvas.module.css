@@ -76,15 +76,24 @@
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.6;
-  }
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes buttonGlow {
+  0%, 100% { box-shadow: 0 4px 14px rgba(99,102,241,0.30); }
+  50%       { box-shadow: 0 4px 22px rgba(99,102,241,0.55); }
 }
 
 @keyframes shimmer {
@@ -152,37 +161,51 @@
 }
 
 .button {
-  padding: 10px 20px;
-  background: linear-gradient(to right, #4f46e5, #9333ea);
-  border: 1.5px solid transparent;
+  padding: 7px 20px;
+  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  border: none;
   color: white;
   font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
   position: relative;
-  min-width: 120px;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-position 0.4s ease;
+  animation: buttonGlow 2.5s ease-in-out infinite;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .button:hover {
-  background: linear-gradient(to right, #4338ca, #7e22ce);
+  background-position: 100% 50%;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  animation: none;
 }
 
 .button:active {
-  background: linear-gradient(to right, #4338ca, #7e22ce);
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
 }
 
 .button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
 }
 
 #counter {
@@ -193,46 +216,43 @@
 
 .clearButton {
   padding: 7px 14px;
-  background-color: rgba(239, 68, 68, 0.07);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: transparent;
+  border: 1px solid var(--color-border);
   color: #dc2626;
   font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: var(--radius-md);
-  box-shadow: 0 1px 5px rgba(220, 38, 38, 0.15);
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
-  min-width: 90px;
+  transition: all 0.18s ease;
 }
 
 .clearButton:hover {
-  background-color: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.35);
 }
 
 .clearCurrentButton {
   padding: 7px 14px;
-  background-color: rgba(79, 70, 229, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.35);
-  box-shadow: 0 1px 5px rgba(79, 70, 229, 0.15);
-  color: #4f46e5;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
-  min-width: 75px;
+  transition: all 0.18s ease;
 }
 
 .clearCurrentButton:hover {
-  background-color: rgba(79, 70, 229, 0.15);
-  border-color: rgba(79, 70, 229, 0.6);
+  background: var(--color-surface-2);
+  border-color: #94a3b8;
+  color: var(--color-text-primary);
 }
 
 .countBadge {
@@ -415,6 +435,13 @@
   box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
   max-width: 520px;
   width: 90%;
+  animation: fadeSlideUp 0.45s ease both;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.handSelectionContainer:hover {
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.16), 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }
 
 /* Card header */
@@ -433,6 +460,7 @@
   border-radius: 14px;
   margin-bottom: 14px;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  animation: iconFloat 3s ease-in-out infinite;
 }
 
 .cardIcon {
@@ -487,14 +515,14 @@
   padding: 14px 16px;
   background: var(--color-surface);
   border: 1px solid #cbd5e1;
-  box-shadow:0 1px 6px rgba(0, 0, 0, 0.178);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-weight: 500;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
 }
 
@@ -507,6 +535,12 @@
 .handOptionCard:hover {
   border-color: var(--color-accent);
   background: var(--color-surface-2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.handOptionCard:active {
+  transform: scale(0.97);
 }
 
 .handOptionCardActive {
@@ -515,11 +549,14 @@
   color: var(--color-accent);
   font-weight: 600;
   box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
 }
 
 .handOptionCardActive:hover {
   border-color: var(--color-accent);
   background: rgba(37, 99, 235, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 /* Pre-Test sub-header */
@@ -673,7 +710,7 @@
   width: 100%;
   margin-top: 20px;
   padding: 14px;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: linear-gradient(135deg, var(--color-accent), #9333ea);
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -682,17 +719,23 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  animation: buttonGlow 2.5s ease-in-out infinite;
 }
 
 .continueButton:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  animation: none;
+}
+
+.continueButton:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .continueButton:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  animation: none;
   box-shadow: none;
 }
 
@@ -746,42 +789,38 @@
 
 /* outlined by default, filled when active */
 .handButton {
-  padding: 8px 16px;
-  background-color: var(--color-surface);
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.178);
-  color: var(--color-text-primary);
+  padding: 5px 14px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
-  transition: all 0.2s ease-in-out;
-  min-width: 44px;
+  transition: all 0.18s ease;
   white-space: nowrap;
 }
 
 .handButton:hover {
-  background-color: var(--color-surface-2);
-  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .handButtonActive {
-  background-color: #0f172a;
-  border-color: #0f172a;
+  background: #0f172a;
   color: white;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .handButtonActive:hover {
-  background-color: #1e293b;
-  border-color: #1e293b;
+  background: #1e293b;
   color: white;
-  box-shadow: var(--shadow-card);
 }
 
 /* Selected Hand Indicator */
@@ -831,21 +870,20 @@
 /* canvas-view controls bar */
 .controlsBar {
   display: inline-flex;
+  align-items: center;
   gap: 0;
-  align-items: stretch;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   margin-bottom: 16px;
-  overflow: hidden;
 }
 
 .controlsGroup {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 10px;
+  padding: 0 20px;
 }
 
 .controlsGroup + .controlsGroup {
@@ -853,12 +891,22 @@
 }
 
 .controlsGroupLabel {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-text-secondary);
   white-space: nowrap;
+}
+
+.segmentedPill {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
 }
 
 .handLRBadgesWrapper {
@@ -868,37 +916,36 @@
 }
 
 .handLRBadge {
-  padding: 8px 16px;
-  background-color: var(--color-surface);
-  border: 1px solid #cbd5e1;
-  box-shadow:0 1px 6px rgba(0, 0, 0, 0.178);
-  color: var(--color-text-primary);
+  padding: 5px 18px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
-  transition: all 0.2s ease-in-out;
-  min-width: 44px;
+  transition: all 0.18s ease;
   text-align: center;
   outline: none;
+  white-space: nowrap;
 }
 
 .handLRBadge:hover {
-  background-color: var(--color-surface-2);
-  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .handLRBadgeSelected,
 .handLRBadgeSelected:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
+  background: #0f172a;
   color: white;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transform: none;
 }
 
@@ -908,33 +955,52 @@
   border: 2px solid rgba(199, 210, 254, 0.5);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  padding: 20px 24px 24px;
+  padding: 20px 24px 20px;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   width: fit-content;
   margin: 0 auto;
+  animation: fadeSlideUp 0.4s ease both;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.drawingCard:hover {
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.13), 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }
 
 .saveButton {
-  padding: 10px 20px;
-  background-color: #0b1220;
-  border: 1.5px solid #0b1220;
+  padding: 7px 20px;
+  background: #0f172a;
+  border: none;
   color: white;
   font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 13px;
   border-radius: 8px;
   cursor: pointer;
   line-height: 1.5;
   box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
-  min-width: 120px;
+  transition: all 0.18s ease;
+  min-width: 70px;
 }
 
 .saveButton:hover {
-  background-color: #1e293b;
-  border-color: #1e293b;
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.saveButton:active {
+  transform: scale(0.98);
+}
+
+.saveButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .cardDivider {

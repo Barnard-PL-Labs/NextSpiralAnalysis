@@ -3,12 +3,13 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { FaHandPaper } from "react-icons/fa";
 import styles from "@/styles/MiniSpiralHistory.module.css";
 
+
 /**
  * Accepts savedDrawings as either:
  *  - Array of point arrays (legacy)
  *  - Array of objects: { points: [...], handSide: 'L'|'R', handUsed?: 'dominant'|'non-dominant' }
  */
-const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = true, onRemove }) => {
+const MiniSpiralHistory = ({ savedDrawings, sidebar = true, onRemove }) => {
   if (!savedDrawings || savedDrawings.length === 0) return null;
 
   const getPoints = (drawing) => (Array.isArray(drawing) ? drawing : drawing?.points || []);
@@ -49,10 +50,10 @@ const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = t
                 position: "absolute",
                 left: 8,
                 top: "50%",
-                transform: "translateY(-50%)",
-                opacity: 0.9,
-                width: 18,
-                height: 18,
+                transform: "translateY(-50%) scaleX(-1)",
+                opacity: 0.8,
+                width: 16,
+                height: 16,
               }}
             />
           )}
@@ -60,7 +61,6 @@ const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = t
           {/* Title text stays centered */}
           <span>Spiral {index + 1}</span>
 
-          {/* Right-hand icon on the right of the title (mirrored) */}
           {side === "R" && (
             <FaHandPaper
               aria-label="Right hand"
@@ -68,10 +68,10 @@ const MiniSpiralHistory = ({ savedDrawings, currentDrawingIndex = 0, sidebar = t
                 position: "absolute",
                 right: 8,
                 top: "50%",
-                transform: "translateY(-50%) scaleX(-1)",
-                opacity: 0.9,
-                width: 18,
-                height: 18,
+                transform: "translateY(-50%)",
+                opacity: 0.8,
+                width: 16,
+                height: 16,
               }}
             />
           )}

@@ -42,21 +42,22 @@ const styles = {
   },
 };
 
-const BASE_CANVAS_SIZE = 10 * 264 / 2.54;
-const getCanvasSize = () => {
+const TARGET_CM = 10;
+const getCanvasSize = (devicePpi) => {
   if (typeof window === "undefined") return 500;
   const dpr = window.devicePixelRatio || 1;
-  return Math.round(BASE_CANVAS_SIZE / dpr);
+  const cssPpi = devicePpi / dpr;
+  return Math.round((TARGET_CM / 2.54) * cssPpi);
 };
 
-const Canvas = forwardRef(({ setDrawData }, ref) => {
+const Canvas = forwardRef(({ setDrawData, devicePpi = 264 }, ref) => {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [localDrawData, setLocalDrawData] = useState([]);
   const [backgroundImage] = useState(null);
-  const [canvasSize, setCanvasSize] = useState(getCanvasSize);
+  const [canvasSize, setCanvasSize] = useState(() => getCanvasSize(devicePpi));
 
   const startStampRef = useRef(null);
   const supportsRawUpdateRef = useRef(false);
@@ -66,12 +67,11 @@ const Canvas = forwardRef(({ setDrawData }, ref) => {
   const animationFrameIdRef = useRef(null);
 
   useEffect(() => {
-    const updateCanvasSize = () => setCanvasSize(getCanvasSize());
-
+    const updateCanvasSize = () => setCanvasSize(getCanvasSize(devicePpi));
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
-  }, []);
+  }, [devicePpi]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
