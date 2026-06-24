@@ -47,15 +47,6 @@ const publications = [
   },
 ];
 
-const getInitials = (name) =>
-  name
-    .split(",")[0]
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("");
-
 export default function TeamPage() {
   return (
     <>
@@ -117,7 +108,6 @@ export default function TeamPage() {
               {alumni.map((person) => (
                 <div key={person} className={styles.alumniCard}>
                   <strong>{person}</strong>
-                  <span>{getInitials(person)} - Spiral Analysis contributor</span>
                 </div>
               ))}
             </div>
