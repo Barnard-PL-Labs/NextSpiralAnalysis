@@ -1,261 +1,380 @@
-.teamPage {
+.aboutPage {
   min-height: 100vh;
-  background: var(--color-bg);
-  padding-top: 75px;
-  padding-bottom: 60px;
+  background: #ffffff;
+  color: #0f1f33;
   font-family: var(--font-sans);
+  padding-top: 48px;
 }
 
-.pageInner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 32px 0;
-}
-
-.pageTitle {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin: 0 0 36px;
-}
-
-/* ── Two-column layout ── */
-.twoCol {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
-}
-
-.teamSection {
-  flex: 1 1 55%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  padding: 32px;
-}
-
-.researchSection {
-  flex: 1 1 40%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* ── Section headings ── */
-.sectionLabel {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin: 0 0 20px;
-}
-
-.alumniTitle {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin: 28px 0 16px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border);
-}
-
-.newsTitle {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin: 0 0 16px;
-}
-
-/* ── Director grid ── */
-.directorsRow {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-/* ── Alumni grid ── */
-.membersRow {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 24px;
-}
-
-/* ── Team member card ── */
-.teamMember {
-  padding: 12px 0;
-}
-
-.director {
-  padding: 16px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-}
-
-.teamMember h3 {
-  margin: 0 0 4px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.teamMember p {
-  margin: 2px 0;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  font-weight: 400;
-}
-
-.membersRow .teamMember h3 {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* ── Link / tooltip ── */
-.linkContainer {
+.hero {
   position: relative;
-  display: inline-block;
+  overflow: hidden;
+  background: #f7faff;
+  border-bottom: 1px solid #e5ecf4;
 }
 
-.linkContainer h3 {
-  color: var(--color-accent) !important;
-  cursor: pointer;
-}
-
-.linkContainer h3:hover {
-  text-decoration: underline;
-}
-
-.tooltip {
-  position: absolute;
-  top: -34px;
-  left: 0;
-  background: var(--color-text-primary);
-  color: white;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.72rem;
-  white-space: nowrap;
-  z-index: 1000;
-  box-shadow: var(--shadow-card);
-  pointer-events: none;
-}
-
-.tooltip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 10px;
-  border: 5px solid transparent;
-  border-top-color: var(--color-text-primary);
-}
-
-/* ── Research cards ── */
-.gridContainer {
+.heroInner {
+  position: relative;
+  max-width: 1120px;
+  min-height: 315px;
+  margin: 0 auto;
+  padding: 68px 32px 56px;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
 }
 
-.gridItem {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 0.2s, transform 0.2s;
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 620px);
 }
 
-.gridItem:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+.eyebrow {
+  margin: 0 0 18px;
+  color: #2249c7;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
-.gridImageContainer {
-  width: 100%;
-  height: 160px;
-  overflow: hidden;
+.hero h1,
+.section h2 {
+  margin: 0;
+  color: #102033;
+  letter-spacing: 0;
+  line-height: 1.02;
 }
 
-.gridImage {
+.hero h1 {
+  max-width: 560px;
+  font-size: clamp(2.4rem, 5vw, 4.15rem);
+  font-weight: 800;
+}
+
+.heroText {
+  max-width: 580px;
+  margin: 24px 0 0;
+  color: #3d526b;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.spiralMark {
+  position: absolute;
+  right: -72px;
+  top: -82px;
+  width: 460px;
+  height: 460px;
+  color: #dce4ee;
+  opacity: 0.85;
+}
+
+.spiralMark svg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
 }
 
-.gridContent {
-  padding: 14px 16px;
+.content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 68px 32px 56px;
 }
 
-.gridTitle {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-accent);
-  line-height: 1.5;
-  margin: 0;
-  transition: text-decoration 0.15s;
+.section {
+  margin-bottom: 64px;
 }
 
-.gridTitle:hover {
-  text-decoration: underline;
+.section h2 {
+  max-width: 520px;
+  font-size: clamp(1.75rem, 3vw, 2.2rem);
+  font-weight: 750;
 }
 
-.gridDescription {
+.piGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.piCard,
+.publicationCard,
+.alumniCard {
+  background: #ffffff;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 31, 51, 0.02);
+}
+
+.piCard {
+  min-height: 104px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.piCard:hover,
+.publicationCard:hover {
+  border-color: #b8c7dc;
+  box-shadow: 0 10px 28px rgba(25, 47, 78, 0.08);
+  transform: translateY(-1px);
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2447c4;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.piCard > span:not(.avatar) strong,
+.piCard > span:not(.avatar) span,
+.piCard > span:not(.avatar) small {
+  display: block;
+}
+
+.piCard strong {
+  margin-bottom: 6px;
+  color: #102033;
+  font-size: 1.04rem;
+  font-weight: 750;
+}
+
+.piCard span span {
+  color: #2447c4;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.piCard small {
+  margin-top: 2px;
+  color: #62748a;
   font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
+}
+
+.alumniGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.alumniCard {
+  min-height: 72px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.alumniCard strong {
+  color: #102033;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.alumniCard span {
   margin-top: 6px;
+  color: #728399;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
-/* ── Responsive ── */
-@media (max-width: 860px) {
-  .twoCol {
-    flex-direction: column;
-  }
-
-  .teamSection,
-  .researchSection {
-    flex: unset;
-    width: 100%;
-  }
-
-  .gridContainer {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .gridItem {
-    flex: 1 1 280px;
-  }
+.publicationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 30px;
 }
 
-@media (max-width: 480px) {
-  .pageInner {
-    padding: 24px 16px 0;
+.publicationCard {
+  min-height: 160px;
+  padding: 24px;
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.articleMeta {
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.articleMeta span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: #eef5ff;
+  color: #2447c4;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.articleMeta small {
+  color: #62748a;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+}
+
+.publicationCard strong {
+  max-width: 420px;
+  color: #102033;
+  font-size: 1.04rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.publicationCard em {
+  margin-top: 10px;
+  color: #687b91;
+  font-size: 0.82rem;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.readLink {
+  margin-top: auto;
+  padding-top: 18px;
+  color: #2447c4;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.footer {
+  border-top: 1px solid #dce5ef;
+  background: #f7faff;
+  padding: 32px max(32px, calc((100vw - 1120px) / 2 + 32px));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  color: #102033;
+}
+
+.footer div {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.footerLogo {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2447c4;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.footer p {
+  margin: 0;
+  color: #62748a;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 900px) {
+  .heroInner {
+    min-height: 300px;
+    padding: 54px 24px 48px;
   }
 
-  .pageTitle {
-    font-size: 1.75rem;
+  .spiralMark {
+    right: -170px;
+    top: -68px;
+    width: 390px;
+    height: 390px;
   }
 
-  .directorsRow,
-  .membersRow {
+  .content {
+    padding: 54px 24px 44px;
+  }
+
+  .piGrid,
+  .publicationGrid {
     grid-template-columns: 1fr;
   }
 
-  .gridContainer {
-    flex-direction: column;
+  .alumniGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* unused legacy — kept to avoid import errors */
-.imageContainer { display: contents; }
-.gridSectionWrapper { display: contents; }
+@media (max-width: 560px) {
+  .heroInner {
+    min-height: auto;
+    padding: 46px 20px 44px;
+  }
+
+  .hero h1 {
+    font-size: 2.3rem;
+  }
+
+  .heroText {
+    font-size: 0.98rem;
+  }
+
+  .spiralMark {
+    right: -230px;
+    top: -42px;
+    width: 360px;
+    height: 360px;
+  }
+
+  .content {
+    padding: 44px 20px 32px;
+  }
+
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .piCard {
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.05rem;
+  }
+
+  .alumniGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
