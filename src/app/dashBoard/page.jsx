@@ -11,6 +11,32 @@ import Link from "next/link";
 import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
 import SettingsPopup from "../../components/SettingsPopup";
 
+const MiniSpiralThumb = ({ drawing }) => {
+  if (!drawing || drawing.length < 2) return null;
+  const xs = drawing.map((p) => p.x);
+  const ys = drawing.map((p) => p.y);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const xRange = xMax - xMin || 1;
+  const yRange = yMax - yMin || 1;
+  const vw = 80, vh = 80, pad = 6;
+  const scale = Math.min((vw - pad * 2) / xRange, (vh - pad * 2) / yRange);
+  const offsetX = pad + ((vw - pad * 2) - xRange * scale) / 2;
+  const offsetY = pad + ((vh - pad * 2) - yRange * scale) / 2;
+  const points = drawing
+    .map((p) => `${offsetX + (p.x - xMin) * scale},${offsetY + (p.y - yMin) * scale}`)
+    .join(" ");
+  return (
+    <svg
+      width="32" height="32"
+      viewBox={`0 0 ${vw} ${vh}`}
+      style={{ flexShrink: 0, borderRadius: 6, background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)" }}
+    >
+      <polyline points={points} fill="none" stroke="#4f46e5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
+
 const SUPERUSER_EMAILS = (
   process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
   process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
@@ -223,56 +249,73 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <h2 className={styles.pastResultsHeading}>
-              Past Results
-              {averageDOS && ` - Your Overall Average: ${averageDOS}`}
-            </h2>
+            <div className={styles.pastResultsHeadingRow}>
+              <h2 className={styles.pastResultsHeading}>Past Results</h2>
+              {averageDOS && (
+                <span className={styles.overallAvgBadge}>Overall avg DOS: {averageDOS}</span>
+              )}
+            </div>
             <ul className={styles.entriesList}>
-              {paginatedEntries.map((entry, index) => (
-                <li key={entry.key} className={styles.accordionItem}>
-                  <div className={styles.accordionHeader} onClick={() => handleAccordionClick(index)}>
-                    <span>
-                      {index + 1 + (currentPage - 1) * entriesPerPage}. Avg DOS:
-                      {entry.average_DOS || "N/A"}{" "}
-                      – {new Date(entry.created_at).toLocaleString()}
-                      {isSuperuser && (
-                        <>
-                          {" "} — <strong>User:</strong> {entry.email || "N/A"}
-                        </>
-                      )}
-                    </span>
-                    <span className={styles.arrow}>
-                      {activeIndex === index ? "▲" : "▼"}
-                    </span>
-                  </div>
-                  {activeIndex === index && (
-                    <div className={styles.accordionContent}>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
-                        <div className={styles.drawingCountBadge}>
-                          {entry.all_drawings.length}
-                          {entry.all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                        </div>
-                        {entry.hand_used && (
-                          <div className={styles.handBadge}>
-                            {entry.hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
+              {paginatedEntries.map((entry, index) => {
+                const entryNum = index + 1 + (currentPage - 1) * entriesPerPage;
+                const date = new Date(entry.created_at);
+                const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                const isOpen = activeIndex === index;
+                return (
+                  <li key={entry.key} className={styles.accordionItem}>
+                    <div className={styles.accordionHeader} onClick={() => handleAccordionClick(index)}>
+                      <div className={styles.accordionHeaderLeft}>
+                        <span className={styles.accordionIndex}>{entryNum}</span>
+                        <div className={styles.accordionMeta}>
+                          <span className={styles.accordionDate}>{dateStr} · {timeStr}</span>
+                          <div className={styles.accordionBadges}>
+                            <span className={styles.accordionBadgeCount}>
+                              {entry.all_drawings.length} {entry.all_drawings.length === 1 ? "Drawing" : "Drawings"}
+                            </span>
+                            {entry.hand_used && (
+                              <span className={styles.accordionBadgeHand}>
+                                {entry.hand_used === "dominant" ? "Dominant" : "Non-Dom"}
+                              </span>
+                            )}
+                            {isSuperuser && entry.email && (
+                              <span className={styles.accordionUser}>{entry.email}</span>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </div>
-                      <div className={styles.scatterPlot}>
-                        <HorizontalSpiralHistory savedDrawings={entry.all_drawings} />
-                      </div>
-                      <div className={styles.resultLink}>
-                        <Link
-                          href={`/result/${entry.session_id || entry.drawing_id}`}
-                          className={styles.viewFullAnalysisLink}
+                      <div className={styles.accordionHeaderRight}>
+                        <MiniSpiralThumb drawing={entry.all_drawings[0]} />
+                        <div className={styles.accordionDosBlock}>
+                          <span className={styles.accordionDosLabel}>DOS</span>
+                          <span className={styles.accordionDos}>{entry.average_DOS || "N/A"}</span>
+                        </div>
+                        <svg
+                          className={`${styles.chevron}${isOpen ? " " + styles.chevronOpen : ""}`}
+                          width="16" height="16" viewBox="0 0 16 16" fill="none"
                         >
-                          View Full Analysis
-                        </Link>
+                          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                       </div>
                     </div>
-                  )}
-                </li>
-              ))}
+                    {isOpen && (
+                      <div className={styles.accordionContent}>
+                        <div className={styles.accordionScatterPlot}>
+                          <HorizontalSpiralHistory savedDrawings={entry.all_drawings} compact={true} />
+                        </div>
+                        <div className={styles.resultLink}>
+                          <Link
+                            href={`/result/${entry.session_id || entry.drawing_id}`}
+                            className={styles.viewFullAnalysisLink}
+                          >
+                            View Full Analysis →
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
             <Pagination
               currentPage={currentPage}

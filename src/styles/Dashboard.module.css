@@ -136,22 +136,32 @@
 }
 
 /* ── Past results list ── */
+.pastResultsHeadingRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: 40px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
 .pastResultsHeading {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-top: 40px;
-  margin-bottom: 14px;
+  margin: 0;
 }
 
-.overallAvg {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-  margin-bottom: 14px;
+.overallAvgBadge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.07);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 20px;
+  padding: 3px 10px;
 }
 
 .entriesList {
@@ -159,7 +169,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .accordionItem {
@@ -180,37 +190,108 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  padding: 14px 20px;
+  padding: 8px 14px;
   user-select: none;
+  gap: 10px;
 }
 
-.accordionHeaderText {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
+.accordionHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.accordionIndex {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.accordionMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.accordionDate {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.accordionBadges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
+.accordionBadgeCount {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.accordionBadgeHand {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.04);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.accordionUser {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.accordionHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.accordionDosBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.accordionDosLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
 .accordionDos {
+  font-size: 0.95rem;
   font-weight: 700;
   color: #4f46e5;
 }
 
-.accordionDate {
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-}
-
-.accordionUser {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-}
-
 .chevron {
-  font-size: 10px;
   color: var(--color-text-secondary);
   transition: transform 0.2s ease;
   flex-shrink: 0;
@@ -222,10 +303,10 @@
 
 .accordionContent {
   border-top: 1px solid var(--color-border);
-  padding: 16px 20px 20px;
+  padding: 10px 14px 12px;
 }
 
-/* ── Scatter plot ── */
+/* ── Scatter plot (main card) ── */
 .scatterPlot {
   width: 100%;
   height: 280px;
@@ -240,23 +321,33 @@
   width: 100%;
 }
 
+/* ── Scatter plot (accordion — compact) ── */
+.accordionScatterPlot {
+  width: 100%;
+  height: 116px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+}
+
 /* ── View full analysis link ── */
 .resultLink {
-  margin-top: 18px;
+  margin-top: 8px;
 }
 
 .viewFullAnalysisLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   text-decoration: none;
-  color: #4f46e5;
-  font-size: 0.875rem;
+  color:  rgba(99, 102, 241, 0.04);
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 8px 16px;
-  border: 1.5px solid rgba(99, 102, 241, 0.3);
-  border-radius: 8px;
-  background: rgba(99, 102, 241, 0.04);
+  padding: 5px 11px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  background: #4f46e5;
   transition: all 0.2s ease;
 }
 
