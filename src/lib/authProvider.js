@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
 const AuthContext = createContext();
@@ -9,21 +9,82 @@ const getEmailPrefix = (email) => {
   return email.split("@")[0];
 };
 
+const AUTH_OPERATION_TIMEOUT_MS = 10000;
+
+const withTimeout = (promise, timeoutMs, label) => {
+  let timeoutId;
+
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${label} timed out`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
+const clearStoredSupabaseAuth = () => {
+  if (typeof window === "undefined") return;
+
+  Object.keys(window.localStorage)
+    .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+    .forEach((key) => window.localStorage.removeItem(key));
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
 
   const fetchUsername = (u) => {
-    if (u) setUsername(getEmailPrefix(u.email));
+    setUsername(u ? getEmailPrefix(u.email) : "");
   };
+
+  const clearLocalSession = useCallback(() => {
+    setUser(null);
+    setUsername("");
+    clearStoredSupabaseAuth();
+  }, []);
+
+  const validateSession = useCallback(async () => {
+    try {
+      const { data: sessionData } = await withTimeout(
+        supabase.auth.getSession(),
+        AUTH_OPERATION_TIMEOUT_MS,
+        "Session check"
+      );
+
+      if (!sessionData?.session) {
+        clearLocalSession();
+        return;
+      }
+
+      const { data, error } = await withTimeout(
+        supabase.auth.getUser(),
+        AUTH_OPERATION_TIMEOUT_MS,
+        "Session validation"
+      );
+      if (error || !data?.user) {
+        clearLocalSession();
+        return;
+      }
+
+      setUser(data.user);
+      fetchUsername(data.user);
+    } catch (error) {
+      console.error("Session validation failed:", error);
+      clearLocalSession();
+    }
+  }, [clearLocalSession]);
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       const u = session?.user || null;
       setUser(u);
+      fetchUsername(u);
 
       if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-        if (u) fetchUsername(u);
         if (event === "SIGNED_IN" && u) {
           const { data: existing } = await supabase
             .from("profiles")
@@ -41,18 +102,36 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    return () => {
-      authListener.subscription.unsubscribe();
+    validateSession();
+
+    const handleWake = () => {
+      if (!document.hidden) validateSession();
     };
-  }, []);
+
+    document.addEventListener("visibilitychange", handleWake);
+    window.addEventListener("focus", validateSession);
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+      document.removeEventListener("visibilitychange", handleWake);
+      window.removeEventListener("focus", validateSession);
+    };
+  }, [validateSession]);
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await withTimeout(
+        supabase.auth.signOut(),
+        AUTH_OPERATION_TIMEOUT_MS,
+        "Sign out"
+      );
     } catch (error) {
       console.error("signOut failed, forcing local clear:", error);
-      setUser(null);
-      setUsername("");
+    } finally {
+      try {
+        await supabase.auth.signOut({ scope: "local" });
+      } catch {}
+      clearLocalSession();
     }
   };
 

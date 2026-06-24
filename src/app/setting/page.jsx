@@ -7,9 +7,11 @@ import { IoPerson } from "react-icons/io5";
 import styles from "../../styles/Settings.module.css";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
+import { useAuth } from "@/lib/authProvider";
 
 export default function Settings() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,7 @@ export default function Settings() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await logout();
     router.push("/login");
   };
 
@@ -76,7 +78,7 @@ export default function Settings() {
     if (confirmDelete && user) {
       try {
         await supabase.from("profiles").delete().eq("id", user.id);
-        await supabase.auth.signOut();
+        await logout();
         router.push("/login");
       } catch (error) {
         setMessage(error.message);

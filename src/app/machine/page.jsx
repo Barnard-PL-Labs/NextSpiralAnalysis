@@ -35,6 +35,23 @@ function detectDevicePpi() {
   return { ppi: 264, recognized: false };
 }
 
+const SUPABASE_WRITE_TIMEOUT_MS = 20000;
+const ANALYSIS_TIMEOUT_MS = 70000;
+
+const withTimeout = (promise, timeoutMs, label) => {
+  let timeoutId;
+
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${label} timed out. Please check your connection and try again.`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
 export default function MachinePage() {
   const canvasRef = useRef();
   const drawingIdMap = useRef({}); // localId -> drawingId, updated synchronously (avoids React state timing issues)
@@ -176,6 +193,39 @@ export default function MachinePage() {
     return sessionId;
   };
 
+  const refreshAuthBeforeWrite = async () => {
+    if (!user?.id) return;
+
+    const { data: sessionData, error: sessionError } = await withTimeout(
+      supabase.auth.getSession(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session check"
+    );
+
+    if (sessionError) throw sessionError;
+    if (!sessionData?.session) {
+      throw new Error("Your login session expired. Please sign in again before saving.");
+    }
+
+    const { error: refreshError } = await withTimeout(
+      supabase.auth.refreshSession(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session refresh"
+    );
+
+    if (refreshError) throw refreshError;
+
+    const { data, error } = await withTimeout(
+      supabase.auth.getUser(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session validation"
+    );
+
+    if (error || !data?.user) {
+      throw error || new Error("Your login session expired. Please sign in again before saving.");
+    }
+  };
+
   const saveAndAnalyzeCurrentDrawing = async () => {
     if (!selectedHandSide) {
       alert("Please select Left (L) or Right (R) hand first.");
@@ -212,6 +262,8 @@ export default function MachinePage() {
     const sessionId = getOrCreateSessionId();
 
     try {
+      await refreshAuthBeforeWrite();
+
       console.log("[1/3] Saving drawing to Supabase...", { sessionId, points: drawingPoints.length });
       const drawingId = await saveSingleDrawingToDatabase(drawingPoints, sessionId);
       console.log("[1/3] Drawing saved:", drawingId);
@@ -236,15 +288,17 @@ export default function MachinePage() {
       console.log("[3/3] Result saved. Pipeline complete.");
     } catch (error) {
       console.error("Drawing analysis failed:", error?.message || error?.details || JSON.stringify(error) || error);
-      setIsSaving(false);
+      if (!drawingIdMap.current[localId]) {
+        setSavedDrawings((prev) => prev.filter((d) => d.localId !== localId));
+      }
+      alert(error?.message || "Unable to save this drawing. Please try again.");
     } finally {
+      setIsSaving(false);
       setIsAnalyzing(false);
     }
   };
 
   const backgroundAnalysis = async (drawingData) => {
-    
-    const TIMEOUT_MS = 70000;
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
       // pre-divided by 8 to compensate for dataconvert.m's hardcoded *8 factor
@@ -281,22 +335,29 @@ export default function MachinePage() {
       console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
       console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
       console.log("====================================================");
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Analysis timeout: API did not respond within 70 seconds")), TIMEOUT_MS)
-      );
+      const controller = new AbortController();
       const fetchPromise = fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ drawData: scaledData }),
+        signal: controller.signal,
       });
-      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      const response = await withTimeout(
+        fetchPromise,
+        ANALYSIS_TIMEOUT_MS,
+        "Analysis request"
+      ).catch((error) => {
+        controller.abort();
+        throw error;
+      });
       const responseText = await response.text();
       const data = JSON.parse(responseText);
       if (!response.ok) throw new Error(data.error || `Analysis failed with status ${response.status}`);
       if (!data.result || typeof data.result !== "object") throw new Error("Invalid analysis result received");
       return data.result;
     } catch (error) {
-      if (error.message.includes("timeout")) {
+      const message = error?.message?.toLowerCase() || "";
+      if (message.includes("timeout") || message.includes("timed out")) {
         return { status: "timeout", message: "N/A - Analysis timed out", error: error.message };
       }
       throw error;
@@ -324,22 +385,26 @@ export default function MachinePage() {
       } catch {}
     }
 
-    const { data: savedDrawing, error } = await supabase
-      .from("drawings")
-      .insert({
-        user_id: isAuthenticated ? user.id : null,
-        email,
-        username,
-        drawing_data: drawingData,
-        session_id: sessionId,
-        is_anonymous: !isAuthenticated,
-        hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
-        hand_side: selectedHandSide,   // 'L' | 'R'
-        created_at: new Date().toISOString(),
-        ...demographicsData,
-      })
-      .select("id")
-      .single();
+    const { data: savedDrawing, error } = await withTimeout(
+      supabase
+        .from("drawings")
+        .insert({
+          user_id: isAuthenticated ? user.id : null,
+          email,
+          username,
+          drawing_data: drawingData,
+          session_id: sessionId,
+          is_anonymous: !isAuthenticated,
+          hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
+          hand_side: selectedHandSide,   // 'L' | 'R'
+          created_at: new Date().toISOString(),
+          ...demographicsData,
+        })
+        .select("id")
+        .single(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Drawing save"
+    );
 
     if (error) throw error;
     return savedDrawing.id;
@@ -351,16 +416,20 @@ export default function MachinePage() {
     const username = isAuthenticated ? email.split("@")[0] : `anonymous_${sessionId.slice(-8)}`;
     const status = analysisResult.status === "timeout" ? "timeout" : "completed";
 
-    const { error } = await supabase.from("api_results").insert({
-      user_id: isAuthenticated ? user.id : null,
-      email,
-      username,
-      drawing_id: drawingId,
-      session_id: sessionId,
-      is_anonymous: !isAuthenticated,
-      status,
-      result_data: { ...analysisResult, completed_at: new Date().toISOString() },
-    });
+    const { error } = await withTimeout(
+      supabase.from("api_results").insert({
+        user_id: isAuthenticated ? user.id : null,
+        email,
+        username,
+        drawing_id: drawingId,
+        session_id: sessionId,
+        is_anonymous: !isAuthenticated,
+        status,
+        result_data: { ...analysisResult, completed_at: new Date().toISOString() },
+      }),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Analysis result save"
+    );
     if (error) throw error;
   };
 
@@ -790,4 +859,3 @@ export default function MachinePage() {
     
   );
 }
-
