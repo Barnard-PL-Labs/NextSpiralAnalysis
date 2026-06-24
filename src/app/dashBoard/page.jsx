@@ -187,6 +187,7 @@ const Dashboard = () => {
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
   const isSuperuser = SUPERUSER_EMAILS.includes(user?.email?.toLowerCase() ?? "");
+  const accountEmailPrefix = user?.email?.split("@")[0] || "";
 
   const getHandLabel = (handSide) => {
     if (!handSide) return "N/A";
@@ -200,6 +201,15 @@ const Dashboard = () => {
     if (handSide === "R") return "Right";
     return null;
   };
+
+  const formatDashboardDate = (dateValue) =>
+    new Date(dateValue).toLocaleString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
 
   const ds = {
     pageContainer: {
@@ -234,7 +244,7 @@ const Dashboard = () => {
       background: "#FFFFFF",
       border: "1px solid #E4E9EE",
       borderRadius: "16px",
-      padding: "28px 32px",
+      padding: "20px 24px",
       boxShadow: "0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0,0,0,0.04)",
       marginBottom: "12px",
     },
@@ -244,13 +254,13 @@ const Dashboard = () => {
       letterSpacing: "0.08em",
       textTransform: "uppercase",
       color: "#4C5BD4",
-      marginBottom: "10px",
+      marginBottom: "6px",
     },
     latestResultTitle: {
       fontSize: "0.95rem",
       fontWeight: "600",
       color: "#6A7A8A",
-      margin: "0 0 16px",
+      margin: "0 0 12px",
       letterSpacing: "-0.01em",
     },
     metaRow: {
@@ -258,16 +268,16 @@ const Dashboard = () => {
       alignItems: "center",
       flexWrap: "wrap",
       gap: "10px",
-      marginBottom: "18px",
+      marginBottom: "12px",
     },
     drawingCountBadge: {
       display: "inline-flex",
       alignItems: "center",
       background: "#2B2B2B",
       color: "white",
-      padding: "4px 12px",
+      padding: "3px 10px",
       borderRadius: "20px",
-      fontSize: "12px",
+      fontSize: "11px",
       fontWeight: "600",
       border: "1px solid white",
     },
@@ -277,9 +287,9 @@ const Dashboard = () => {
       background: "transparent",
       color: "#4A4A4A",
       border: "1px solid #4A4A4A",
-      padding: "4px 12px",
+      padding: "3px 10px",
       borderRadius: "20px",
-      fontSize: "12px",
+      fontSize: "11px",
       fontWeight: "600",
       textTransform: "capitalize",
     },
@@ -289,11 +299,11 @@ const Dashboard = () => {
       color: "#6A7A8A",
       textTransform: "uppercase",
       letterSpacing: "0.05em",
-      marginBottom: "6px",
+      marginBottom: "4px",
       display: "block",
     },
     dosValue: {
-      fontSize: "52px",
+      fontSize: "44px",
       fontWeight: "700",
       letterSpacing: "-0.02em",
       lineHeight: "1",
@@ -339,7 +349,9 @@ const Dashboard = () => {
         <div style={ds.inner}>
         {/* Header */}
         <div style={{ marginBottom: "32px" }}>
-          <p style={{ fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#6A7A8A", margin: "0 0 8px" }}>Account</p>
+          <p style={{ fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#6A7A8A", margin: "0 0 8px" }}>
+            Account{accountEmailPrefix ? ` · ${accountEmailPrefix}` : ""}
+          </p>
           <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.02em", color: "#0B1B2B", margin: "0 0 24px" }}>Your Assessment History</h1>
           <hr style={{ border: "none", borderTop: "1px solid #E4E9EE", margin: 0 }} />
         </div>
@@ -361,7 +373,7 @@ const Dashboard = () => {
             <div style={ds.latestResultBox}>
               <p style={ds.latestResultLabel}>Latest Result</p>
               <p style={ds.latestResultTitle}>
-                {new Date(entries[0].created_at).toLocaleString()}
+                {formatDashboardDate(entries[0].created_at)}
               </p>
 
               <div style={ds.metaRow}>
@@ -377,7 +389,7 @@ const Dashboard = () => {
               </div>
 
               {/* DOS Score */}
-              <div style={{ marginBottom: "28px", marginTop: "20px" }}>
+                <div style={{ marginBottom: "20px", marginTop: "14px" }}>
                 <span style={ds.statLabel}>AVG DOS SCORE</span>
                 <div style={{ ...ds.dosValue, color: "#13917F" }}>
                   {entries[0].average_DOS || "N/A"}
@@ -385,7 +397,7 @@ const Dashboard = () => {
               </div>
 
               {/* Spirals Grid */}
-              <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "18px", overflowX: "auto", overflowY: "hidden", paddingBottom: "6px" }}>
                 {entries[0].all_drawings.map((drawing, idx) => {
                   const result = entries[0].all_results[idx];
                   const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
@@ -400,19 +412,19 @@ const Dashboard = () => {
                   const points = drawing.map(d => `${d.x},${d.y}`).join(" ");
                   const strokeW = (xMax - xMin) * 0.014;
                   return (
-                    <div key={idx} style={{ background: "#F7F9FB", border: "1px solid #E4E9EE", borderRadius: "12px", padding: "16px 36px", textAlign: "center", width: "220px", flexShrink: 0 }}>
+                    <div key={idx} style={{ background: "#F7F9FB", border: "1px solid #E4E9EE", borderRadius: "10px", padding: "10px 24px", textAlign: "center", width: "176px", flexShrink: 0 }}>
                       <svg
                         viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
-                        style={{ width: "136px", height: "136px", display: "block", margin: "0 auto" }}
+                        style={{ width: "104px", height: "104px", display: "block", margin: "0 auto" }}
                         preserveAspectRatio="xMidYMid meet"
                       >
                         <polyline points={points} fill="none" stroke="#4C5BD4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px", color: "#9AA6B2", marginTop: "12px" }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", color: "#9AA6B2", marginTop: "8px" }}>
                         Spiral {idx + 1}{handSide ? ` (${handSide})` : ""}
                       </div>
                       {dos && (
-                        <div style={{ fontSize: "0.95rem", fontWeight: "700", color: "#0B1B2B", marginTop: "4px" }}>
+                        <div style={{ fontSize: "12px", fontWeight: "700", color: "#0B1B2B", marginTop: "2px" }}>
                           {dos}
                         </div>
                       )}
@@ -458,7 +470,7 @@ const Dashboard = () => {
                       background: isOpen ? "#EAF1FD" : "white",
                       border: "none",
                       borderBottom: isOpen ? "1px solid #D0E2F9" : "1px solid transparent",
-                      padding: "18px 20px",
+                      padding: "12px 16px",
                       cursor: "pointer",
                       transition: "background 0.2s ease, border-color 0.2s ease",
                       fontFamily: "inherit",
@@ -467,26 +479,26 @@ const Dashboard = () => {
                     onMouseLeave={(e) => { if (!isOpen) e.currentTarget.style.background = "white"; }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "4px" }}>DATE & TIME</div>
-                      <div style={{ fontSize: "0.95rem", fontWeight: "600", color: "#0B1B2B" }}>
-                        {new Date(entry.created_at).toLocaleString()}
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>DATE & TIME</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#0B1B2B" }}>
+                        {formatDashboardDate(entry.created_at)}
                       </div>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "4px" }}>HAND</div>
-                      <div style={{ fontSize: "0.95rem", color: "#0B1B2B" }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>HAND</div>
+                      <div style={{ fontSize: "0.88rem", color: "#0B1B2B" }}>
                         {getHandLabel(entry.hand_side)}
                       </div>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "4px" }}>AVERAGE DOS</div>
-                      <div style={{ fontSize: "0.95rem", fontWeight: "600", color: "#13917F" }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>AVERAGE DOS</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#13917F" }}>
                         {entry.average_DOS || "N/A"}
                       </div>
                     </div>
                     <div style={{ flex: 0.5 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "4px" }}>COUNT</div>
-                      <div style={{ fontSize: "0.95rem", fontWeight: "600", color: "#0B1B2B" }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>COUNT</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#0B1B2B" }}>
                         {entry.all_drawings.length}
                       </div>
                     </div>
@@ -498,8 +510,8 @@ const Dashboard = () => {
                   </button>
 
                   <div style={{ maxHeight: isOpen ? "900px" : "0", overflow: "hidden", transition: "max-height 0.4s ease", background: "#F9FAFB" }}>
-                    <div style={{ padding: "20px", opacity: isOpen ? 1 : 0, transition: "opacity 0.3s ease 0.05s" }}>
-                      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
+                    <div style={{ padding: "14px 16px", opacity: isOpen ? 1 : 0, transition: "opacity 0.3s ease 0.05s" }}>
+                      <div style={{ display: "flex", gap: "10px", marginBottom: "12px", overflowX: "auto", overflowY: "hidden", paddingBottom: "6px" }}>
                         {entry.all_drawings.map((drawing, dIdx) => {
                           const result = entry.all_results[dIdx];
                           const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
@@ -514,19 +526,19 @@ const Dashboard = () => {
                           const points = drawing.map(d => `${d.x},${d.y}`).join(" ");
                           const strokeW = (xMax - xMin) * 0.014;
                           return (
-                            <div key={dIdx} style={{ background: "#FFFFFF", border: "1px solid #E4E9EE", borderRadius: "12px", padding: "16px 36px", textAlign: "center", width: "220px", flexShrink: 0 }}>
+                            <div key={dIdx} style={{ background: "#FFFFFF", border: "1px solid #E4E9EE", borderRadius: "10px", padding: "10px 24px", textAlign: "center", width: "176px", flexShrink: 0 }}>
                               <svg
                                 viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
-                                style={{ width: "136px", height: "136px", display: "block", margin: "0 auto" }}
+                                style={{ width: "104px", height: "104px", display: "block", margin: "0 auto" }}
                                 preserveAspectRatio="xMidYMid meet"
                               >
                                 <polyline points={points} fill="none" stroke="#4C5BD4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
-                              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", color: "#9AA6B2", marginTop: "10px" }}>
+                              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", color: "#9AA6B2", marginTop: "8px" }}>
                                 Spiral {dIdx + 1}{handSide ? ` (${handSide})` : ""}
                               </div>
                               {dos && (
-                                <div style={{ fontSize: "0.95rem", fontWeight: "700", color: "#0B1B2B", marginTop: "3px" }}>
+                                <div style={{ fontSize: "12px", fontWeight: "700", color: "#0B1B2B", marginTop: "2px" }}>
                                   {dos}
                                 </div>
                               )}
@@ -539,9 +551,9 @@ const Dashboard = () => {
                         style={{
                           display: "inline-block",
                           color: "#4C5BD4",
-                          fontSize: "0.875rem",
+                          fontSize: "0.82rem",
                           fontWeight: "600",
-                          padding: "8px 16px",
+                          padding: "6px 12px",
                           border: "1.5px solid #4C5BD4",
                           borderRadius: "8px",
                           background: "white",
