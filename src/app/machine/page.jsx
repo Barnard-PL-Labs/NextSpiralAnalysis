@@ -468,6 +468,11 @@ export default function MachinePage() {
     setIsConfirmed(true);
   };
 
+  const handSideLabel = selectedHandSide === "L" ? "Left" : selectedHandSide === "R" ? "Right" : "";
+  const dominanceLabel = selectedHand === "dominant" ? "dominant" : selectedHand === "non-dominant" ? "non-dominant" : "";
+  const activeHandSummary = handSideLabel && dominanceLabel ? `${handSideLabel} · ${dominanceLabel}` : "";
+  const showActiveHandSummary = Boolean(activeHandSummary);
+
   const removeDrawing = async (index) => {
     const drawing = savedDrawings[index];
     if (!drawing) return;
@@ -538,63 +543,11 @@ export default function MachinePage() {
       <p className={styles.cardSubtitle}>Please provide the following information to begin the assessment</p>
     </div>
 
-    {/* Dominance */}
-    <div className={styles.selectionGroup}>
-      <label className={styles.sectionLabel}>
-        <span className={styles.sectionDot} />
-        Is this your dominant hand?
-      </label>
-      <div className={styles.handOptionsGrid}>
-        <button
-          onClick={() => handleHandSelection("dominant")}
-          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
-          aria-pressed={selectedHand === "dominant"}
-        >
-          Dominant
-        </button>
-        <button
-          onClick={() => handleHandSelection("non-dominant")}
-          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
-          aria-pressed={selectedHand === "non-dominant"}
-        >
-          Non-Dominant
-        </button>
-      </div>
-    </div>
-
-    {/* Hand side */}
-    <div className={styles.selectionGroup}>
-      <label className={styles.sectionLabel}>
-        <span className={styles.sectionDot} />
-        Which hand will be tested?
-      </label>
-      <div className={styles.handOptionsGrid}>
-        <button
-          type="button"
-          className={`${styles.handOptionCard}${selectedHandSide === "L" ? " " + styles.handOptionCardActive : ""}`}
-          onClick={() => handleHandSideSelection("L")}
-          aria-pressed={selectedHandSide === "L"}
-        >
-          Left Hand
-        </button>
-        <button
-          type="button"
-          className={`${styles.handOptionCard}${selectedHandSide === "R" ? " " + styles.handOptionCardActive : ""}`}
-          onClick={() => handleHandSideSelection("R")}
-          aria-pressed={selectedHandSide === "R"}
-        >
-          Right Hand
-        </button>
-      </div>
-    </div>
-
-    <div className={styles.selectionDivider} />
-
-    {/* Demographics toggle */}
-    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
-      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
-      <span className={styles.demographicsLabel}>Include optional demographics</span>
-    </div>
+	    {/* Demographics toggle */}
+	    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
+	      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
+	      <span className={styles.demographicsLabel}>Include optional demographics</span>
+	    </div>
 
     {/* Inline demographics panel */}
     <div className={`${styles.demographicsPanel} ${showDemographics ? styles.demographicsPanelOpen : ""}`}>
@@ -705,11 +658,63 @@ export default function MachinePage() {
               </select>
             </div>
           </>
-        )}
-      </div>
-    </div>
+	        )}
+	      </div>
+	    </div>
 
-    {/* Continue button */}
+	    <div className={styles.selectionDivider} />
+
+	    {/* Dominance */}
+	    <div className={styles.selectionGroup}>
+	      <label className={styles.sectionLabel}>
+	        <span className={styles.sectionDot} />
+	        Is this your dominant hand?
+	      </label>
+	      <div className={styles.handOptionsGrid}>
+	        <button
+	          onClick={() => handleHandSelection("dominant")}
+	          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={selectedHand === "dominant"}
+	        >
+	          Dominant
+	        </button>
+	        <button
+	          onClick={() => handleHandSelection("non-dominant")}
+	          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={selectedHand === "non-dominant"}
+	        >
+	          Non-Dominant
+	        </button>
+	      </div>
+	    </div>
+
+	    {/* Hand side */}
+	    <div className={styles.selectionGroup}>
+	      <label className={styles.sectionLabel}>
+	        <span className={styles.sectionDot} />
+	        Which hand will be tested?
+	      </label>
+	      <div className={styles.handOptionsGrid}>
+	        <button
+	          type="button"
+	          className={`${styles.handOptionCard}${selectedHandSide === "L" ? " " + styles.handOptionCardActive : ""}`}
+	          onClick={() => handleHandSideSelection("L")}
+	          aria-pressed={selectedHandSide === "L"}
+	        >
+	          Left Hand
+	        </button>
+	        <button
+	          type="button"
+	          className={`${styles.handOptionCard}${selectedHandSide === "R" ? " " + styles.handOptionCardActive : ""}`}
+	          onClick={() => handleHandSideSelection("R")}
+	          aria-pressed={selectedHandSide === "R"}
+	        >
+	          Right Hand
+	        </button>
+	      </div>
+	    </div>
+
+	    {/* Continue button */}
     <button
       onClick={handleContinue}
       disabled={!selectedHand || !selectedHandSide}
@@ -754,9 +759,9 @@ export default function MachinePage() {
                       >R</button>
                     </div>
                   </div>
-                  <div className={styles.controlsGroup}>
-                    <span className={styles.controlsGroupLabel}>Dominance</span>
-                    <div className={styles.segmentedPill}>
+	                  <div className={styles.controlsGroup}>
+	                    <span className={styles.controlsGroupLabel}>Dominance</span>
+	                    <div className={styles.segmentedPill}>
                       <button
                         onClick={() => handleHandSelection("dominant")}
                         aria-pressed={selectedHand === "dominant"}
@@ -767,11 +772,14 @@ export default function MachinePage() {
                         aria-pressed={selectedHand === "non-dominant"}
                         className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
                       >Non</button>
-                    </div>
-                  </div>
-                </div>
+	                    </div>
+	                  </div>
+	                </div>
+	                {showActiveHandSummary && (
+	                  <div className={styles.activeHandSummary}>{activeHandSummary}</div>
+	                )}
 
-                <div style={{ position: "relative" }}>
+	                <div style={{ position: "relative" }}>
                   <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} devicePpi={devicePpi} />
                   {!deviceRecognized && !warningAcknowledged && (
                     <div style={{

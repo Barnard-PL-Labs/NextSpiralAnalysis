@@ -636,23 +636,23 @@
 .demographicsPanelInner {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 16px 20px 20px;
 }
 
 .demographicsField {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .demographicsFieldLabel {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  min-width: 60px;
-  flex-shrink: 0;
+  min-width: 0;
+  text-align: right;
 }
 
 .demographicsInput {
@@ -665,6 +665,7 @@
   background: var(--color-surface);
   transition: border-color 0.2s ease;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -899,6 +900,15 @@
   white-space: nowrap;
 }
 
+.activeHandSummary {
+  margin: -8px 0 8px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
 .segmentedPill {
   display: flex;
   align-items: center;
@@ -1017,5 +1027,3 @@
   gap: 40px;
   flex-wrap: wrap;
 }
-
-
