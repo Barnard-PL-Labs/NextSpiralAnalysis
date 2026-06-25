@@ -33,6 +33,16 @@ const clearStoredSupabaseAuth = () => {
     .forEach((key) => window.localStorage.removeItem(key));
 };
 
+const isStaleRefreshTokenError = (error) => {
+  const message = `${error?.message || ""} ${error?.name || ""}`.toLowerCase();
+  return (
+    message.includes("invalid refresh token") ||
+    message.includes("refresh token not found") ||
+    message.includes("refresh token has expired") ||
+    message.includes("invalid_grant")
+  );
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
@@ -73,7 +83,9 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       fetchUsername(data.user);
     } catch (error) {
-      console.error("Session validation failed:", error);
+      if (!isStaleRefreshTokenError(error)) {
+        console.warn("Session validation failed; clearing local session.");
+      }
       clearLocalSession();
     }
   }, [clearLocalSession]);
@@ -126,7 +138,9 @@ export const AuthProvider = ({ children }) => {
         "Sign out"
       );
     } catch (error) {
-      console.error("signOut failed, forcing local clear:", error);
+      if (!isStaleRefreshTokenError(error)) {
+        console.warn("signOut failed, forcing local clear.");
+      }
     } finally {
       try {
         await supabase.auth.signOut({ scope: "local" });
