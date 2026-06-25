@@ -79,21 +79,22 @@
 .drawingCountBadge {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: #2B2B2B;
   color: white;
+  border: 1px solid white;
+  box-shadow: none;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
 
 .handBadge {
   display: inline-flex;
   align-items: center;
-  background: rgba(99, 102, 241, 0.08);
-  color: #4f46e5;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: transparent;
+  color: #4A4A4A;
+  border: 1px solid #4A4A4A;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -132,26 +133,36 @@
 .dosValue {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #4f46e5;
+  color: #4C5BD4;
 }
 
 /* ── Past results list ── */
+.pastResultsHeadingRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: 40px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
 .pastResultsHeading {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-top: 40px;
-  margin-bottom: 14px;
+  margin: 0;
 }
 
-.overallAvg {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-  margin-bottom: 14px;
+.overallAvgBadge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.07);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 20px;
+  padding: 3px 10px;
 }
 
 .entriesList {
@@ -159,7 +170,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .accordionItem {
@@ -180,37 +191,108 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  padding: 14px 20px;
+  padding: 8px 14px;
   user-select: none;
+  gap: 10px;
 }
 
-.accordionHeaderText {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
+.accordionHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
-.accordionDos {
-  font-weight: 700;
+.accordionIndex {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.08);
   color: #4f46e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.accordionMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .accordionDate {
-  color: var(--color-text-secondary);
   font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.accordionBadges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.accordionBadgeCount {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.accordionBadgeHand {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.04);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 2px 8px;
 }
 
 .accordionUser {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--color-text-secondary);
 }
 
+.accordionHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.accordionDosBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.accordionDosLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.accordionDos {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4C5BD4;
+}
+
 .chevron {
-  font-size: 10px;
   color: var(--color-text-secondary);
   transition: transform 0.2s ease;
   flex-shrink: 0;
@@ -222,10 +304,10 @@
 
 .accordionContent {
   border-top: 1px solid var(--color-border);
-  padding: 16px 20px 20px;
+  padding: 10px 14px 12px;
 }
 
-/* ── Scatter plot ── */
+/* ── Scatter plot (main card) ── */
 .scatterPlot {
   width: 100%;
   height: 280px;
@@ -240,29 +322,39 @@
   width: 100%;
 }
 
+/* ── Scatter plot (accordion — compact) ── */
+.accordionScatterPlot {
+  width: 100%;
+  height: 116px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+}
+
 /* ── View full analysis link ── */
 .resultLink {
-  margin-top: 18px;
+  margin-top: 8px;
 }
 
 .viewFullAnalysisLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   text-decoration: none;
-  color: #4f46e5;
+  color: #4C5BD4;
   font-size: 0.875rem;
   font-weight: 600;
   padding: 8px 16px;
-  border: 1.5px solid rgba(99, 102, 241, 0.3);
+  border: 1.5px solid rgba(76, 91, 212, 0.3);
   border-radius: 8px;
-  background: rgba(99, 102, 241, 0.04);
+  background: rgba(76, 91, 212, 0.04);
   transition: all 0.2s ease;
 }
 
 .viewFullAnalysisLink:hover {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(76, 91, 212, 0.08);
+  border-color: rgba(76, 91, 212, 0.5);
 }
 
 /* ── No entries ── */
@@ -286,7 +378,7 @@
 }
 
 .superuserRow input {
-  accent-color: #4f46e5;
+  accent-color: #4C5BD4;
   width: 15px;
   height: 15px;
 }
@@ -320,21 +412,21 @@
 }
 
 .pagination button:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-  color: #4f46e5;
-  background: rgba(99, 102, 241, 0.04);
+  border-color: rgba(76, 91, 212, 0.4);
+  color: #4C5BD4;
+  background: rgba(76, 91, 212, 0.04);
 }
 
 .pagination button.activePage {
   color: white;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: #4C5BD4;
   border-color: transparent;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 91, 212, 0.3);
 }
 
 .activePage {
   color: white;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: #4C5BD4;
   border-color: transparent;
 }
 
@@ -371,6 +463,56 @@
 
 .gotoInput:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: #4C5BD4;
+  box-shadow: 0 0 0 3px rgba(76, 91, 212, 0.1);
+}
+
+/* ── Past results table ── */
+.tableContainer {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 0.5fr 40px;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 0.5fr 40px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: var(--color-surface-2);
+}
+
+.tableCell {
+  padding-right: 12px;
+}
+
+.expandedRow {
+  padding: 20px 24px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.arrow {
+  display: inline-block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
 }

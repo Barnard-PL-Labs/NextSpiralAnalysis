@@ -91,8 +91,7 @@
   margin-top: 5px;
   overflow-x: auto;
   overflow-y: hidden; /* Prevent vertical scrolling */
-  width: 100px;
-  max-width: 100%;
+  width: 100%;
   min-height: 280px; /* Ensure container is tall enough for larger cards */
 }
 
@@ -119,6 +118,35 @@
   width: 100%;
   height: 190px; /* Increased from 170px to accommodate larger card */
 }
+/* Compact versions for accordion expanded content */
+.dashboardHorizontalSidebarCompact {
+  display: flex;
+  gap: 12px;
+  padding: 4px 2px 4px 2px;
+  background: transparent;
+  border-radius: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 110px;
+}
+
+.dashboardHorizontalCardCompact {
+  width: 100px;
+  height: 100px;
+  background-color: rgba(99, 102, 241, 0.04);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 8px;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.dashboardHorizontalChartCompact {
+  width: 100%;
+  height: 72px;
+}
+
 /* Scrollbar styles for medium horizontal cards */
 .dashboardHorizontalSidebar::-webkit-scrollbar {
   height: 8px; /* Horizontal scrollbar height */
