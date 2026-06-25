@@ -596,7 +596,6 @@
 .demographicsRowOpen {
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   border: none;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .demographicsRow:hover {
@@ -1017,5 +1016,4 @@
   gap: 40px;
   flex-wrap: wrap;
 }
-
 
