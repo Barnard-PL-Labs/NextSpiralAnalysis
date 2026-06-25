@@ -16,10 +16,16 @@
   padding-top: 56px;
 }
 
+.contentGrid > aside {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+}
+
 /* ── Sections ────────────────────────────────────────────────────────────── */
 .section {
   padding-bottom: 35px;
-  border-bottom: 1px solid #E4E9EE;
+  border-bottom: 1px solid var(--color-border);
   margin-bottom: 35px;
   scroll-margin-top: 80px;
 }
@@ -44,7 +50,7 @@
   font-size: 28px;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #0B1B2B;
+  color: var(--color-text-primary);
   margin: 0 0 20px;
 }
 
@@ -58,7 +64,7 @@
 }
 
 .bodyText strong {
-  color: #0B1B2B;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -84,7 +90,7 @@
   align-items: flex-start;
   gap: 12px;
   background: white;
-  border: 1px solid #E4E9EE;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 14px 16px;
   transition: border-color 170ms ease, box-shadow 170ms ease;
@@ -113,7 +119,7 @@
 
 /* ── Steps ───────────────────────────────────────────────────────────────── */
 .stepsContainer {
-  border: 1px solid #E4E9EE;
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   overflow: hidden;
   max-width: 640px;
@@ -131,7 +137,7 @@
 }
 
 .stepOdd  { background: white; }
-.stepEven { background: #F7F9FB; }
+.stepEven { background: var(--color-surface-2); }
 
 .stepNum {
   font-family: 'IBM Plex Mono', monospace;
@@ -151,7 +157,7 @@
 }
 
 .stepText strong {
-  color: #0B1B2B;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -172,7 +178,7 @@
 }
 
 .metricsList li strong {
-  color: #0B1B2B;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -212,7 +218,7 @@
 
 .metricCard {
   background: white;
-  border: 1px solid #E4E9EE;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 18px 20px;
   display: flex;
@@ -237,7 +243,7 @@
   font-family: 'Manrope', sans-serif;
   font-weight: 600;
   font-size: 15px;
-  color: #0B1B2B;
+  color: var(--color-text-primary);
 }
 
 .pillBlue {
@@ -276,7 +282,7 @@
   align-items: center;
   gap: 8px;
   padding-top: 10px;
-  border-top: 1px solid #E4E9EE;
+  border-top: 1px solid var(--color-border);
 }
 
 .metricRangeLabel {
@@ -290,9 +296,7 @@
 
 /* ── TOC ─────────────────────────────────────────────────────────────────── */
 .toc {
-  position: sticky;
-  top: 80px;
-  align-self: start;
+  position: static;
 }
 
 .tocLabel {
@@ -308,7 +312,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  border-left: 1px solid #E4E9EE;
+  border-left: 1px solid var(--color-border);
 }
 
 .tocItem {
