@@ -479,9 +479,9 @@ const Dashboard = () => {
                     <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '22px 20px', borderLeft: '1px solid #F0F3F7' }}>
                       <Link
                         href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
-                        style={{ display: 'block', color: '#4C5BD4', background: 'transparent', border: '1.5px solid #4C5BD4', fontSize: '14px', fontWeight: '600', padding: '13px 22px', borderRadius: '12px', textDecoration: 'none', textAlign: 'center', whiteSpace: 'nowrap', transition: 'background 0.15s ease' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#EAF1FD'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        style={{ display: 'block', color: '#6B7FD4', background: 'rgba(76,91,212,0.04)', border: '1px solid rgba(76,91,212,0.2)', fontSize: '13px', fontWeight: '500', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', textAlign: 'center', whiteSpace: 'nowrap', transition: 'all 0.15s ease', letterSpacing: '0.01em' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(76,91,212,0.09)'; e.currentTarget.style.borderColor = 'rgba(76,91,212,0.35)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(76,91,212,0.04)'; e.currentTarget.style.borderColor = 'rgba(76,91,212,0.2)'; }}
                       >
                         View Analysis →
                       </Link>
