@@ -469,7 +469,7 @@ export default function MachinePage() {
   };
 
   const handSideLabel = selectedHandSide === "L" ? "Left" : selectedHandSide === "R" ? "Right" : "";
-  const dominanceLabel = selectedHand === "dominant" ? "dominant" : selectedHand === "non-dominant" ? "non-dominant" : "";
+  const dominanceLabel = selectedHand === "dominant" ? "Dominant Hand" : selectedHand === "non-dominant" ? "Non-dominant Hand" : "";
   const activeHandSummary = handSideLabel && dominanceLabel ? `${handSideLabel} · ${dominanceLabel}` : "";
   const showActiveHandSummary = Boolean(activeHandSummary);
 
@@ -555,8 +555,7 @@ export default function MachinePage() {
 
         {/* Clinical study toggle — top of panel */}
         <div
-          className={styles.demographicsField}
-          style={{ cursor: "pointer" }}
+          className={styles.demographicsToggleField}
           onClick={() => setShowStudyDemographics(prev => !prev)}
         >
           <input
@@ -565,7 +564,6 @@ export default function MachinePage() {
             checked={showStudyDemographics}
             readOnly
             onChange={() => {}}
-            style={{ marginRight: "8px" }}
           />
           <label className={styles.demographicsFieldLabel} style={{ cursor: "pointer" }}>Clinical study</label>
         </div>
@@ -598,7 +596,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>
@@ -649,7 +646,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>

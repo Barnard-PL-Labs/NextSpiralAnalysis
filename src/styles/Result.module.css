@@ -97,7 +97,7 @@
 .processingDot {
   display: inline-block;
   animation: processedDotPulse 1.8s ease-in-out infinite;
-  background: var(--color-accent);
+  background: var(--color-success);
 }
 
 .pendingMetric {
@@ -127,14 +127,14 @@
 }
 
 .pendingMetricAnalyzing {
-  border-color: rgba(58, 111, 216, 0.24);
-  background: rgba(58, 111, 216, 0.08);
-  color: var(--color-accent);
+  border-color: rgba(27, 146, 127, 0.24);
+  background: rgba(27, 146, 127, 0.08);
+  color: var(--color-success);
 }
 
 .pendingMetricAnalyzing .processingDot {
   animation: processedDotPulse 1.8s ease-in-out infinite;
-  background: var(--color-accent);
+  background: var(--color-success);
   opacity: 1;
 }
 

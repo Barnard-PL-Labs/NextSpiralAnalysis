@@ -52,6 +52,19 @@ const MiniSpiralThumb = ({ drawing }) => {
   );
 };
 
+const isFallbackPressureDrawing = (drawing) => {
+  if (!Array.isArray(drawing)) return false;
+
+  const pressures = drawing
+    .map((point) => Number(point?.p))
+    .filter((pressure) => Number.isFinite(pressure));
+
+  if (pressures.length < 10) return false;
+
+  const fallbackCount = pressures.filter((pressure) => pressure >= 495 && pressure <= 505).length;
+  return fallbackCount / pressures.length >= 0.9;
+};
+
 const SUPERUSER_EMAILS = (
   process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
   process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
@@ -133,7 +146,8 @@ const Dashboard = () => {
         return {
           ...session,
           hand_side: uniqueHandSides.length === 1 ? uniqueHandSides[0] : uniqueHandSides.length > 1 ? "both" : null,
-          average_DOS: sessionAverageDOS
+          average_DOS: sessionAverageDOS,
+          pressure_incompatible: session.all_drawings.some(isFallbackPressureDrawing),
         };
       });
 
@@ -225,14 +239,19 @@ const Dashboard = () => {
     return null;
   };
 
-  const formatDashboardDate = (dateValue) =>
-    new Date(dateValue).toLocaleString([], {
+  const formatDashboardDate = (dateValue) => {
+    const date = new Date(dateValue);
+    const datePart = date.toLocaleDateString([], {
       year: "numeric",
       month: "numeric",
       day: "numeric",
+    });
+    const timePart = date.toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
+    return `${datePart} · ${timePart}`;
+  };
 
   const ds = {
     pageContainer: {
@@ -434,7 +453,7 @@ const Dashboard = () => {
                     <div style={{ fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.12em', color: '#8BBDD4', textTransform: 'uppercase', marginBottom: '6px' }}>
                       AVG DOS SCORE
                     </div>
-                    <div style={{ fontSize: '68px', fontFamily: "'Manrope', sans-serif", fontWeight: '700', color: '#FFFFFF', lineHeight: '1' }}>
+                    <div style={{ fontSize: '68px', fontFamily: "'Manrope', sans-serif", fontWeight: '700', color: entries[0].pressure_incompatible ? '#9AA6B2' : '#FFFFFF', lineHeight: '1' }}>
                       {entries[0].average_DOS ?? 'N/A'}
                     </div>
                   </div>
@@ -541,7 +560,7 @@ const Dashboard = () => {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>AVERAGE DOS</div>
-                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#13917F" }}>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: entry.pressure_incompatible ? "#9AA6B2" : "#13917F" }}>
                         {entry.average_DOS || "N/A"}
                       </div>
                     </div>
@@ -676,12 +695,16 @@ const Dashboard = () => {
                         <path d={linePath} fill="none" stroke="#1E40AF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                         {pts.map(([x, y], i) => {
                           const val = parseFloat(chartData[i].average_DOS);
+                          const isPressureIncompatible = chartData[i].pressure_incompatible;
+                          const pointColor = isPressureIncompatible ? "#9AA6B2" : "#13917F";
+                          const pointFillOpacity = isPressureIncompatible ? 0.18 : 0.12;
                           const dateLabel = new Date(chartData[i].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                           return (
                             <g key={i}>
-                              <circle cx={x} cy={y} r={7} fill="#13917F" fillOpacity={0.12} />
-                              <circle cx={x} cy={y} r={4} fill="#13917F" stroke="#FFFFFF" strokeWidth={2} />
-                              <text x={x} y={y - 12} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#13917F" fontWeight="600">
+                              {isPressureIncompatible && <title>Pressure data appears fixed at 500 on this visit</title>}
+                              <circle cx={x} cy={y} r={7} fill={pointColor} fillOpacity={pointFillOpacity} />
+                              <circle cx={x} cy={y} r={4} fill={pointColor} stroke="#FFFFFF" strokeWidth={2} />
+                              <text x={x} y={y - 12} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill={pointColor} fontWeight="600">
                                 {isNaN(val) ? '' : val.toFixed(2)}
                               </text>
                               <text x={x} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">

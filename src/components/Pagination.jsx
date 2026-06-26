@@ -25,35 +25,58 @@ const Pagination = ({ currentPage, setCurrentPage, pageCount }) => {
     }
   };
 
+  const getPageItems = () => {
+    if (pageCount <= 3) {
+      return Array.from({ length: pageCount }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 2) {
+      return [1, 2, "...", pageCount];
+    }
+
+    if (currentPage >= pageCount - 1) {
+      return [1, "...", pageCount - 1, pageCount];
+    }
+
+    return [1, "...", currentPage, "...", pageCount];
+  };
+
   return (
     <div className={styles.pagination}>
-      {pageCount <= 5 ? (
-        Array.from({ length: pageCount }, (_, i) => (
-          <button
-            key={i + 1}
-            onClick={() => setCurrentPage(i + 1)}
-            className={currentPage === i + 1 ? styles.activePage : ''}
-          >
-            {i + 1}
-          </button>
-        ))
-      ) : (
-        <>
-          <button onClick={() => setCurrentPage(1)} className={currentPage === 1 ? styles.activePage : ''}>1</button>
-          {currentPage > 3 && <span className={styles.ellipsis}>...</span>}
-          {currentPage > 2 && (
-            <button onClick={() => setCurrentPage(currentPage - 1)}>{currentPage - 1}</button>
-          )}
-          {currentPage !== 1 && currentPage !== pageCount && (
-            <button className={styles.activePage}>{currentPage}</button>
-          )}
-          {currentPage + 1 < pageCount && (
-            <button onClick={() => setCurrentPage(currentPage + 1)}>{currentPage + 1}</button>
-          )}
-          {currentPage < pageCount - 2 && <span className={styles.ellipsis}>...</span>}
-          <button onClick={() => setCurrentPage(pageCount)} className={currentPage === pageCount ? styles.activePage : ''}>{pageCount}</button>
-        </>
-      )}
+      <button
+        type="button"
+        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+        className={styles.pageArrow}
+        aria-label="Previous page"
+      >
+        ‹
+      </button>
+      <div className={styles.pageNumberGroup}>
+        {getPageItems().map((item, index) => (
+          item === "..." ? (
+            <span key={`ellipsis-${index}`} className={styles.ellipsis}>...</span>
+          ) : (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setCurrentPage(item)}
+              className={currentPage === item ? styles.activePage : ''}
+            >
+              {item}
+            </button>
+          )
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setCurrentPage(Math.min(pageCount, currentPage + 1))}
+        disabled={currentPage === pageCount}
+        className={styles.pageArrow}
+        aria-label="Next page"
+      >
+        ›
+      </button>
       <div className={styles.gotoContainer}>
         <input
           type="number"

@@ -387,10 +387,20 @@
 .pagination {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-top: 32px;
   width: fit-content;
   margin-inline: auto;
+}
+
+.pageNumberGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
 }
 
 .pagination button {
@@ -411,10 +421,59 @@
   font-family: var(--font-sans);
 }
 
+.pageNumberGroup button {
+  border-color: transparent;
+  background: transparent;
+  min-width: 30px;
+  height: 30px;
+}
+
 .pagination button:hover {
   border-color: rgba(76, 91, 212, 0.4);
   color: #4C5BD4;
   background: rgba(76, 91, 212, 0.04);
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  color: var(--color-text-secondary);
+  background: white;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.pagination button:disabled:hover {
+  color: var(--color-text-secondary);
+  background: white;
+  border-color: var(--color-border);
+}
+
+.pageArrow {
+  min-width: 28px !important;
+  width: 28px;
+  height: 28px !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--color-text-secondary) !important;
+  font-size: 1.45rem !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  border-radius: 999px !important;
+}
+
+.pageArrow:hover {
+  color: #4C5BD4 !important;
+  background: rgba(76, 91, 212, 0.07) !important;
+  border: none !important;
+}
+
+.pageArrow:disabled,
+.pageArrow:disabled:hover {
+  background: transparent !important;
+  border: none !important;
+  color: var(--color-text-secondary) !important;
 }
 
 .pagination button.activePage {
