@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authProvider";
 import Sidebar from "../../components/SideBar";
@@ -9,6 +9,22 @@ import Pagination from "../../components/Pagination";
 import Link from "next/link";
 import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
 import SettingsPopup from "../../components/SettingsPopup";
+
+// Archimedean reference spiral — same parameters as the template shown during drawing
+function generateSpiral({ turns = 4, b = 19, steps = 500 } = {}) {
+  const maxT = turns * 2 * Math.PI;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = (maxT * i) / steps;
+    const r = (b * t) / (2 * Math.PI);
+    const x = (r * Math.cos(t)).toFixed(2);
+    const y = (r * Math.sin(t)).toFixed(2);
+    d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+  }
+  return d.trim();
+}
+const TEMPLATE_PATH = generateSpiral();
+const TEMPLATE_MAX_R = 76; // b=19 × turns=4 = 76
 
 const MiniSpiralThumb = ({ drawing }) => {
   if (!drawing || drawing.length < 2) return null;
@@ -56,6 +72,7 @@ const Dashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const dosChartRef = useRef(null);
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -180,6 +197,12 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [viewAll, user]);
 
+  useEffect(() => {
+    if (dosChartRef.current) {
+      dosChartRef.current.scrollLeft = dosChartRef.current.scrollWidth;
+    }
+  }, [entries]);
+
   const handleAccordionClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
@@ -215,19 +238,19 @@ const Dashboard = () => {
     pageContainer: {
       display: "flex",
       minHeight: "100vh",
-      background: "#FFFFFF",
+      background: "#F0F2F5",
       paddingBottom: "48px",
     },
     content: {
       flex: 1,
       maxWidth: "100%",
-      padding: "32px 40px",
+      padding: "32px 36px",
       marginLeft: "180px",
       overflowY: "auto",
     },
     inner: {
       width: "100%",
-      maxWidth: "860px",
+      maxWidth: "980px",
       margin: "0 auto",
     },
     welcomeSection: {
@@ -333,7 +356,7 @@ const Dashboard = () => {
     pastResultsHeading: {
       fontSize: "1rem",
       fontWeight: "700",
-      color: "#6A7A8A",
+      color: "#5A6A9A",
       textTransform: "uppercase",
       letterSpacing: "0.06em",
       marginBottom: "0",
@@ -349,11 +372,11 @@ const Dashboard = () => {
         <div style={ds.inner}>
         {/* Header */}
         <div style={{ marginBottom: "32px" }}>
-          <p style={{ fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#6A7A8A", margin: "0 0 8px" }}>
+          <p style={{ fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#5A6A9A", margin: "0 0 8px" }}>
             Account{accountEmailPrefix ? ` · ${accountEmailPrefix}` : ""}
           </p>
-          <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.02em", color: "#0B1B2B", margin: "0 0 24px" }}>Your Assessment History</h1>
-          <hr style={{ border: "none", borderTop: "1px solid #E4E9EE", margin: 0 }} />
+          <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.02em", color: "#0B1020", margin: "0 0 24px" }}>Your Assessment History</h1>
+          <hr style={{ border: "none", borderTop: "1px solid #D4D8F0", margin: 0 }} />
         </div>
 
         {isSuperuser && (
@@ -370,86 +393,112 @@ const Dashboard = () => {
         ) : entries.length > 0 ? (
           <>
             {/* ── LATEST RESULT ── */}
-            <div style={ds.latestResultBox}>
-              <p style={ds.latestResultLabel}>Latest Result</p>
-              <p style={ds.latestResultTitle}>
-                {formatDashboardDate(entries[0].created_at)}
-              </p>
+            {(() => {
+              // Precompute per-hand spiral labels: R Spiral 1, L Spiral 1, R Spiral 2 …
+              const handCounts = {};
+              const spiralLabels = (entries[0].all_hand_sides || []).map((hs) => {
+                const key = hs || '?';
+                handCounts[key] = (handCounts[key] || 0) + 1;
+                return hs ? `${hs} Spiral ${handCounts[key]}` : `Spiral ${handCounts[key]}`;
+              });
+              return (
+                <div style={{ borderRadius: '18px', overflow: 'hidden', border: '1px solid #1A2A3A', boxShadow: '0 8px 32px rgba(0,0,0,0.20)', marginBottom: '16px' }}>
 
-              <div style={ds.metaRow}>
-                <div style={ds.drawingCountBadge}>
-                  {entries[0].all_drawings.length}
-                  {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                </div>
-                {entries[0].hand_side && (
-                  <div style={ds.handBadge}>
-                    {getHandLabel(entries[0].hand_side)}
-                  </div>
-                )}
-              </div>
+                  {/* ── Dark header ── */}
+                  <div style={{ background: '#0C1825', padding: '22px 28px 26px', position: 'relative', overflow: 'hidden' }}>
 
-              {/* DOS Score */}
-                <div style={{ marginBottom: "20px", marginTop: "14px" }}>
-                <span style={ds.statLabel}>AVG DOS SCORE</span>
-                <div style={{ ...ds.dosValue, color: "#13917F" }}>
-                  {entries[0].average_DOS || "N/A"}
-                </div>
-              </div>
-
-              {/* Spirals Grid */}
-              <div style={{ display: "flex", gap: "10px", marginBottom: "18px", overflowX: "auto", overflowY: "hidden", paddingBottom: "6px" }}>
-                {entries[0].all_drawings.map((drawing, idx) => {
-                  const result = entries[0].all_results[idx];
-                  const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
-                  const handSide = getShortHandLabel(entries[0].all_hand_sides?.[idx]);
-                  const xVals = drawing.map(d => d.x);
-                  const yVals = drawing.map(d => d.y);
-                  const xMin = Math.min(...xVals);
-                  const xMax = Math.max(...xVals);
-                  const yMin = Math.min(...yVals);
-                  const yMax = Math.max(...yVals);
-                  const pad = Math.max(xMax - xMin, yMax - yMin) * 0.12;
-                  const points = drawing.map(d => `${d.x},${d.y}`).join(" ");
-                  const strokeW = (xMax - xMin) * 0.014;
-                  return (
-                    <div key={idx} style={{ background: "#F7F9FB", border: "1px solid #E4E9EE", borderRadius: "10px", padding: "10px 24px", textAlign: "center", width: "176px", flexShrink: 0 }}>
-                      <svg
-                        viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
-                        style={{ width: "104px", height: "104px", display: "block", margin: "0 auto" }}
-                        preserveAspectRatio="xMidYMid meet"
-                      >
-                        <polyline points={points} fill="none" stroke="#4C5BD4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Watermark spiral — faint, top-right */}
+                    <div style={{ position: 'absolute', right: -30, top: -30, pointerEvents: 'none' }}>
+                      <svg width="260" height="260" viewBox="-80 -80 160 160" style={{ opacity: 0.07 }}>
+                        <path d={TEMPLATE_PATH} fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
                       </svg>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", color: "#9AA6B2", marginTop: "8px" }}>
-                        Spiral {idx + 1}{handSide ? ` (${handSide})` : ""}
+                    </div>
+
+                    {/* Top meta row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                      <div style={{ fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.12em', color: '#8BBDD4', textTransform: 'uppercase' }}>
+                        Latest Result
+                        <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>
+                        {formatDashboardDate(entries[0].created_at)}
+                        <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>
+                        {entries[0].all_drawings.length} drawing{entries[0].all_drawings.length !== 1 ? 's' : ''}
                       </div>
-                      {dos && (
-                        <div style={{ fontSize: "12px", fontWeight: "700", color: "#0B1B2B", marginTop: "2px" }}>
-                          {dos}
+                      {entries[0].hand_side && (
+                        <div style={{ background: 'rgba(255,255,255,0.07)', color: '#C8E0EE', padding: '4px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', border: '1px solid rgba(255,255,255,0.28)', flexShrink: 0 }}>
+                          {getHandLabel(entries[0].hand_side)}
                         </div>
                       )}
                     </div>
-                  );
-                })}
-              </div>
 
-              <Link
-                href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
-                style={ds.viewAnalysisLink}
-                onMouseEnter={(e) => e.currentTarget.style.background = "#EAF1FD"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                View Full Analysis
-              </Link>
-            </div>
+                    {/* AVG DOS SCORE */}
+                    <div style={{ fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.12em', color: '#8BBDD4', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      AVG DOS SCORE
+                    </div>
+                    <div style={{ fontSize: '68px', fontFamily: "'Manrope', sans-serif", fontWeight: '700', color: '#FFFFFF', lineHeight: '1' }}>
+                      {entries[0].average_DOS ?? 'N/A'}
+                    </div>
+                  </div>
+
+                  {/* ── Spiral row + View Analysis ── */}
+                  <div style={{ background: '#FFFFFF', display: 'flex', alignItems: 'stretch' }}>
+                    {/* Scrollable spiral section — 3 always visible, more scroll right */}
+                    <div style={{ flex: 1, display: 'flex', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      {entries[0].all_drawings.map((drawing, idx) => {
+                        const result = entries[0].all_results[idx];
+                        const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
+                        const xVals = drawing.map(p => p.x);
+                        const yVals = drawing.map(p => p.y);
+                        const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
+                        const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
+                        const pad = Math.max(xMax - xMin, yMax - yMin) * 0.12;
+                        const strokeW = (xMax - xMin) * 0.013;
+                        const points = drawing.map(p => `${p.x},${p.y}`).join(' ');
+                        return (
+                          <div key={idx} style={{ flex: '0 0 33.33%', minWidth: '140px', padding: '22px 16px 20px', textAlign: 'center', borderRight: '1px solid #F0F3F7', boxSizing: 'border-box' }}>
+                            <svg
+                              viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
+                              style={{ width: '110px', height: '110px', display: 'block', margin: '0 auto' }}
+                              preserveAspectRatio="xMidYMid meet"
+                            >
+                              <polyline points={points} fill="none" stroke="#3D4FC4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10.5px', color: '#9AA6B2', marginTop: '10px', letterSpacing: '0.04em' }}>
+                              {spiralLabels[idx] || `Spiral ${idx + 1}`}
+                            </div>
+                            {dos && (
+                              <div style={{ fontSize: '15px', fontWeight: '700', color: '#0B1B2B', marginTop: '3px' }}>
+                                {dos}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* View Analysis — pinned right, never scrolls away */}
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '22px 20px', borderLeft: '1px solid #F0F3F7' }}>
+                      <Link
+                        href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
+                        style={{ display: 'block', color: '#4C5BD4', background: 'transparent', border: '1.5px solid #4C5BD4', fontSize: '14px', fontWeight: '600', padding: '13px 22px', borderRadius: '12px', textDecoration: 'none', textAlign: 'center', whiteSpace: 'nowrap', transition: 'background 0.15s ease' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#EAF1FD'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        View Analysis →
+                      </Link>
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })()}
 
             {/* ── PAST RESULTS ── */}
-            <div style={{ marginTop: "40px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <div>
-                <div style={ds.pastResultsHeading}>Past Results</div>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#0B1B2B", margin: "8px 0 0", letterSpacing: "-0.01em" }}>
-                  Your overall average: <span style={{ color: "#13917F" }}>{averageDOS || "N/A"}</span>
-                </h2>
+            <div style={{ marginTop: "40px", marginBottom: "16px" }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#6A7A8A", marginBottom: "6px" }}>
+                Past Results
+              </div>
+              <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: "700", fontSize: "17px", letterSpacing: "-0.01em", color: "#0B1B2B" }}>
+                Overall avg: <span style={{ color: "#4C5BD4" }}>{averageDOS || "N/A"}</span>
               </div>
             </div>
 
@@ -577,6 +626,78 @@ const Dashboard = () => {
               setCurrentPage={setCurrentPage}
               pageCount={pageCount}
             />
+
+            {/* ── DOS BY VISIT CHART ── */}
+            {(() => {
+              const chartData = [...entries].reverse();
+              if (chartData.length < 2) return null;
+              const colW = 72, yAxisW = 40, pR = 16, pT = 30, pB = 36, H = 230, maxD = 4;
+              const n = chartData.length;
+              const bodyW = colW * n + pR;
+              const pH = H - pT - pB;
+              // x coords are relative to the scrollable body SVG (no left offset)
+              const xOf = (i) => colW * i + colW / 2;
+              const yOf = (v) => pT + pH * (1 - Math.min(parseFloat(v) || 0, maxD) / maxD);
+              const gridY = [0, 1, 2, 3, 4];
+              const pts = chartData.map((e, i) => [xOf(i), yOf(e.average_DOS)]);
+              const linePts = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`);
+              const areaPath = `M${linePts.join(' L')} L${pts[pts.length-1][0].toFixed(1)},${pT+pH} L0,${pT+pH} Z`;
+              const linePath = `M${linePts.join(' L')}`;
+              return (
+                <div style={{ background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '18px', padding: '24px', marginTop: '24px' }}>
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.14em', color: '#6A7A8A', marginBottom: '6px', textTransform: 'uppercase' }}>
+                      TREND OVER TIME
+                    </div>
+                    <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '17px', letterSpacing: '-0.01em', color: '#0B1B2B' }}>
+                      Degree of Severity by visit
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
+                    {/* Sticky Y-axis — never scrolls, soft right-edge fade to blend into chart */}
+                    <div style={{ flexShrink: 0, position: 'relative', zIndex: 2 }}>
+                      <svg width={yAxisW} height={H} style={{ display: 'block', background: '#FFFFFF' }}>
+                        {gridY.map(v => (
+                          <text key={v} x={yAxisW - 6} y={yOf(v) + 3.5} textAnchor="end" fontSize={9.5} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">{v}</text>
+                        ))}
+                      </svg>
+                      {/* Feathered right edge — blurs the axis/chart boundary */}
+                      <div style={{ position: 'absolute', top: 0, right: -16, width: 16, height: H, background: 'linear-gradient(to right, #FFFFFF, rgba(255,255,255,0))', pointerEvents: 'none' }} />
+                    </div>
+
+                    {/* Scrollable chart body */}
+                    <div ref={dosChartRef} style={{ overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
+                      <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
+                        {gridY.map(v => (
+                          <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
+                        ))}
+                        <path d={areaPath} fill="rgba(30,64,175,0.06)" />
+                        <path d={linePath} fill="none" stroke="#1E40AF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        {pts.map(([x, y], i) => {
+                          const val = parseFloat(chartData[i].average_DOS);
+                          const dateLabel = new Date(chartData[i].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                          return (
+                            <g key={i}>
+                              <circle cx={x} cy={y} r={7} fill="#13917F" fillOpacity={0.12} />
+                              <circle cx={x} cy={y} r={4} fill="#13917F" stroke="#FFFFFF" strokeWidth={2} />
+                              <text x={x} y={y - 12} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#13917F" fontWeight="600">
+                                {isNaN(val) ? '' : val.toFixed(2)}
+                              </text>
+                              <text x={x} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
+                                {dateLabel}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </div>
+                    {/* Right-edge fade — hints at more scrollable content */}
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: 40, height: H, background: 'linear-gradient(to right, rgba(255,255,255,0), #FFFFFF)', pointerEvents: 'none', zIndex: 1 }} />
+                  </div>
+                </div>
+              );
+            })()}
           </>
         ) : (
           <p style={{ color: "#6A7A8A", fontSize: "1.1rem", fontWeight: "500", marginTop: "40px", textAlign: "center" }}>
