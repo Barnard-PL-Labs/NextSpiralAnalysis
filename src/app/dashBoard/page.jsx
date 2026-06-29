@@ -86,6 +86,7 @@ const Dashboard = () => {
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const dosChartRef = useRef(null);
+  const [chartHand, setChartHand] = useState('L');
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -709,8 +710,6 @@ const Dashboard = () => {
               const chartData = [...entries].reverse();
               if (chartData.length < 2) return null;
               const colW = 72, yAxisW = 40, pR = 16, pT = 30, pB = 36, H = 230, maxD = 4;
-              const n = chartData.length;
-              const bodyW = colW * n + pR;
               const pH = H - pT - pB;
               const xOf = (i) => colW * i + colW / 2;
               const yOf = (v) => pT + pH * (1 - Math.min(parseFloat(v) || 0, maxD) / maxD);
@@ -723,8 +722,17 @@ const Dashboard = () => {
                 return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
               };
 
+              const isBoth = chartHand === 'both';
+              // Single-hand view: only sessions that have data for that hand
+              // Both view: all sessions (each hand connects across gaps independently)
+              const displayData = isBoth
+                ? chartData
+                : chartData.filter(e => getHandDOS(e, chartHand) !== null);
+              const n = displayData.length;
+              const bodyW = colW * n + pR;
+
               const buildPath = (hand) => {
-                const pts = chartData
+                const pts = displayData
                   .map((e, i) => { const d = getHandDOS(e, hand); return d !== null ? [xOf(i), yOf(d)] : null; })
                   .filter(Boolean);
                 if (pts.length < 1) return '';
@@ -732,20 +740,18 @@ const Dashboard = () => {
                   pts.slice(1).map(([x, y]) => ` L${x.toFixed(1)},${y.toFixed(1)}`).join('');
               };
 
-              const leftPath = buildPath('L');
-              const rightPath = buildPath('R');
-
-              // Smart label offset: keeps labels clear of dots (min 16px above center)
-              // and separates L+R labels when their dots are within 22px vertically
-              const getLabelY = (sessionIdx, hand, yPos) => {
-                const e = chartData[sessionIdx];
-                const otherDOS = getHandDOS(e, hand === 'L' ? 'R' : 'L');
+              // In Both mode, push labels apart when L and R dots are within 22px
+              const getLabelY = (idx, hand, yPos) => {
+                if (!isBoth) return yPos - 16;
+                const otherDOS = getHandDOS(displayData[idx], hand === 'L' ? 'R' : 'L');
                 if (otherDOS === null) return yPos - 16;
                 const otherY = yOf(otherDOS);
                 if (Math.abs(yPos - otherY) >= 22) return yPos - 16;
-                // Dots are close — push upper label higher, keep lower label at min clearance
                 return yPos <= otherY ? yPos - 24 : yPos - 16;
               };
+
+              const HAND_COLOR = { L: '#5B8FE0', R: '#13917F' };
+              const handsToRender = isBoth ? ['L', 'R'] : [chartHand];
 
               return (
                 <div style={{ background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '18px', padding: '24px', marginTop: '24px' }}>
@@ -758,12 +764,28 @@ const Dashboard = () => {
                         Degree of Severity by visit
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center', paddingTop: '2px' }}>
-                      {[['L', '#13917F', 'Left'], ['R', '#1E40AF', 'Right']].map(([hand, color, label]) => (
-                        <div key={hand} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', color: '#6A7A8A', letterSpacing: '0.06em' }}>{label}</span>
-                        </div>
+                    {/* Hand toggle — segmented tabs */}
+                    <div style={{ display: 'flex', background: '#F0F2F5', borderRadius: '10px', padding: '3px', gap: '2px' }}>
+                      {[['L', 'Left', '#5B8FE0'], ['R', 'Right', '#13917F'], ['both', 'Both', '#0B1B2B']].map(([hand, label, color]) => (
+                        <button
+                          key={hand}
+                          onClick={() => setChartHand(hand)}
+                          style={{
+                            padding: '6px 18px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: '11px',
+                            fontWeight: chartHand === hand ? '700' : '500',
+                            background: chartHand === hand ? '#FFFFFF' : 'transparent',
+                            color: chartHand === hand ? color : '#9AA6B2',
+                            boxShadow: chartHand === hand ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {label}
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -779,46 +801,59 @@ const Dashboard = () => {
                     </div>
 
                     <div ref={dosChartRef} style={{ overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
-                      <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
-                        {gridY.map(v => (
-                          <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
-                        ))}
-                        {leftPath && <path d={leftPath} fill="none" stroke="#5B8FE0" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />}
-                        {rightPath && <path d={rightPath} fill="none" stroke="#13917F" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />}
-                        {/* Dots first (both hands), then labels on top */}
-                        {[['L', '#5B8FE0'], ['R', '#13917F']].map(([hand, color]) =>
-                          chartData.map((e, i) => {
-                            const dos = getHandDOS(e, hand);
-                            if (dos === null) return null;
-                            const x = xOf(i), y = yOf(dos);
-                            const dotColor = e.pressure_incompatible ? '#9AA6B2' : color;
-                            return (
-                              <g key={`dot-${hand}-${i}`}>
-                                <circle cx={x} cy={y} r={7} fill={dotColor} fillOpacity={0.12} />
-                                <circle cx={x} cy={y} r={4} fill={dotColor} stroke="#FFFFFF" strokeWidth={2} />
-                              </g>
-                            );
-                          })
-                        )}
-                        {[['L', '#5B8FE0'], ['R', '#13917F']].map(([hand, color]) =>
-                          chartData.map((e, i) => {
-                            const dos = getHandDOS(e, hand);
-                            if (dos === null) return null;
-                            const x = xOf(i), y = yOf(dos);
-                            const dotColor = e.pressure_incompatible ? '#9AA6B2' : color;
-                            return (
-                              <text key={`label-${hand}-${i}`} x={x} y={getLabelY(i, hand, y)} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill={dotColor} fontWeight="600">
-                                {dos.toFixed(2)}
-                              </text>
-                            );
-                          })
-                        )}
-                        {chartData.map((e, i) => (
-                          <text key={`date-${i}`} x={xOf(i)} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
-                            {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </text>
-                        ))}
-                      </svg>
+                      {n === 0 ? (
+                        <div style={{ height: H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: '#9AA6B2' }}>
+                            No {chartHand === 'L' ? 'left' : 'right'} hand data recorded yet
+                          </span>
+                        </div>
+                      ) : (
+                        <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
+                          {gridY.map(v => (
+                            <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
+                          ))}
+                          {/* Lines */}
+                          {handsToRender.map(hand => {
+                            const p = buildPath(hand);
+                            return p ? <path key={hand} d={p} fill="none" stroke={HAND_COLOR[hand]} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> : null;
+                          })}
+                          {/* Dots — all hands first */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <g key={`dot-${hand}-${i}`}>
+                                  <circle cx={x} cy={y} r={7} fill={dotColor} fillOpacity={0.12} />
+                                  <circle cx={x} cy={y} r={4} fill={dotColor} stroke="#FFFFFF" strokeWidth={2} />
+                                </g>
+                              );
+                            })
+                          )}
+                          {/* Labels — rendered after all dots so they sit on top */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <text key={`label-${hand}-${i}`} x={x} y={getLabelY(i, hand, y)} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill={dotColor} fontWeight="600">
+                                  {dos.toFixed(2)}
+                                </text>
+                              );
+                            })
+                          )}
+                          {/* Date x-axis */}
+                          {displayData.map((e, i) => (
+                            <text key={`date-${i}`} x={xOf(i)} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
+                              {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </text>
+                          ))}
+                        </svg>
+                      )}
                     </div>
                     <div style={{ position: 'absolute', top: 0, right: 0, width: 40, height: H, background: 'linear-gradient(to right, rgba(255,255,255,0), #FFFFFF)', pointerEvents: 'none', zIndex: 1 }} />
                   </div>
