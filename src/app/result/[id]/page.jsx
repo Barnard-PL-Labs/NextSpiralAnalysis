@@ -300,7 +300,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
             <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9.5, color: "#7A94AA" }}>
               {drawings[0]?.created_at ? new Date(drawings[0].created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
             </span>
-            <span style={{ marginLeft: "auto", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: C.teal, background: "rgba(91,123,179,0.1)", border: "1px solid rgba(91,123,179,0.2)", borderRadius: 20, padding: "4px 12px" }}>
+            <span style={{ marginLeft: "auto", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#9EF2D6", background: "rgba(27,146,127,0.16)", border: "1px solid rgba(158,242,214,0.34)", borderRadius: 20, padding: "4px 12px", boxShadow: "0 0 18px rgba(27,146,127,0.24), inset 0 0 10px rgba(158,242,214,0.08)", textShadow: "0 0 10px rgba(158,242,214,0.45)" }}>
               {perStatusCounts.completed} / {drawings.length} processed
             </span>
           </div>

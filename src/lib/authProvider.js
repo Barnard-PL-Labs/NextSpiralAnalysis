@@ -100,15 +100,21 @@ export const AuthProvider = ({ children }) => {
         if (event === "SIGNED_IN" && u) {
           const { data: existing } = await supabase
             .from("profiles")
-            .select("id")
+            .select("id, email")
             .eq("id", u.id)
             .maybeSingle();
           if (!existing) {
             await supabase.from("profiles").insert({
               id: u.id,
+              email: u.email || "",
               username: u.email?.split("@")[0] || "",
               created_at: new Date().toISOString(),
             });
+          } else if (u.email && existing.email !== u.email) {
+            await supabase
+              .from("profiles")
+              .update({ email: u.email })
+              .eq("id", u.id);
           }
         }
       }

@@ -259,6 +259,7 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setMessage("");
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
+      email: user.email || "",
       username: profileUsername.trim(),
       bio: profileBio.trim(),
     });
