@@ -300,6 +300,26 @@ export default function MachinePage() {
 
   const backgroundAnalysis = async (drawingData) => {
     try {
+      // Final preflight guard for traces captured by older clients or restored
+      // from storage. The MATLAB interpolation step requires strictly
+      // increasing timestamps and is destabilized by repeated samples.
+      const cleanedData = drawingData.reduce((clean, pt) => {
+        const t = Number(pt.t);
+        const x = Number(pt.x);
+        const y = Number(pt.y);
+        const p = Number(pt.p);
+        if (![t, x, y, p].every(Number.isFinite)) return clean;
+
+        const previous = clean.at(-1);
+        if (previous && t <= previous.t) return clean;
+
+        clean.push({ ...pt, n: clean.length + 1, t, x, y, p });
+        return clean;
+      }, []);
+      if (cleanedData.length < 3) {
+        throw new Error("Not enough valid drawing samples to analyze");
+      }
+
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
       // pre-divided by 8 to compensate for dataconvert.m's hardcoded *8 factor
       // (a legacy Wacom tablet calibration that inflates all coordinates 8×).
@@ -310,8 +330,8 @@ export default function MachinePage() {
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = devicePpi / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi / 8;
-      const firstY = drawingData[0].y;
-      const scaledData = drawingData.map((pt) => ({
+      const firstY = cleanedData[0].y;
+      const scaledData = cleanedData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
         y: +((pt.y - firstY) * scale + 150).toFixed(4),
@@ -746,13 +766,13 @@ export default function MachinePage() {
                         onClick={() => handleHandSideSelection("L")}
                         aria-pressed={selectedHandSide === "L"}
                         className={styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")}
-                      >L</button>
+                      >Left</button>
                       <button
                         type="button"
                         onClick={() => handleHandSideSelection("R")}
                         aria-pressed={selectedHandSide === "R"}
                         className={styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")}
-                      >R</button>
+                      >Right</button>
                     </div>
                   </div>
 	                  <div className={styles.controlsGroup}>
@@ -762,12 +782,12 @@ export default function MachinePage() {
                         onClick={() => handleHandSelection("dominant")}
                         aria-pressed={selectedHand === "dominant"}
                         className={styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")}
-                      >Dom</button>
+                      >Dominant</button>
                       <button
                         onClick={() => handleHandSelection("non-dominant")}
                         aria-pressed={selectedHand === "non-dominant"}
                         className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
-                      >Non</button>
+                      >Non-dominant</button>
 	                    </div>
 	                  </div>
 	                </div>

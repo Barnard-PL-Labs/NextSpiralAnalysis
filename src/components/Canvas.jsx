@@ -60,7 +60,6 @@ const Canvas = forwardRef(({ setDrawData, devicePpi = 264 }, ref) => {
   const [canvasSize, setCanvasSize] = useState(() => getCanvasSize(devicePpi));
 
   const startStampRef = useRef(null);
-  const supportsRawUpdateRef = useRef(false);
 
   const pointBufferRef = useRef([]);
   const renderBufferRef = useRef([]);
@@ -194,54 +193,35 @@ const Canvas = forwardRef(({ setDrawData, devicePpi = 264 }, ref) => {
     }
   }, [localDrawData, renderLoop]);
 
-  // Chromium only: pointerrawupdate fires at the raw device rate (120Hz+ on iPad/Wacom).
-  // This handler owns data collection on Chromium and sets supportsRawUpdateRef so that
-  // onPointerMove knows to skip data collection (avoiding duplicates).
-  const handleRawUpdate = useCallback((event) => {
-    if (!isDrawing) return;
-    supportsRawUpdateRef.current = true;
-
-    const samples = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
-    for (const e of samples) {
-      const { x, y, pressure } = getPointerData(e);
-      const relT = startStampRef.current != null ? (e.timeStamp - startStampRef.current) : 0;
-      pointBufferRef.current.push({
-        n: pointBufferRef.current.length + 1,
-        x: +x.toFixed(4),
-        y: +y.toFixed(4),
-        p: Math.round((pressure ?? 0.5) * 1000),
-        t: Math.max(0, Math.round(relT)),
-      });
-      renderBufferRef.current.push({ x, y });
-    }
-  }, [isDrawing]);
-
-  // Fallback for Safari/Firefox (no pointerrawupdate). On Chromium this is a no-op
-  // because supportsRawUpdateRef is true by the time pointermove fires.
+  // Use a single collection path. Mixing pointerrawupdate and pointermove can
+  // deliver overlapping coalesced samples, especially on tablet browsers.
   const handlePointerMove = useCallback((event) => {
-    if (!isDrawing || supportsRawUpdateRef.current) return;
+    if (!isDrawing) return;
 
     const samples = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
     for (const e of samples) {
       const { x, y, pressure } = getPointerData(e);
       const relT = startStampRef.current != null ? (e.timeStamp - startStampRef.current) : 0;
-      pointBufferRef.current.push({
+      const point = {
         n: pointBufferRef.current.length + 1,
         x: +x.toFixed(4),
         y: +y.toFixed(4),
         p: Math.round((pressure ?? 0.5) * 1000),
-        t: Math.max(0, Math.round(relT)),
-      });
+        // Retain sub-millisecond precision so distinct high-rate samples do not
+        // collapse onto the same integer timestamp.
+        t: +Math.max(0, relT).toFixed(3),
+      };
+      const previous = pointBufferRef.current.at(-1);
+
+      // The analysis pipeline interpolates on time, so it requires strictly
+      // increasing timestamps. This also removes exact samples replayed by
+      // getCoalescedEvents().
+      if (previous && point.t <= previous.t) continue;
+
+      pointBufferRef.current.push(point);
       renderBufferRef.current.push({ x, y });
     }
   }, [isDrawing]);
-
-  useEffect(() => {
-    const c = canvasRef.current;
-    if (!c) return;
-    c.addEventListener("pointerrawupdate", handleRawUpdate, { passive: true });
-    return () => c.removeEventListener("pointerrawupdate", handleRawUpdate);
-  }, [handleRawUpdate]);
 
   const stopDrawing = useCallback(() => {
     if (!isDrawing) return;
