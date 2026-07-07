@@ -915,18 +915,20 @@ export default function UnifiedResultPage() {
                 {/* DOS score for selected drawing */}
                 {(() => {
                   const cur = analysisHistory?.individual_results?.[selectedDrawingIndex];
-                  let dosText, dosColor, tightnessText, SecondOSmText;
-                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"; SecondOSmText = "Pending…" }
-                  else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; tightnessText = "Failed"}
-                  else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; tightnessText = "Timeout"}
-                  else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"}
+                  let dosText, dosColor, tightnessText, SecondOSmText, covText;
+                  if (!cur) { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"; SecondOSmText = "Pending…"; covText = "Pending…"; }
+                  else if (cur.error) { dosText = "Failed"; dosColor = "#991b1b"; tightnessText = "Failed"; covText = "Failed"; }
+                  else if (cur.status === "timeout") { dosText = "Timeout"; dosColor = "#991b1b"; tightnessText = "Timeout"; covText = "Timeout"; }
+                  else if (cur.status === "processing" || cur.status === "pending") { dosText = "Pending…"; dosColor = "#92400e"; tightnessText = "Pending…"; covText = "Pending…"; }
                   else {
                     const dos = Number(cur.DOS);
                     const tightness = Number(cur.Tightness);
-                    const smoothness = Number(cur["2nd order sm"])
+                    const smoothness = Number(cur["2nd order sm"]);
+                    const cov = Number(cur["COV of width"]);
                     dosText = Number.isNaN(dos) ? "N/A" : dos.toFixed(4);
                     tightnessText = Number.isNaN(tightness) ? "N/A" : tightness.toFixed(4);
                     SecondOSmText = Number.isNaN(smoothness) ? "N/A" : smoothness.toFixed(4);
+                    covText = Number.isNaN(cov) ? "N/A" : cov.toFixed(4);
                     dosColor = "#0b1220";
                   }
                   return (
@@ -942,6 +944,10 @@ export default function UnifiedResultPage() {
                       <div style={{ textAlign: "center"}}>
                         <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>2nd Order Smoothness:</span>
                         <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{SecondOSmText}</div>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <span style={{ fontSize: 14, color: "#111", opacity: 0.65 }}>COV of Width:</span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: dosColor, letterSpacing: 0.3, marginTop: 2 }}>{covText}</div>
                       </div>
                     </div>
                   );
