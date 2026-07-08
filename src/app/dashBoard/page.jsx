@@ -1,15 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authProvider";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
 import Pagination from "../../components/Pagination";
-import styles from "../../styles/Dashboard.module.css";
 import Link from "next/link";
 import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
 import SettingsPopup from "../../components/SettingsPopup";
+
+// Archimedean reference spiral — same parameters as the template shown during drawing
+function generateSpiral({ turns = 4, b = 19, steps = 500 } = {}) {
+  const maxT = turns * 2 * Math.PI;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = (maxT * i) / steps;
+    const r = (b * t) / (2 * Math.PI);
+    const x = (r * Math.cos(t)).toFixed(2);
+    const y = (r * Math.sin(t)).toFixed(2);
+    d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+  }
+  return d.trim();
+}
+const TEMPLATE_PATH = generateSpiral();
+const TEMPLATE_MAX_R = 76; // b=19 × turns=4 = 76
 
 const MiniSpiralThumb = ({ drawing }) => {
   if (!drawing || drawing.length < 2) return null;
@@ -37,6 +52,19 @@ const MiniSpiralThumb = ({ drawing }) => {
   );
 };
 
+const isFallbackPressureDrawing = (drawing) => {
+  if (!Array.isArray(drawing)) return false;
+
+  const pressures = drawing
+    .map((point) => Number(point?.p))
+    .filter((pressure) => Number.isFinite(pressure));
+
+  if (pressures.length < 10) return false;
+
+  const fallbackCount = pressures.filter((pressure) => pressure >= 495 && pressure <= 505).length;
+  return fallbackCount / pressures.length >= 0.9;
+};
+
 const SUPERUSER_EMAILS = (
   process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
   process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
@@ -47,7 +75,7 @@ const SUPERUSER_EMAILS = (
   .filter((email) => email !== "");
 
 const Dashboard = () => {
-  const { user, username } = useAuth();
+  const { user } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -57,7 +85,8 @@ const Dashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const dosChartRef = useRef(null);
+  const [chartHand, setChartHand] = useState('L');
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -68,9 +97,8 @@ const Dashboard = () => {
 
       results.forEach((entry) => {
         if (!entry.drawings?.drawing_data) {
-          return; 
+          return;
         }
-
 
         const groupingKey = entry.session_id || `legacy-${entry.id}`;
 
@@ -78,24 +106,25 @@ const Dashboard = () => {
           sessions.set(groupingKey, {
             key: groupingKey,
             session_id: entry.session_id,
-            drawing_id: entry.drawing_id, 
+            drawing_id: entry.drawing_id,
             user_id: entry.user_id,
             email: entry.email,
             created_at: entry.created_at,
             all_drawings: [],
             all_results: [],
-            hand_used: entry.drawings?.hand_used || null,
+            all_hand_sides: [],
+            hand_side: entry.drawings?.hand_side || null,
           });
         }
-        
+
         const session = sessions.get(groupingKey);
 
         session.all_drawings.push(entry.drawings.drawing_data);
         session.all_results.push(entry.result_data);
-        
-        // Update hand_used if not already set
-        if (!session.hand_used && entry.drawings?.hand_used) {
-          session.hand_used = entry.drawings.hand_used;
+        session.all_hand_sides.push(entry.drawings?.hand_side || null);
+
+        if (!session.hand_side && entry.drawings?.hand_side) {
+          session.hand_side = entry.drawings.hand_side;
         }
 
         if (new Date(entry.created_at) > new Date(session.created_at)) {
@@ -105,21 +134,24 @@ const Dashboard = () => {
 
       const groupedEntries = Array.from(sessions.values()).map(session => {
         const dosValues = session.all_results
-          .map(res => parseFloat(res?.DOS)) 
+          .map(res => parseFloat(res?.DOS))
           .filter(dos => !isNaN(dos));
+        const uniqueHandSides = [...new Set(session.all_hand_sides.filter(Boolean))];
 
         let sessionAverageDOS = null;
         if (dosValues.length > 0) {
           const sum = dosValues.reduce((a, b) => a + b, 0);
           sessionAverageDOS = (sum / dosValues.length).toFixed(4);
         }
-        
+
         return {
           ...session,
-          average_DOS: sessionAverageDOS 
+          hand_side: uniqueHandSides.length === 1 ? uniqueHandSides[0] : uniqueHandSides.length > 1 ? "both" : null,
+          average_DOS: sessionAverageDOS,
+          pressure_incompatible: session.all_drawings.some(isFallbackPressureDrawing),
         };
       });
-      
+
       groupedEntries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       return groupedEntries;
@@ -138,7 +170,7 @@ const Dashboard = () => {
         .from("api_results")
         .select(`
           id, drawing_id, session_id, created_at, result_data, user_id, email,
-          drawings ( id, drawing_data, hand_used )
+          drawings ( id, drawing_data, hand_side )
         `)
         .order("created_at", { ascending: false });
 
@@ -180,6 +212,12 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [viewAll, user]);
 
+  useEffect(() => {
+    if (dosChartRef.current) {
+      dosChartRef.current.scrollLeft = dosChartRef.current.scrollWidth;
+    }
+  }, [entries]);
+
   const handleAccordionClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
@@ -187,22 +225,197 @@ const Dashboard = () => {
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
   const isSuperuser = SUPERUSER_EMAILS.includes(user?.email?.toLowerCase() ?? "");
+  const accountEmailPrefix = user?.email?.split("@")[0] || "";
+
+  const getHandLabel = (handSide) => {
+    if (!handSide) return "N/A";
+    if (handSide === "L") return "Left hand";
+    if (handSide === "R") return "Right hand";
+    return 'Both hands';
+  };
+
+  const getShortHandLabel = (handSide) => {
+    if (handSide === "L") return "Left";
+    if (handSide === "R") return "Right";
+    return null;
+  };
+
+  const handAverages = (sides, results) => {
+    const pick = (hand) => (sides || [])
+      .map((hs, i) => hs === hand ? parseFloat(results?.[i]?.DOS) : NaN)
+      .filter(v => !isNaN(v));
+    const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    return { left: mean(pick('L')), right: mean(pick('R')) };
+  };
+
+  const handStat = (v, dark = false) => {
+    if (v == null) return { val: '—', color: dark ? '#5E7184' : '#0B1B2B' };
+    return { val: v.toFixed(2), color: dark ? '#FFFFFF' : '#0B1B2B' };
+  };
+
+  const formatDashboardDate = (dateValue) => {
+    const date = new Date(dateValue);
+    const datePart = date.toLocaleDateString([], {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+    const timePart = date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    return `${datePart} · ${timePart}`;
+  };
+
+  const ds = {
+    pageContainer: {
+      display: "flex",
+      minHeight: "100vh",
+      background: "#F0F2F5",
+      paddingBottom: "48px",
+    },
+    content: {
+      flex: 1,
+      maxWidth: "100%",
+      padding: "32px 36px",
+      marginLeft: "180px",
+      overflowY: "auto",
+    },
+    inner: {
+      width: "100%",
+      maxWidth: "980px",
+      margin: "0 auto",
+    },
+    welcomeSection: {
+      marginBottom: "40px",
+    },
+    welcome: {
+      fontSize: "1.75rem",
+      fontWeight: "700",
+      letterSpacing: "-0.02em",
+      color: "#0B1B2B",
+      margin: 0,
+    },
+    latestResultBox: {
+      background: "#FFFFFF",
+      border: "1px solid #E4E9EE",
+      borderRadius: "16px",
+      padding: "20px 24px",
+      boxShadow: "0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0,0,0,0.04)",
+      marginBottom: "12px",
+    },
+    latestResultLabel: {
+      fontSize: "0.7rem",
+      fontWeight: "700",
+      letterSpacing: "0.08em",
+      textTransform: "uppercase",
+      color: "#4C5BD4",
+      marginBottom: "6px",
+    },
+    latestResultTitle: {
+      fontSize: "0.95rem",
+      fontWeight: "600",
+      color: "#6A7A8A",
+      margin: "0 0 12px",
+      letterSpacing: "-0.01em",
+    },
+    metaRow: {
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: "10px",
+      marginBottom: "12px",
+    },
+    drawingCountBadge: {
+      display: "inline-flex",
+      alignItems: "center",
+      background: "#2B2B2B",
+      color: "white",
+      padding: "3px 10px",
+      borderRadius: "20px",
+      fontSize: "11px",
+      fontWeight: "600",
+      border: "1px solid white",
+    },
+    handBadge: {
+      display: "inline-flex",
+      alignItems: "center",
+      background: "transparent",
+      color: "#4A4A4A",
+      border: "1px solid #4A4A4A",
+      padding: "3px 10px",
+      borderRadius: "20px",
+      fontSize: "11px",
+      fontWeight: "600",
+      textTransform: "capitalize",
+    },
+    statLabel: {
+      fontSize: "0.8rem",
+      fontWeight: "600",
+      color: "#6A7A8A",
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+      marginBottom: "4px",
+      display: "block",
+    },
+    dosValue: {
+      fontSize: "44px",
+      fontWeight: "700",
+      letterSpacing: "-0.02em",
+      lineHeight: "1",
+    },
+    spiralCard: {
+      background: "#F7F9FB",
+      border: "1px solid #E4E9EE",
+      borderRadius: "14px",
+      padding: "16px",
+      textAlign: "center",
+    },
+    viewAnalysisLink: {
+      display: "inline-block",
+      width: "100%",
+      color: "#4C5BD4",
+      background: "transparent",
+      border: "1.5px solid #4C5BD4",
+      fontSize: "14.5px",
+      fontWeight: "600",
+      padding: "12px 20px",
+      borderRadius: "11px",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      textDecoration: "none",
+      textAlign: "center",
+    },
+    pastResultsHeading: {
+      fontSize: "1rem",
+      fontWeight: "700",
+      color: "#5A6A9A",
+      textTransform: "uppercase",
+      letterSpacing: "0.06em",
+      marginBottom: "0",
+    },
+  };
 
   return (
-    <div className={styles.pageContainer}>
+    <div style={ds.pageContainer}>
       {isMobile ? <BottomNav onSettingsClick={() => setIsSettingsOpen(true)} /> : <Sidebar onSettingsClick={() => setIsSettingsOpen(true)} />}
       <SettingsPopup isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      <div className={styles.content}>
-        <div className={styles.welcomeContainer}>
-          <h1 className={styles.welcome}>
-            {username ? `Welcome back, ${username}!` : "Welcome back!"}
-          </h1>
+
+      <div style={ds.content}>
+        <div style={ds.inner}>
+        {/* Header */}
+        <div style={{ marginBottom: "32px" }}>
+          <p style={{ fontSize: "0.7rem", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#5A6A9A", margin: "0 0 8px" }}>
+            Account{accountEmailPrefix ? ` · ${accountEmailPrefix}` : ""}
+          </p>
+          <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.02em", color: "#0B1020", margin: "0 0 24px" }}>Your Assessment History</h1>
+          <hr style={{ border: "none", borderTop: "1px solid #D4D8F0", margin: 0 }} />
         </div>
 
         {isSuperuser && (
           <div style={{ margin: "1rem 0" }}>
             <label>
-              <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)}/>
+              <input type="checkbox" checked={viewAll} onChange={(e) => setViewAll(e.target.checked)} />
               {" "}View all user entries
             </label>
           </div>
@@ -212,120 +425,448 @@ const Dashboard = () => {
           <p>Loading...</p>
         ) : entries.length > 0 ? (
           <>
-            <div className={styles.latestResultContainer}>
-              <div className={styles.latestResultBox}>
-                <p className={styles.latestResultLabel}>Latest Result</p>
-                <p className={styles.latestResultTitle}>
-                  {new Date(entries[0].created_at).toLocaleString()}
-                </p>
-                <div className={styles.metaRow}>
-                  <div className={styles.drawingCountBadge}>
-                    {entries[0].all_drawings.length}
-                    {entries[0].all_drawings.length === 1 ? " Drawing" : " Drawings"}
-                  </div>
-                  {entries[0].hand_used && (
-                    <div className={styles.handBadge}>
-                      {entries[0].hand_used === 'dominant' ? 'Dominant' : 'Non-Dominant'} Hand
-                    </div>
-                  )}
-                </div>
-                <div className={styles.statRow}>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Avg DOS Score</span>
-                    <span className={styles.dosValue}>{entries[0].average_DOS || "N/A"}</span>
-                  </div>
-                </div>
-                <div className={styles.scatterPlot}>
-                  <HorizontalSpiralHistory savedDrawings={entries[0].all_drawings}/>
-                </div>
-                <div className={styles.resultLink}>
-                  <Link
-                    href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
-                    className={styles.viewFullAnalysisLink}
-                  >
-                    View Full Analysis
-                  </Link>
-                </div>
-              </div>
-            </div>
+            {/* ── LATEST RESULT ── */}
+            {(() => {
+              // Precompute per-hand spiral labels: R Spiral 1, L Spiral 1, R Spiral 2 …
+              const handCounts = {};
+              const spiralLabels = (entries[0].all_hand_sides || []).map((hs) => {
+                const key = hs || '?';
+                handCounts[key] = (handCounts[key] || 0) + 1;
+                return hs ? `${hs} Spiral ${handCounts[key]}` : `Spiral ${handCounts[key]}`;
+              });
+              return (
+                <div style={{ borderRadius: '18px', overflow: 'hidden', border: '1px solid #1A2A3A', boxShadow: '0 8px 32px rgba(0,0,0,0.20)', marginBottom: '16px' }}>
 
-            <div className={styles.pastResultsHeadingRow}>
-              <h2 className={styles.pastResultsHeading}>Past Results</h2>
-              {averageDOS && (
-                <span className={styles.overallAvgBadge}>Overall avg DOS: {averageDOS}</span>
-              )}
-            </div>
-            <ul className={styles.entriesList}>
-              {paginatedEntries.map((entry, index) => {
-                const entryNum = index + 1 + (currentPage - 1) * entriesPerPage;
-                const date = new Date(entry.created_at);
-                const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-                const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-                const isOpen = activeIndex === index;
-                return (
-                  <li key={entry.key} className={styles.accordionItem}>
-                    <div className={styles.accordionHeader} onClick={() => handleAccordionClick(index)}>
-                      <div className={styles.accordionHeaderLeft}>
-                        <span className={styles.accordionIndex}>{entryNum}</span>
-                        <div className={styles.accordionMeta}>
-                          <span className={styles.accordionDate}>{dateStr} · {timeStr}</span>
-                          <div className={styles.accordionBadges}>
-                            <span className={styles.accordionBadgeCount}>
-                              {entry.all_drawings.length} {entry.all_drawings.length === 1 ? "Drawing" : "Drawings"}
-                            </span>
-                            {entry.hand_used && (
-                              <span className={styles.accordionBadgeHand}>
-                                {entry.hand_used === "dominant" ? "Dominant" : "Non-Dom"}
-                              </span>
-                            )}
-                            {isSuperuser && entry.email && (
-                              <span className={styles.accordionUser}>{entry.email}</span>
-                            )}
+                  {/* ── Dark header ── */}
+                  <div style={{ background: '#0C1825', padding: '22px 28px 26px', position: 'relative', overflow: 'hidden' }}>
+
+                    {/* Watermark spiral — faint, top-right */}
+                    <div style={{ position: 'absolute', right: -30, top: -30, pointerEvents: 'none' }}>
+                      <svg width="260" height="260" viewBox="-80 -80 160 160" style={{ opacity: 0.07 }}>
+                        <path d={TEMPLATE_PATH} fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
+                      </svg>
+                    </div>
+
+                    {/* Top meta row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                      <div style={{ fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.12em', color: '#8BBDD4', textTransform: 'uppercase' }}>
+                        Latest Result
+                        <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>
+                        {formatDashboardDate(entries[0].created_at)}
+                        <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>
+                        {entries[0].all_drawings.length} drawing{entries[0].all_drawings.length !== 1 ? 's' : ''}
+                      </div>
+                      {entries[0].hand_side && (
+                        <div style={{ background: 'rgba(255,255,255,0.07)', color: '#C8E0EE', padding: '4px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', border: '1px solid rgba(255,255,255,0.28)', flexShrink: 0 }}>
+                          {getHandLabel(entries[0].hand_side)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* L / R DOS blocks */}
+                    {(() => {
+                      const avg = handAverages(entries[0].all_hand_sides, entries[0].all_results);
+                      const L = handStat(avg.left, true);
+                      const R = handStat(avg.right, true);
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '36px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '0.12em', color: '#8CA1B5' }}>AVG DOS</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', fontWeight: '700', letterSpacing: '0.08em', color: '#0E1A2B', background: '#7AAEE8', borderRadius: '4px', padding: '2px 7px' }}>LEFT</span>
+                            </div>
+                            <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '800', fontSize: '56px', letterSpacing: '-0.04em', lineHeight: '1', color: L.color }}>{L.val}</div>
+                          </div>
+                          <div style={{ width: '1px', height: '56px', background: 'rgba(255,255,255,0.16)', marginBottom: '4px' }} />
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '0.12em', color: '#8CA1B5' }}>AVG DOS</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', fontWeight: '700', letterSpacing: '0.08em', color: '#0E1A2B', background: '#3FD0B8', borderRadius: '4px', padding: '2px 7px' }}>RIGHT</span>
+                            </div>
+                            <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '800', fontSize: '56px', letterSpacing: '-0.04em', lineHeight: '1', color: R.color }}>{R.val}</div>
                           </div>
                         </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* ── Spiral row + View Analysis ── */}
+                  <div style={{ background: '#FFFFFF', display: 'flex', alignItems: 'stretch' }}>
+                    {/* Scrollable spiral section — 3 always visible, more scroll right */}
+                    <div style={{ flex: 1, display: 'flex', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      {entries[0].all_drawings.map((drawing, idx) => {
+                        const result = entries[0].all_results[idx];
+                        const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
+                        const xVals = drawing.map(p => p.x);
+                        const yVals = drawing.map(p => p.y);
+                        const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
+                        const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
+                        const pad = Math.max(xMax - xMin, yMax - yMin) * 0.12;
+                        const strokeW = (xMax - xMin) * 0.013;
+                        const points = drawing.map(p => `${p.x},${p.y}`).join(' ');
+                        return (
+                          <div key={idx} style={{ flex: '0 0 33.33%', minWidth: '140px', padding: '22px 16px 20px', textAlign: 'center', borderRight: '1px solid #F0F3F7', boxSizing: 'border-box' }}>
+                            <svg
+                              viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
+                              style={{ width: '110px', height: '110px', display: 'block', margin: '0 auto' }}
+                              preserveAspectRatio="xMidYMid meet"
+                            >
+                              <polyline points={points} fill="none" stroke="#3D4FC4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10.5px', color: '#9AA6B2', marginTop: '10px', letterSpacing: '0.04em' }}>
+                              {spiralLabels[idx] || `Spiral ${idx + 1}`}
+                            </div>
+                            {dos && (
+                              <div style={{ fontSize: '15px', fontWeight: '700', color: '#0B1B2B', marginTop: '3px' }}>
+                                {dos}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* View Analysis — pinned right, never scrolls away */}
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '22px 20px', borderLeft: '1px solid #F0F3F7' }}>
+                      <Link
+                        href={`/result/${entries[0].session_id || entries[0].drawing_id}`}
+                        style={{ display: 'block', color: '#6B7FD4', background: 'rgba(76,91,212,0.04)', border: '1px solid rgba(76,91,212,0.2)', fontSize: '13px', fontWeight: '500', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', textAlign: 'center', whiteSpace: 'nowrap', transition: 'all 0.15s ease', letterSpacing: '0.01em' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(76,91,212,0.09)'; e.currentTarget.style.borderColor = 'rgba(76,91,212,0.35)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(76,91,212,0.04)'; e.currentTarget.style.borderColor = 'rgba(76,91,212,0.2)'; }}
+                      >
+                        View Analysis →
+                      </Link>
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })()}
+
+            {/* ── PAST RESULTS ── */}
+            <div style={{ marginTop: "40px", marginBottom: "16px" }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#6A7A8A", marginBottom: "10px" }}>
+                Past Results
+              </div>
+              {(() => {
+                const allSides = entries.flatMap(e => e.all_hand_sides || []);
+                const allResults = entries.flatMap(e => e.all_results || []);
+                const avg = handAverages(allSides, allResults);
+                const L = handStat(avg.left, false);
+                const R = handStat(avg.right, false);
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: '#9AA6B2' }}>Avg DOS</span>
+                    {[['L', '#5B8FE0', L.val], ['R', '#13917F', R.val]].map(([hand, color, val]) => (
+                      <div key={hand} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '9px', padding: '5px 11px 5px 6px' }}>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', fontWeight: '700', color: '#fff', background: color, borderRadius: '4px', padding: '2px 6px' }}>{hand}</span>
+                        <span style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '16px', color: color }}>{val}</span>
                       </div>
-                      <div className={styles.accordionHeaderRight}>
-                        <MiniSpiralThumb drawing={entry.all_drawings[0]} />
-                        <div className={styles.accordionDosBlock}>
-                          <span className={styles.accordionDosLabel}>DOS</span>
-                          <span className={styles.accordionDos}>{entry.average_DOS || "N/A"}</span>
-                        </div>
-                        <svg
-                          className={`${styles.chevron}${isOpen ? " " + styles.chevronOpen : ""}`}
-                          width="16" height="16" viewBox="0 0 16 16" fill="none"
-                        >
-                          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Results List */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+              {paginatedEntries.map((entry, index) => {
+                const isOpen = activeIndex === index;
+                return (
+                <div key={entry.key} style={{ borderRadius: "12px", overflow: "hidden", border: `1px solid ${isOpen ? "#4C5BD4" : "#E4E9EE"}`, transition: "border-color 0.2s ease", boxShadow: isOpen ? "0 4px 16px rgba(76, 91, 212,0.1)" : "none" }}>
+                  <button
+                    onClick={() => handleAccordionClick(index)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                      textAlign: "left",
+                      background: isOpen ? "#EAF1FD" : "white",
+                      border: "none",
+                      borderBottom: isOpen ? "1px solid #D0E2F9" : "1px solid transparent",
+                      padding: "12px 16px",
+                      cursor: "pointer",
+                      transition: "background 0.2s ease, border-color 0.2s ease",
+                      fontFamily: "inherit",
+                    }}
+                    onMouseEnter={(e) => { if (!isOpen) e.currentTarget.style.background = "#F7F9FB"; }}
+                    onMouseLeave={(e) => { if (!isOpen) e.currentTarget.style.background = "white"; }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>DATE & TIME</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#0B1B2B" }}>
+                        {formatDashboardDate(entry.created_at)}
                       </div>
                     </div>
-                    {isOpen && (
-                      <div className={styles.accordionContent}>
-                        <div className={styles.accordionScatterPlot}>
-                          <HorizontalSpiralHistory savedDrawings={entry.all_drawings} compact={true} />
-                        </div>
-                        <div className={styles.resultLink}>
-                          <Link
-                            href={`/result/${entry.session_id || entry.drawing_id}`}
-                            className={styles.viewFullAnalysisLink}
-                          >
-                            View Full Analysis →
-                          </Link>
-                        </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>HAND</div>
+                      <div style={{ fontSize: "0.88rem", color: "#0B1B2B" }}>
+                        {getHandLabel(entry.hand_side)}
                       </div>
-                    )}
-                  </li>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', color: '#9AA6B2', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '6px' }}>AVG DOS</div>
+                      {(() => {
+                        const avg = handAverages(entry.all_hand_sides, entry.all_results);
+                        const L = handStat(avg.left, false);
+                        const R = handStat(avg.right, false);
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            {[['L', '#5B8FE0', L.val], ['R', '#13917F', R.val]].map(([hand, color, val]) => (
+                              <div key={hand} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '8.5px', fontWeight: '700', color: '#fff', background: color, borderRadius: '3px', padding: '1px 5px' }}>{hand}</span>
+                                <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: '15px', fontWeight: '700', color: color }}>{val}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    <div style={{ flex: 0.5 }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>COUNT</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#0B1B2B" }}>
+                        {entry.all_drawings.length}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: "16px", flex: 0.3 }}>
+                      <span style={{ fontSize: "12px", color: "#6B7280", display: "inline-block", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }}>
+                        ▼
+                      </span>
+                    </div>
+                  </button>
+
+                  <div style={{ maxHeight: isOpen ? "900px" : "0", overflow: "hidden", transition: "max-height 0.4s ease", background: "#F9FAFB" }}>
+                    <div style={{ padding: "14px 16px", opacity: isOpen ? 1 : 0, transition: "opacity 0.3s ease 0.05s" }}>
+                      <div style={{ display: "flex", gap: "10px", marginBottom: "12px", overflowX: "auto", overflowY: "hidden", paddingBottom: "6px" }}>
+                        {entry.all_drawings.map((drawing, dIdx) => {
+                          const result = entry.all_results[dIdx];
+                          const dos = result?.DOS != null ? parseFloat(result.DOS).toFixed(2) : null;
+                          const handSide = getShortHandLabel(entry.all_hand_sides?.[dIdx]);
+                          const xVals = drawing.map(d => d.x);
+                          const yVals = drawing.map(d => d.y);
+                          const xMin = Math.min(...xVals);
+                          const xMax = Math.max(...xVals);
+                          const yMin = Math.min(...yVals);
+                          const yMax = Math.max(...yVals);
+                          const pad = Math.max(xMax - xMin, yMax - yMin) * 0.12;
+                          const points = drawing.map(d => `${d.x},${d.y}`).join(" ");
+                          const strokeW = (xMax - xMin) * 0.014;
+                          return (
+                            <div key={dIdx} style={{ background: "#FFFFFF", border: "1px solid #E4E9EE", borderRadius: "10px", padding: "10px 24px", textAlign: "center", width: "176px", flexShrink: 0 }}>
+                              <svg
+                                viewBox={`${xMin - pad} ${yMin - pad} ${xMax - xMin + pad * 2} ${yMax - yMin + pad * 2}`}
+                                style={{ width: "104px", height: "104px", display: "block", margin: "0 auto" }}
+                                preserveAspectRatio="xMidYMid meet"
+                              >
+                                <polyline points={points} fill="none" stroke="#4C5BD4" strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", color: "#9AA6B2", marginTop: "8px" }}>
+                                Spiral {dIdx + 1}{handSide ? ` (${handSide})` : ""}
+                              </div>
+                              {dos && (
+                                <div style={{ fontSize: "12px", fontWeight: "700", color: "#0B1B2B", marginTop: "2px" }}>
+                                  {dos}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <Link
+                        href={`/result/${entry.session_id || entry.drawing_id}`}
+                        style={{
+                          display: "inline-block",
+                          color: "#4C5BD4",
+                          fontSize: "0.82rem",
+                          fontWeight: "600",
+                          padding: "6px 12px",
+                          border: "1.5px solid #4C5BD4",
+                          borderRadius: "8px",
+                          background: "white",
+                          textDecoration: "none",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "#EAF1FD"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                      >
+                        View Full Analysis
+                      </Link>
+                    </div>
+                  </div>
+                </div>
                 );
               })}
-            </ul>
+            </div>
+
             <Pagination
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
               pageCount={pageCount}
             />
+
+            {/* ── DOS BY VISIT CHART ── */}
+            {(() => {
+              const chartData = [...entries].reverse();
+              if (chartData.length < 2) return null;
+              const colW = 72, yAxisW = 40, pR = 16, pT = 30, pB = 36, H = 230, maxD = 4;
+              const pH = H - pT - pB;
+              const xOf = (i) => colW * i + colW / 2;
+              const yOf = (v) => pT + pH * (1 - Math.min(parseFloat(v) || 0, maxD) / maxD);
+              const gridY = [0, 1, 2, 3, 4];
+
+              const getHandDOS = (session, hand) => {
+                const vals = (session.all_hand_sides || [])
+                  .map((hs, idx) => hs === hand ? parseFloat(session.all_results?.[idx]?.DOS) : NaN)
+                  .filter(v => !isNaN(v));
+                return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+              };
+
+              const isBoth = chartHand === 'both';
+              // Single-hand view: only sessions that have data for that hand
+              // Both view: all sessions (each hand connects across gaps independently)
+              const displayData = isBoth
+                ? chartData
+                : chartData.filter(e => getHandDOS(e, chartHand) !== null);
+              const n = displayData.length;
+              const bodyW = colW * n + pR;
+
+              const buildPath = (hand) => {
+                const pts = displayData
+                  .map((e, i) => { const d = getHandDOS(e, hand); return d !== null ? [xOf(i), yOf(d)] : null; })
+                  .filter(Boolean);
+                if (pts.length < 1) return '';
+                return `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}` +
+                  pts.slice(1).map(([x, y]) => ` L${x.toFixed(1)},${y.toFixed(1)}`).join('');
+              };
+
+              // In Both mode, push labels apart when L and R dots are within 22px
+              const getLabelY = (idx, hand, yPos) => {
+                if (!isBoth) return yPos - 16;
+                const otherDOS = getHandDOS(displayData[idx], hand === 'L' ? 'R' : 'L');
+                if (otherDOS === null) return yPos - 16;
+                const otherY = yOf(otherDOS);
+                if (Math.abs(yPos - otherY) >= 22) return yPos - 16;
+                return yPos <= otherY ? yPos - 24 : yPos - 16;
+              };
+
+              const HAND_COLOR = { L: '#5B8FE0', R: '#13917F' };
+              const handsToRender = isBoth ? ['L', 'R'] : [chartHand];
+
+              return (
+                <div style={{ background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '18px', padding: '24px', marginTop: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.14em', color: '#6A7A8A', marginBottom: '6px', textTransform: 'uppercase' }}>
+                        TREND OVER TIME
+                      </div>
+                      <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '17px', letterSpacing: '-0.01em', color: '#0B1B2B' }}>
+                        Degree of Severity by visit
+                      </div>
+                    </div>
+                    {/* Hand toggle — segmented tabs */}
+                    <div style={{ display: 'flex', background: '#F0F2F5', borderRadius: '10px', padding: '3px', gap: '2px' }}>
+                      {[['L', 'Left', '#5B8FE0'], ['R', 'Right', '#13917F'], ['both', 'Both', '#0B1B2B']].map(([hand, label, color]) => (
+                        <button
+                          key={hand}
+                          onClick={() => setChartHand(hand)}
+                          style={{
+                            padding: '6px 18px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: '11px',
+                            fontWeight: chartHand === hand ? '700' : '500',
+                            background: chartHand === hand ? '#FFFFFF' : 'transparent',
+                            color: chartHand === hand ? color : '#9AA6B2',
+                            boxShadow: chartHand === hand ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
+                    <div style={{ flexShrink: 0, position: 'relative', zIndex: 2 }}>
+                      <svg width={yAxisW} height={H} style={{ display: 'block', background: '#FFFFFF' }}>
+                        {gridY.map(v => (
+                          <text key={v} x={yAxisW - 6} y={yOf(v) + 3.5} textAnchor="end" fontSize={9.5} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">{v}</text>
+                        ))}
+                      </svg>
+                      <div style={{ position: 'absolute', top: 0, right: -16, width: 16, height: H, background: 'linear-gradient(to right, #FFFFFF, rgba(255,255,255,0))', pointerEvents: 'none' }} />
+                    </div>
+
+                    <div ref={dosChartRef} style={{ overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
+                      {n === 0 ? (
+                        <div style={{ height: H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: '#9AA6B2' }}>
+                            No {chartHand === 'L' ? 'left' : 'right'} hand data recorded yet
+                          </span>
+                        </div>
+                      ) : (
+                        <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
+                          {gridY.map(v => (
+                            <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
+                          ))}
+                          {/* Lines */}
+                          {handsToRender.map(hand => {
+                            const p = buildPath(hand);
+                            return p ? <path key={hand} d={p} fill="none" stroke={HAND_COLOR[hand]} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> : null;
+                          })}
+                          {/* Dots — all hands first */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <g key={`dot-${hand}-${i}`}>
+                                  <circle cx={x} cy={y} r={7} fill={dotColor} fillOpacity={0.12} />
+                                  <circle cx={x} cy={y} r={4} fill={dotColor} stroke="#FFFFFF" strokeWidth={2} />
+                                </g>
+                              );
+                            })
+                          )}
+                          {/* Labels — rendered after all dots so they sit on top */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <text key={`label-${hand}-${i}`} x={x} y={getLabelY(i, hand, y)} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill={dotColor} fontWeight="600">
+                                  {dos.toFixed(2)}
+                                </text>
+                              );
+                            })
+                          )}
+                          {/* Date x-axis */}
+                          {displayData.map((e, i) => (
+                            <text key={`date-${i}`} x={xOf(i)} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
+                              {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </text>
+                          ))}
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: 40, height: H, background: 'linear-gradient(to right, rgba(255,255,255,0), #FFFFFF)', pointerEvents: 'none', zIndex: 1 }} />
+                  </div>
+                </div>
+              );
+            })()}
           </>
         ) : (
-          <p className={styles.noEntry}>No entries found.</p>
+          <p style={{ color: "#6A7A8A", fontSize: "1.1rem", fontWeight: "500", marginTop: "40px", textAlign: "center" }}>
+            No entries found.
+          </p>
         )}
+        </div>
       </div>
     </div>
   );

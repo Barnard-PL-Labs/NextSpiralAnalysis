@@ -6,7 +6,38 @@ import { Dialog, Transition } from "@headlessui/react";
 import Image from "next/image";
 import { FaExclamationCircle } from "react-icons/fa";
 
-export default function LoginModal({ isOpen, closeModal }) {
+const AUTH_OPERATION_TIMEOUT_MS = 10000;
+
+const withTimeout = (promise, timeoutMs, label) => {
+  let timeoutId;
+
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${label} timed out. Please try again.`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
+const clearStoredSupabaseAuth = () => {
+  if (typeof window === "undefined") return;
+
+  Object.keys(window.localStorage)
+    .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+    .forEach((key) => window.localStorage.removeItem(key));
+};
+
+const getAuthRedirectBase = () => {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
+  if (typeof window !== "undefined") return window.location.origin;
+  return "";
+};
+
+export default function LoginModal({ isOpen, closeModal, initialMessage = "" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,23 +46,52 @@ export default function LoginModal({ isOpen, closeModal }) {
   const [isForgot, setIsForgot] = useState(false);
   const [signupMode, setSignupMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isOpen || !initialMessage) return;
+    setSignupMode(false);
+    setIsForgot(false);
+    setMessage(initialMessage);
+  }, [initialMessage, isOpen]);
+
   const handleCreateAccount = async () => {
     if (password != confirmPassword) {
       setMessage("Passwords don't match!");
       return;
     }
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      setMessage(error.message);
-    } else {
-      if (data.user) {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          username: fullName.trim() || email.split("@")[0],
-          created_at: new Date().toISOString(),
-        });
+    try {
+      try {
+        await supabase.auth.signOut({ scope: "local" });
+      } catch {}
+      clearStoredSupabaseAuth();
+
+      const redirectBase = getAuthRedirectBase();
+      const { data, error } = await withTimeout(
+        supabase.auth.signUp({
+          email,
+          password,
+          options: redirectBase
+            ? { emailRedirectTo: `${redirectBase}/machine?confirmed=true` }
+            : undefined,
+        }),
+        AUTH_OPERATION_TIMEOUT_MS,
+        "Sign up"
+      );
+      if (error) {
+        setMessage(error.message);
+      } else {
+        if (data.user) {
+          await supabase.from("profiles").upsert({
+            id: data.user.id,
+            email: data.user.email || email,
+            username: fullName.trim() || email.split("@")[0],
+            created_at: new Date().toISOString(),
+          });
+        }
+        setMessage("Check your email to confirm your account!");
       }
-      setMessage("Check your email to confirm your account!");
+    } catch (error) {
+      setMessage(error.message || "Failed to create account. Please try again.");
     }
   };
 
@@ -47,27 +107,36 @@ export default function LoginModal({ isOpen, closeModal }) {
   };
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      if (error.message === "Invalid login credentials") {
-        setMessage("Invalid email or password. Please try again.");
-      } else if (error.message === "Email not confirmed") {
-        setMessage("Please confirm your email before logging in.");
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email,
+          password,
+        }),
+        AUTH_OPERATION_TIMEOUT_MS,
+        "Login"
+      );
+      if (error) {
+        if (error.message === "Invalid login credentials") {
+          setMessage("Invalid email or password. Please try again.");
+        } else if (error.message === "Email not confirmed") {
+          setMessage("Please confirm your email before logging in.");
+        } else {
+          setMessage("An unexpected error occurred. Please try again later.");
+        }
       } else {
-        setMessage("An unexpected error occurred. Please try again later.");
+        closeModal();
+        router.push("/machine");
       }
-    } else {
-      closeModal();
-      router.push("/machine");
+    } catch (error) {
+      setMessage(error.message || "Failed to log in. Please try again.");
     }
   };
 
   const handleForgotPassword = async () => {
+    const redirectBase = getAuthRedirectBase();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+      redirectTo: `${redirectBase}/reset-password`,
     });
 
     if (error) {

@@ -35,6 +35,23 @@ function detectDevicePpi() {
   return { ppi: 264, recognized: false };
 }
 
+const SUPABASE_WRITE_TIMEOUT_MS = 20000;
+const ANALYSIS_TIMEOUT_MS = 70000;
+
+const withTimeout = (promise, timeoutMs, label) => {
+  let timeoutId;
+
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${label} timed out. Please check your connection and try again.`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
 export default function MachinePage() {
   const canvasRef = useRef();
   const drawingIdMap = useRef({}); // localId -> drawingId, updated synchronously (avoids React state timing issues)
@@ -66,35 +83,6 @@ export default function MachinePage() {
     localStorage.removeItem("anonymous_session_id");
     localStorage.removeItem("anonymous_session_timestamp");
     console.log("[device] devicePixelRatio:", window.devicePixelRatio);
-  }, []);
-
-  useEffect(() => {
-    const meta = document.querySelector("meta[name='viewport']");
-    const original = meta?.getAttribute("content");
-    meta?.setAttribute("content", "width=device-width, initial-scale=1");
-    requestAnimationFrame(() => {
-      meta?.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
-    });
-
-    const originalTouchAction = document.body.style.touchAction;
-    document.body.style.touchAction = "pan-x pan-y";
-
-    const preventZoom = (e) => { if (e.touches.length > 1) e.preventDefault(); };
-    const preventGesture = (e) => e.preventDefault();
-
-    document.addEventListener("touchstart", preventZoom, { passive: false });
-    document.addEventListener("touchmove", preventZoom, { passive: false });
-    document.addEventListener("gesturestart", preventGesture, { passive: false });
-    document.addEventListener("gesturechange", preventGesture, { passive: false });
-
-    return () => {
-      if (original) meta?.setAttribute("content", original);
-      document.body.style.touchAction = originalTouchAction;
-      document.removeEventListener("touchstart", preventZoom);
-      document.removeEventListener("touchmove", preventZoom);
-      document.removeEventListener("gesturestart", preventGesture);
-      document.removeEventListener("gesturechange", preventGesture);
-    };
   }, []);
 
   useEffect(() => {
@@ -205,6 +193,39 @@ export default function MachinePage() {
     return sessionId;
   };
 
+  const refreshAuthBeforeWrite = async () => {
+    if (!user?.id) return;
+
+    const { data: sessionData, error: sessionError } = await withTimeout(
+      supabase.auth.getSession(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session check"
+    );
+
+    if (sessionError) throw sessionError;
+    if (!sessionData?.session) {
+      throw new Error("Your login session expired. Please sign in again before saving.");
+    }
+
+    const { error: refreshError } = await withTimeout(
+      supabase.auth.refreshSession(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session refresh"
+    );
+
+    if (refreshError) throw refreshError;
+
+    const { data, error } = await withTimeout(
+      supabase.auth.getUser(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Session validation"
+    );
+
+    if (error || !data?.user) {
+      throw error || new Error("Your login session expired. Please sign in again before saving.");
+    }
+  };
+
   const saveAndAnalyzeCurrentDrawing = async () => {
     if (!selectedHandSide) {
       alert("Please select Left (L) or Right (R) hand first.");
@@ -241,6 +262,8 @@ export default function MachinePage() {
     const sessionId = getOrCreateSessionId();
 
     try {
+      await refreshAuthBeforeWrite();
+
       console.log("[1/3] Saving drawing to Supabase...", { sessionId, points: drawingPoints.length });
       const drawingId = await saveSingleDrawingToDatabase(drawingPoints, sessionId);
       console.log("[1/3] Drawing saved:", drawingId);
@@ -265,15 +288,17 @@ export default function MachinePage() {
       console.log("[3/3] Result saved. Pipeline complete.");
     } catch (error) {
       console.error("Drawing analysis failed:", error?.message || error?.details || JSON.stringify(error) || error);
-      setIsSaving(false);
+      if (!drawingIdMap.current[localId]) {
+        setSavedDrawings((prev) => prev.filter((d) => d.localId !== localId));
+      }
+      alert(error?.message || "Unable to save this drawing. Please try again.");
     } finally {
+      setIsSaving(false);
       setIsAnalyzing(false);
     }
   };
 
   const backgroundAnalysis = async (drawingData) => {
-    
-    const TIMEOUT_MS = 70000;
     try {
       // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
       // pre-divided by 8 to compensate for dataconvert.m's hardcoded *8 factor
@@ -310,22 +335,29 @@ export default function MachinePage() {
       console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
       console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
       console.log("====================================================");
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Analysis timeout: API did not respond within 70 seconds")), TIMEOUT_MS)
-      );
+      const controller = new AbortController();
       const fetchPromise = fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ drawData: scaledData }),
+        signal: controller.signal,
       });
-      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      const response = await withTimeout(
+        fetchPromise,
+        ANALYSIS_TIMEOUT_MS,
+        "Analysis request"
+      ).catch((error) => {
+        controller.abort();
+        throw error;
+      });
       const responseText = await response.text();
       const data = JSON.parse(responseText);
       if (!response.ok) throw new Error(data.error || `Analysis failed with status ${response.status}`);
       if (!data.result || typeof data.result !== "object") throw new Error("Invalid analysis result received");
       return data.result;
     } catch (error) {
-      if (error.message.includes("timeout")) {
+      const message = error?.message?.toLowerCase() || "";
+      if (message.includes("timeout") || message.includes("timed out")) {
         return { status: "timeout", message: "N/A - Analysis timed out", error: error.message };
       }
       throw error;
@@ -353,22 +385,26 @@ export default function MachinePage() {
       } catch {}
     }
 
-    const { data: savedDrawing, error } = await supabase
-      .from("drawings")
-      .insert({
-        user_id: isAuthenticated ? user.id : null,
-        email,
-        username,
-        drawing_data: drawingData,
-        session_id: sessionId,
-        is_anonymous: !isAuthenticated,
-        hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
-        hand_side: selectedHandSide,   // 'L' | 'R'
-        created_at: new Date().toISOString(),
-        ...demographicsData,
-      })
-      .select("id")
-      .single();
+    const { data: savedDrawing, error } = await withTimeout(
+      supabase
+        .from("drawings")
+        .insert({
+          user_id: isAuthenticated ? user.id : null,
+          email,
+          username,
+          drawing_data: drawingData,
+          session_id: sessionId,
+          is_anonymous: !isAuthenticated,
+          hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
+          hand_side: selectedHandSide,   // 'L' | 'R'
+          created_at: new Date().toISOString(),
+          ...demographicsData,
+        })
+        .select("id")
+        .single(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Drawing save"
+    );
 
     if (error) throw error;
     return savedDrawing.id;
@@ -380,16 +416,20 @@ export default function MachinePage() {
     const username = isAuthenticated ? email.split("@")[0] : `anonymous_${sessionId.slice(-8)}`;
     const status = analysisResult.status === "timeout" ? "timeout" : "completed";
 
-    const { error } = await supabase.from("api_results").insert({
-      user_id: isAuthenticated ? user.id : null,
-      email,
-      username,
-      drawing_id: drawingId,
-      session_id: sessionId,
-      is_anonymous: !isAuthenticated,
-      status,
-      result_data: { ...analysisResult, completed_at: new Date().toISOString() },
-    });
+    const { error } = await withTimeout(
+      supabase.from("api_results").insert({
+        user_id: isAuthenticated ? user.id : null,
+        email,
+        username,
+        drawing_id: drawingId,
+        session_id: sessionId,
+        is_anonymous: !isAuthenticated,
+        status,
+        result_data: { ...analysisResult, completed_at: new Date().toISOString() },
+      }),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Analysis result save"
+    );
     if (error) throw error;
   };
 
@@ -428,6 +468,11 @@ export default function MachinePage() {
     setIsConfirmed(true);
   };
 
+  const handSideLabel = selectedHandSide === "L" ? "Left" : selectedHandSide === "R" ? "Right" : "";
+  const dominanceLabel = selectedHand === "dominant" ? "Dominant Hand" : selectedHand === "non-dominant" ? "Non-dominant Hand" : "";
+  const activeHandSummary = handSideLabel && dominanceLabel ? `${handSideLabel} · ${dominanceLabel}` : "";
+  const showActiveHandSummary = Boolean(activeHandSummary);
+
   const removeDrawing = async (index) => {
     const drawing = savedDrawings[index];
     if (!drawing) return;
@@ -445,7 +490,7 @@ export default function MachinePage() {
       console.error("[remove] Failed to delete drawing from database:", json);
     }
   };
-
+//hi
   const clearAllDrawings = async () => {
     const ok = window.confirm(
       "Are you sure you want to clear all your drawings? This will also reset your hand selection."
@@ -498,63 +543,11 @@ export default function MachinePage() {
       <p className={styles.cardSubtitle}>Please provide the following information to begin the assessment</p>
     </div>
 
-    {/* Dominance */}
-    <div className={styles.selectionGroup}>
-      <label className={styles.sectionLabel}>
-        <span className={styles.sectionDot} />
-        Is this your dominant hand?
-      </label>
-      <div className={styles.handOptionsGrid}>
-        <button
-          onClick={() => handleHandSelection("dominant")}
-          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
-          aria-pressed={selectedHand === "dominant"}
-        >
-          Dominant
-        </button>
-        <button
-          onClick={() => handleHandSelection("non-dominant")}
-          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
-          aria-pressed={selectedHand === "non-dominant"}
-        >
-          Non-Dominant
-        </button>
-      </div>
-    </div>
-
-    {/* Hand side */}
-    <div className={styles.selectionGroup}>
-      <label className={styles.sectionLabel}>
-        <span className={styles.sectionDot} />
-        Which hand will be tested?
-      </label>
-      <div className={styles.handOptionsGrid}>
-        <button
-          type="button"
-          className={`${styles.handOptionCard}${selectedHandSide === "L" ? " " + styles.handOptionCardActive : ""}`}
-          onClick={() => handleHandSideSelection("L")}
-          aria-pressed={selectedHandSide === "L"}
-        >
-          Left Hand
-        </button>
-        <button
-          type="button"
-          className={`${styles.handOptionCard}${selectedHandSide === "R" ? " " + styles.handOptionCardActive : ""}`}
-          onClick={() => handleHandSideSelection("R")}
-          aria-pressed={selectedHandSide === "R"}
-        >
-          Right Hand
-        </button>
-      </div>
-    </div>
-
-    <div className={styles.selectionDivider} />
-
-    {/* Demographics toggle */}
-    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
-      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
-      <span className={styles.demographicsLabel}>Include optional demographics</span>
-    </div>
+	    {/* Demographics toggle */}
+	    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
+	      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
+	      <span className={styles.demographicsLabel}>Include optional demographics</span>
+	    </div>
 
     {/* Inline demographics panel */}
     <div className={`${styles.demographicsPanel} ${showDemographics ? styles.demographicsPanelOpen : ""}`}>
@@ -562,8 +555,7 @@ export default function MachinePage() {
 
         {/* Clinical study toggle — top of panel */}
         <div
-          className={styles.demographicsField}
-          style={{ cursor: "pointer" }}
+          className={styles.demographicsToggleField}
           onClick={() => setShowStudyDemographics(prev => !prev)}
         >
           <input
@@ -572,7 +564,6 @@ export default function MachinePage() {
             checked={showStudyDemographics}
             readOnly
             onChange={() => {}}
-            style={{ marginRight: "8px" }}
           />
           <label className={styles.demographicsFieldLabel} style={{ cursor: "pointer" }}>Clinical study</label>
         </div>
@@ -605,7 +596,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>
@@ -656,7 +646,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>
@@ -665,11 +654,63 @@ export default function MachinePage() {
               </select>
             </div>
           </>
-        )}
-      </div>
-    </div>
+	        )}
+	      </div>
+	    </div>
 
-    {/* Continue button */}
+	    <div className={styles.selectionDivider} />
+
+	    {/* Dominance */}
+	    <div className={styles.selectionGroup}>
+	      <label className={styles.sectionLabel}>
+	        <span className={styles.sectionDot} />
+	        Is this your dominant hand?
+	      </label>
+	      <div className={styles.handOptionsGrid}>
+	        <button
+	          onClick={() => handleHandSelection("dominant")}
+	          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={selectedHand === "dominant"}
+	        >
+	          Dominant
+	        </button>
+	        <button
+	          onClick={() => handleHandSelection("non-dominant")}
+	          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={selectedHand === "non-dominant"}
+	        >
+	          Non-Dominant
+	        </button>
+	      </div>
+	    </div>
+
+	    {/* Hand side */}
+	    <div className={styles.selectionGroup}>
+	      <label className={styles.sectionLabel}>
+	        <span className={styles.sectionDot} />
+	        Which hand will be tested?
+	      </label>
+	      <div className={styles.handOptionsGrid}>
+	        <button
+	          type="button"
+	          className={`${styles.handOptionCard}${selectedHandSide === "L" ? " " + styles.handOptionCardActive : ""}`}
+	          onClick={() => handleHandSideSelection("L")}
+	          aria-pressed={selectedHandSide === "L"}
+	        >
+	          Left Hand
+	        </button>
+	        <button
+	          type="button"
+	          className={`${styles.handOptionCard}${selectedHandSide === "R" ? " " + styles.handOptionCardActive : ""}`}
+	          onClick={() => handleHandSideSelection("R")}
+	          aria-pressed={selectedHandSide === "R"}
+	        >
+	          Right Hand
+	        </button>
+	      </div>
+	    </div>
+
+	    {/* Continue button */}
     <button
       onClick={handleContinue}
       disabled={!selectedHand || !selectedHandSide}
@@ -714,9 +755,9 @@ export default function MachinePage() {
                       >R</button>
                     </div>
                   </div>
-                  <div className={styles.controlsGroup}>
-                    <span className={styles.controlsGroupLabel}>Dominance</span>
-                    <div className={styles.segmentedPill}>
+	                  <div className={styles.controlsGroup}>
+	                    <span className={styles.controlsGroupLabel}>Dominance</span>
+	                    <div className={styles.segmentedPill}>
                       <button
                         onClick={() => handleHandSelection("dominant")}
                         aria-pressed={selectedHand === "dominant"}
@@ -727,11 +768,14 @@ export default function MachinePage() {
                         aria-pressed={selectedHand === "non-dominant"}
                         className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
                       >Non</button>
-                    </div>
-                  </div>
-                </div>
+	                    </div>
+	                  </div>
+	                </div>
+	                {showActiveHandSummary && (
+	                  <div className={styles.activeHandSummary}>{activeHandSummary}</div>
+	                )}
 
-                <div style={{ position: "relative" }}>
+	                <div style={{ position: "relative" }}>
                   <Canvas ref={canvasRef} setDrawData={setCurrentDrawing} devicePpi={devicePpi} />
                   {!deviceRecognized && !warningAcknowledged && (
                     <div style={{
@@ -819,4 +863,3 @@ export default function MachinePage() {
     
   );
 }
-

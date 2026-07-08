@@ -291,6 +291,5 @@ const Canvas = forwardRef(({ setDrawData, devicePpi = 264 }, ref) => {
     </div>
   );
 });
-
 Canvas.displayName = "Canvas";
 export default Canvas;

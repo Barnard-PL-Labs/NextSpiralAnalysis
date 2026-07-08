@@ -13,9 +13,13 @@ const mockSupabaseClient = {
   }),
   auth: {
     signIn: async () => ({ user: null, error: null }),
+    signInWithPassword: async () => ({ data: { user: null }, error: null }),
+    signUp: async () => ({ data: { user: null }, error: null }),
     signOut: async () => ({ error: null }),
-    onAuthStateChange: () => ({ data: null, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null }),
+    getSession: async () => ({ data: { session: null }, error: null }),
     getUser: async () => ({ data: { user: null }, error: null }),
+    refreshSession: async () => ({ data: { session: null }, error: null }),
   },
 };
 
@@ -29,4 +33,3 @@ const supabase = !supabaseUrl || !supabaseAnonKey
       },
     });
 export {supabase};
-

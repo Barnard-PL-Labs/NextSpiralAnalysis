@@ -10,7 +10,7 @@ import styles from "../styles/Settings.module.css";
 
 export default function SettingsPopup({ isOpen, onClose }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,7 +84,7 @@ export default function SettingsPopup({ isOpen, onClose }) {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await logout();
     router.push("/");
   };
 
@@ -259,6 +259,7 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setMessage("");
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
+      email: user.email || "",
       username: profileUsername.trim(),
       bio: profileBio.trim(),
     });
@@ -656,4 +657,3 @@ export default function SettingsPopup({ isOpen, onClose }) {
     </div>
   );
 }
-

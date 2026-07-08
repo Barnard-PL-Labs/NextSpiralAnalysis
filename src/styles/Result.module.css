@@ -1,13 +1,13 @@
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #faf5ff 100%);
+  background: #F4F6F9;
 }
 
 .container {
   min-height: 100vh;
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
-  padding-top: 80px;
+  padding-top: 96px;
   padding-bottom: 48px;
   color: var(--color-text-primary);
 }
@@ -92,6 +92,72 @@
 .chartContainer > div {
   margin: 0 auto !important;
   max-width: 100%;
+}
+
+.processingDot {
+  display: inline-block;
+  animation: processedDotPulse 1.8s ease-in-out infinite;
+  background: var(--color-success);
+}
+
+.pendingMetric {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgba(221, 228, 236, 0.45);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.pendingMetric .processingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: none;
+  background: var(--color-text-secondary);
+  opacity: 0.65;
+}
+
+.pendingMetricAnalyzing {
+  border-color: rgba(27, 146, 127, 0.24);
+  background: rgba(27, 146, 127, 0.08);
+  color: var(--color-success);
+}
+
+.pendingMetricAnalyzing .processingDot {
+  animation: processedDotPulse 1.8s ease-in-out infinite;
+  background: var(--color-success);
+  opacity: 1;
+}
+
+@keyframes processedDotPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processingDot,
+  .pendingMetricAnalyzing .processingDot {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (max-width: 900px) {

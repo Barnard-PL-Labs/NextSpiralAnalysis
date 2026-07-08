@@ -91,8 +91,7 @@
   margin-top: 5px;
   overflow-x: auto;
   overflow-y: hidden; /* Prevent vertical scrolling */
-  width: 100px;
-  max-width: 100%;
+  width: 100%;
   min-height: 280px; /* Ensure container is tall enough for larger cards */
 }
 
