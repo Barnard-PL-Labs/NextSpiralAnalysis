@@ -95,7 +95,7 @@ function dataAnaly(x, y, p, t) {
 function findOrigin(x, y) {
   const d = x.length;
   const x3 = x.map(v => (v - x[0]) * PHYS_SCALE);
-  const y3 = y.map((v, i) => (v - y[0]) * PHYS_SCALE);
+  const y3 = y.map(v => (v - y[0]) * PHYS_SCALE);
 
   let c = x3.map((v, i) => Math.atan2(y3[i], v));
 
@@ -139,8 +139,23 @@ function findOrigin(x, y) {
 
 function cutAuto(x, y, x1tmp, y1tmp) {
   const d = y1tmp.length;
+
+  // Find where the first full revolution completes so tight inner loops are excluded.
+  const rawAng = x1tmp.map((v, i) => Math.atan2(y1tmp[i], v));
+  const ang = unwrap(rawAng);
+  const startAng = ang[0];
+  // Skip enough inner loops to avoid tight-center artifact, but always keep ≥2 for measurement.
+  const totalLoops = Math.abs(ang[d - 1] - startAng) / TWO_PI;
+  const loopsToSkip = Math.max(0, Math.min(2, Math.floor(totalLoops) - 2));
+  let oneLoopEnd = Math.min(20, d - 2);
+  if (loopsToSkip > 0) {
+    for (let j = 1; j < d; j++) {
+      if (Math.abs(ang[j] - startAng) >= loopsToSkip * TWO_PI) { oneLoopEnd = j; break; }
+    }
+  }
+
   let pickBegin = 0;
-  for (let j = 20; j < d - 1; j++) {
+  for (let j = oneLoopEnd; j < d - 1; j++) {
     if ((y1tmp[j] > 0 && y1tmp[j + 1] <= 0) || (y1tmp[j] < 0 && y1tmp[j + 1] >= 0)) {
       pickBegin = j; break;
     }
@@ -170,7 +185,7 @@ function compWidths(angles, radius) {
   const spiralDir = Math.sign(endAng - startAng);
   const anglesAdj = angles.map(a => (a - startAng) * spiralDir);
 
-  const angs = [], rads = [];
+  const loopAngs = [], loopRads = [];
   let prevEnd = 0;
 
   for (let n = 1; n <= numCycles; n++) {
@@ -182,37 +197,35 @@ function compWidths(angles, radius) {
     }
     if (lastValid === -1) break;
 
-    const lastPos = sub.length - lastValid;
-    const endIdx = prevEnd + sub.length - (lastPos - 1);
+    const endIdx = prevEnd + lastValid + 1;
     const rIdx = Array.from({ length: endIdx - prevEnd }, (_, i) => prevEnd + i);
 
-    angs.push(rIdx.map(i => anglesAdj[i] - 2 * (n - 1) * Math.PI));
-    rads.push(rIdx.map(i => radius[i]));
+    loopAngs.push(rIdx.map(j => anglesAdj[j] - 2 * (n - 1) * Math.PI));
+    loopRads.push(rIdx.map(j => radius[j]));
     prevEnd = endIdx;
   }
 
-  if (angs.length < 2) return { ...empty, spiralDir };
+  if (loopAngs.length < 2) return { ...empty, spiralDir };
 
-  // Unique values from first loop (maintaining order — data is monotone)
-  const seenFirst = new Set();
-  const ang0 = [], rad0 = [];
-  for (let i = 0; i < angs[0].length; i++) {
-    const a = angs[0][i];
-    if (!seenFirst.has(a)) { seenFirst.add(a); ang0.push(a); rad0.push(rads[0][i]); }
-  }
+  // Fixed 5-degree grid matching MATLAB's sampling interval
+  const STEP_DEG = 5;
+  const ang0 = Array.from({ length: Math.floor(360 / STEP_DEG) }, (_, i) => i * STEP_DEG * Math.PI / 180);
+
+  // Interpolate every loop onto the fixed 5-degree grid
+  const interpedRads = loopAngs.map((la, i) => {
+    const seen = new Set();
+    const ua = [], ur = [];
+    for (let j = 0; j < la.length; j++) {
+      const k = Math.round(la[j] * 1e9);
+      if (!seen.has(k)) { seen.add(k); ua.push(la[j]); ur.push(loopRads[i][j]); }
+    }
+    return interpArr(ang0, ua, ur);
+  });
 
   const allWidths = [];
   const widthRows = [];
-
-  for (let i = 1; i < angs.length; i++) {
-    const seenN = new Set();
-    const angN = [], radN = [];
-    for (let j = 0; j < angs[i].length; j++) {
-      const a = angs[i][j];
-      if (!seenN.has(a)) { seenN.add(a); angN.push(a); radN.push(rads[i][j]); }
-    }
-    const inter = interpArr(ang0, angN, radN);
-    const w = ang0.map((_, j) => inter[j] - rad0[j]);
+  for (let i = 1; i < interpedRads.length; i++) {
+    const w = ang0.map((_, j) => interpedRads[i][j] - interpedRads[i - 1][j]);
     widthRows.push(w);
     allWidths.push(...w);
   }
@@ -246,26 +259,25 @@ export function computeWidthMetrics(drawData) {
 
     const x1tmp = seg.x.map(v => (v - xo) * PHYS_SCALE);
     const y1tmp = seg.y.map(v => (v - yo) * PHYS_SCALE);
-    const cut = cutAuto(seg.x, seg.y, x1tmp, y1tmp);
 
-    const x1 = cut.x.map(v => (v - xo) * PHYS_SCALE);
-    const y1 = cut.y.map(v => (v - yo) * PHYS_SCALE);
-    const r = x1.map((v, i) => Math.hypot(v, y1[i]));
-    const c = unwrap(x1.map((v, i) => Math.atan2(y1[i], v)));
+    // Try with adaptive inner-loop trimming first; fall back to no trimming if
+    // too few cycles remain (common for very irregular or short spirals).
+    let cut = cutAuto(seg.x, seg.y, x1tmp, y1tmp);
+    let x1 = cut.x.map(v => (v - xo) * PHYS_SCALE);
+    let y1 = cut.y.map(v => (v - yo) * PHYS_SCALE);
+    let r  = x1.map((v, i) => Math.hypot(v, y1[i]));
+    let c  = unwrap(x1.map((v, i) => Math.atan2(y1[i], v)));
+    let wd = compWidths(c, r);
 
-    const wd = compWidths(c, r);
-
-    if (wd.numCycles < 2 || wd.ang0.length === 0) {
-      return {
-        "overall average of widths": 0,
-        "std of widths.": 0,
-        "COV of width": 0,
-        "1st quad average median": 0,
-        "2nd quad average median": 0,
-        "3rd quad average median": 0,
-        "4th quad average median": 0,
-      };
+    if (wd.numCycles < 2) {
+      x1 = seg.x.map(v => (v - xo) * PHYS_SCALE);
+      y1 = seg.y.map(v => (v - yo) * PHYS_SCALE);
+      r  = x1.map((v, i) => Math.hypot(v, y1[i]));
+      c  = unwrap(x1.map((v, i) => Math.atan2(y1[i], v)));
+      wd = compWidths(c, r);
     }
+
+    if (wd.numCycles < 2 || wd.ang0.length === 0) return null;
 
     const { ave, stdDev, ang0, medP, spiralDir, startAng } = wd;
     const ang = ang0.map(a => ((a * spiralDir + startAng) % TWO_PI + TWO_PI) % TWO_PI);

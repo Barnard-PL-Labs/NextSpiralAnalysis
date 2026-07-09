@@ -557,7 +557,7 @@ export default function UnifiedResultPage() {
                 Average DOS Score: <strong style={{ color: C.accent, fontWeight: 600 }}>{getDOSScore()}</strong>
               </p>
             )}
-            {getProgressDisplay() && <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 18px" }}>{getProgressDisplay()}</p>}
+            {getProgressDisplay() && <div style={{ fontSize: 13.5, color: C.muted, margin: "0 0 18px" }}>{getProgressDisplay()}</div>}
             {error && <p style={{ fontSize: 13.5, color: "#dc2626", margin: "0 0 18px" }}>{error}</p>}
             <div style={{ position: "relative", display: "inline-grid", gridTemplateColumns: "92px 92px", background: C.paper, border: `1px solid ${C.line}`, borderRadius: 10, padding: 2, overflow: "hidden" }}>
               <span
