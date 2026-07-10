@@ -72,13 +72,13 @@ export default function Home() {
             <div style={{ maxWidth: "660px" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "9px", fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent-ink)", background: "var(--accent-soft)", padding: "7px 13px", borderRadius: "100px", marginBottom: "26px" }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--teal)", flexShrink: 0 }} />
-                NEUROMOTOR ASSESSMENT
+                SPIRAL ANALYSIS
               </div>
 
               <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "62px", lineHeight: 1.02, letterSpacing: "-0.03em", margin: "0 0 22px", color: "var(--ink)" }}>
                 {researcherMode
                   ? "Spiral Analysis Tool"
-                  : "Quantify motor control from a single spiral."}
+                  : "Quantify motor control from digital spirals."}
               </h1>
 
               <p style={{ fontSize: "19px", lineHeight: 1.6, color: "var(--ink-soft)", margin: "0 0 34px", maxWidth: "560px" }}>
