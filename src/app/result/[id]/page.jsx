@@ -593,7 +593,7 @@ export default function UnifiedResultPage() {
                 const curTyped = typedResultsByIndex[selectedDrawingIndex];
                 const pickCOV = (r) => {
                   if (!r) return null;
-                  for (const k of ["COV Width", "COV of Width", "Coeff Var Width", "cov_width"]) {
+                  for (const k of ["COV of width", "COV Width", "COV of Width", "Coeff Var Width", "cov_width"]) {
                     if (r[k] !== null && r[k] !== undefined) return r[k];
                   }
                   return null;
