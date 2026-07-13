@@ -53,6 +53,43 @@ const withTimeout = (promise, timeoutMs, label) => {
   });
 };
 
+const cleanPointsForMatlabTimestamps = (points) => {
+  const merged = [];
+
+  for (const point of points) {
+    const t = Math.max(0, Math.round(Number(point.t) || 0));
+    const x = Number(point.x);
+    const y = Number(point.y);
+    const p = Math.round(Number(point.p) || 0);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+
+    const previous = merged[merged.length - 1];
+
+    if (previous && t === previous.t) {
+      const count = previous.__mergeCount + 1;
+      previous.x = previous.x + (x - previous.x) / count;
+      previous.y = previous.y + (y - previous.y) / count;
+      previous.p = Math.round(previous.p + (p - previous.p) / count);
+      previous.__mergeCount = count;
+      continue;
+    }
+
+    if (previous && t < previous.t) continue;
+
+    merged.push({ ...point, x, y, p, t, __mergeCount: 1 });
+  }
+
+  const firstT = merged[0]?.t ?? 0;
+  return merged.map(({ __mergeCount, ...point }, index) => ({
+    ...point,
+    n: index + 1,
+    t: point.t - firstT,
+    x: +point.x.toFixed(4),
+    y: +point.y.toFixed(4),
+  }));
+};
+
 export default function MachinePage() {
   const canvasRef = useRef();
   const drawingIdMap = useRef({}); // localId -> drawingId, updated synchronously (avoids React state timing issues)
@@ -311,8 +348,11 @@ export default function MachinePage() {
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = devicePpi / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi / 8;
-      const firstY = drawingData[0].y;
-      const scaledData = drawingData.map((pt) => ({
+      const cleanedData = cleanPointsForMatlabTimestamps(drawingData);
+      if (cleanedData.length < 3) throw new Error("Drawing does not have enough valid timed points for analysis");
+      console.log("[cleanup] raw points:", drawingData.length, "submitted points:", cleanedData.length, "removed/merged:", drawingData.length - cleanedData.length);
+      const firstY = cleanedData[0].y;
+      const scaledData = cleanedData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
         y: +((pt.y - firstY) * scale + 150).toFixed(4),
