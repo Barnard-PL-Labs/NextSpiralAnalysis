@@ -75,18 +75,21 @@ export const AuthProvider = ({ children }) => {
         AUTH_OPERATION_TIMEOUT_MS,
         "Session validation"
       );
-      if (error || !data?.user) {
-        clearLocalSession();
+
+      // Only sign out on real auth errors (invalid/expired token), not network failures
+      if (error) {
+        if (isStaleRefreshTokenError(error) || error.status === 401) {
+          clearLocalSession();
+        }
         return;
       }
 
-      setUser(data.user);
-      fetchUsername(data.user);
-    } catch (error) {
-      if (!isStaleRefreshTokenError(error)) {
-        console.warn("Session validation failed; clearing local session.");
+      if (data?.user) {
+        setUser(data.user);
+        fetchUsername(data.user);
       }
-      clearLocalSession();
+    } catch {
+      // Network timeout or transient error — don't sign the user out
     }
   }, [clearLocalSession]);
 
@@ -122,17 +125,8 @@ export const AuthProvider = ({ children }) => {
 
     validateSession();
 
-    const handleWake = () => {
-      if (!document.hidden) validateSession();
-    };
-
-    document.addEventListener("visibilitychange", handleWake);
-    window.addEventListener("focus", validateSession);
-
     return () => {
       authListener?.subscription?.unsubscribe();
-      document.removeEventListener("visibilitychange", handleWake);
-      window.removeEventListener("focus", validateSession);
     };
   }, [validateSession]);
 

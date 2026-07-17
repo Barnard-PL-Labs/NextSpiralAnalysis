@@ -71,7 +71,7 @@ export default function LoginModal({ isOpen, closeModal, initialMessage = "" }) 
           email,
           password,
           options: redirectBase
-            ? { emailRedirectTo: `${redirectBase}/machine?confirmed=true` }
+            ? { emailRedirectTo: `${redirectBase}/?confirmed=true` }
             : undefined,
         }),
         AUTH_OPERATION_TIMEOUT_MS,
@@ -126,7 +126,7 @@ export default function LoginModal({ isOpen, closeModal, initialMessage = "" }) 
         }
       } else {
         closeModal();
-        router.push("/machine");
+        router.push("/");
       }
     } catch (error) {
       setMessage(error.message || "Failed to log in. Please try again.");

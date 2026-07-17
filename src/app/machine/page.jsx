@@ -617,7 +617,7 @@ export default function MachinePage() {
 
     {/* Page header */}
     <div className={styles.cardHeader}>
-      <h1 className={styles.cardTitle}>Spiral Drawing Assessment</h1>
+      <h1 className={styles.cardTitle}>Spiral Analysis 2.0</h1>
       <p className={styles.cardSubtitle}>Please provide the following information to begin the assessment</p>
     </div>
 
@@ -824,13 +824,13 @@ export default function MachinePage() {
                         onClick={() => handleHandSideSelection("L")}
                         aria-pressed={selectedHandSide === "L"}
                         className={styles.handLRBadge + (selectedHandSide === "L" ? " " + styles.handLRBadgeSelected : "")}
-                      >L</button>
+                      >Left</button>
                       <button
                         type="button"
                         onClick={() => handleHandSideSelection("R")}
                         aria-pressed={selectedHandSide === "R"}
                         className={styles.handLRBadge + (selectedHandSide === "R" ? " " + styles.handLRBadgeSelected : "")}
-                      >R</button>
+                      >Right</button>
                     </div>
                   </div>
 	                  <div className={styles.controlsGroup}>

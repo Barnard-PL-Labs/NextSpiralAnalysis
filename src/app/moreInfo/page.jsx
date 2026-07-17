@@ -109,7 +109,7 @@ export default function LearnMorePage() {
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLink}>Home</Link>
           <a href="#metrics" className={styles.navLink}>Metrics</a>
-          <Link href="/machine" className={styles.navCta}>Start an assessment</Link>
+          <Link href="/" className={styles.navCta}>Start an assessment</Link>
         </div>
       </nav>
 
@@ -298,7 +298,7 @@ export default function LearnMorePage() {
       <div className={styles.ctaSection}>
         <h2 className={styles.ctaH2}>Ready to capture your first spiral?</h2>
         <div className={styles.ctaButtons}>
-          <Link href="/machine" className={styles.ctaPrimary}>Start an assessment</Link>
+          <Link href="/" className={styles.ctaPrimary}>Start an assessment</Link>
           <Link href="/" className={styles.ctaSecondary}>Back to home</Link>
         </div>
       </div>

@@ -51,8 +51,7 @@ export default function Header() {
   };
 //hi
   const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Spiral Analysis", href: "/machine" },
+    { label: "Home", href: "/home" },
     ...(!researcherMode ? [{ label: "Learn More", href: "/instruction" }] : []),
     { label: "About Us", href: "/info" }
   ];
@@ -76,7 +75,7 @@ export default function Header() {
           {/* Center: nav links */}
           {isClient && !isMobile && (
             <nav style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              {navLinks.filter(item => item.label !== "Home").map((item) => {
+              {navLinks.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>

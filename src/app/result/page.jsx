@@ -13,7 +13,7 @@ export default function ResultEntryPlaceholder() {
       setCountdown((c) => {
         if (c <= 1) {
           clearInterval(interval);
-          router.push("/machine");
+          router.push("/");
         }
         return c - 1;
       });

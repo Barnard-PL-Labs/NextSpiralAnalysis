@@ -378,7 +378,7 @@ export default function UnifiedResultPage() {
   };
 
   useEffect(() => {
-    if (!sessionId) { router.push("/machine"); return; }
+    if (!sessionId) { router.push("/"); return; }
     const load = async () => {
       try {
         setLoadingResult(true);

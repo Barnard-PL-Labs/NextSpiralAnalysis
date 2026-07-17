@@ -14,7 +14,7 @@ const BottomNav = ({ onSettingsClick }) => {
           </div>
         </Link>
 
-        <Link href="/machine">
+        <Link href="/">
           <div className={styles.centerItem}>
             <div className={styles.centerIconWrapper}>
               <FaPhoenixSquadron className={styles.centerIcon} />
