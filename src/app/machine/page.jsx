@@ -804,8 +804,8 @@ export default function MachinePage() {
           {/* Title + Canvas + Controls */}
           {showCanvas && (
             <>
-              <h1 className={styles.title} style={{ marginBottom: 6, fontSize: "1.875rem" }}>Draw Your Spiral</h1>
-              <p style={{ color: "var(--color-text-secondary)", fontSize: "1rem", marginBottom: 28, marginTop: 0 }}>
+              <h1 className={styles.title} style={{ marginBottom: 6, fontSize: "1.85rem" }}>Draw Your Spiral</h1>
+              <p style={{ color: "#545e6f", fontSize: "1.15rem", fontWeight: 600, marginBottom: 28, marginTop: 0 }}>
                 Select your preferences and draw a spiral from the center outward
               </p>
 
