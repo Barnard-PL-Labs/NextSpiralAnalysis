@@ -92,7 +92,7 @@ const pickTightness = (r) => {
 };
 const pickSecondOSM = (r) => {
   if (!r) return null;
-  if (r["TIghtness"] !== null && r["2nd order sm"] !== undefined) return r["2nd order sm"];
+  if (r["2nd order sm"] !== null && r["2nd order sm"] !== undefined) return r["2nd order sm"] - 3;
   return null;
 };
 
