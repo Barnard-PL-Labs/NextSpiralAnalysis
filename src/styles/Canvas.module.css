@@ -536,7 +536,7 @@
   border-color: var(--color-accent);
   background: var(--color-surface-2);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
 }
 
 .handOptionCard:active {
@@ -556,7 +556,7 @@
   border-color: var(--color-accent);
   background: rgba(37, 99, 235, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
 }
 
 /* Pre-Test sub-header */

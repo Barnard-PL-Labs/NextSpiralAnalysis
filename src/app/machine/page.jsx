@@ -618,7 +618,7 @@ export default function MachinePage() {
     {/* Page header */}
     <div className={styles.cardHeader}>
       <h1 className={styles.cardTitle}>Spiral Analysis 2.0</h1>
-      <p className={styles.cardSubtitle}>Please provide the following information to begin the assessment</p>
+      <p className={styles.cardSubtitle}>Please provide the following information to begin the drawing</p>
     </div>
 
 	    {/* Demographics toggle */}
@@ -659,7 +659,7 @@ export default function MachinePage() {
               />
             </div>
             <div className={styles.demographicsField}>
-              <label className={styles.demographicsFieldLabel}>Patient ID:</label>
+              <label className={styles.demographicsFieldLabel}>Subject ID:</label>
               <input
                 type="text"
                 value={demographics.name}

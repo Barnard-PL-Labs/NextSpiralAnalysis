@@ -35,7 +35,7 @@ const palette = {
 };
 
 const steps = [
-  { n: "01", title: "Draw the spiral", body: "The patient traces an Archimedean spiral on a tablet — no wires, no specialist hardware. Takes under two minutes." },
+  { n: "01", title: "Draw the spiral", body: "An Archimedean spiral on a tablet — no wires, no specialist hardware. Takes under two minutes." },
   { n: "02", title: "We analyze the trace", body: "Every point (x, y, pressure, time) is decomposed into smoothness, speed, pressure, and consistency indices." },
   { n: "03", title: "Track over time", body: "Saved as an objective baseline so subtle change is visible session over session." },
 ];
@@ -95,7 +95,7 @@ export default function Home() {
                   onMouseDown={e => { e.currentTarget.style.transform = "translateY(0) scale(0.97)"; e.currentTarget.style.boxShadow = "0 6px 16px -8px rgba(30,64,175,0.4)"; }}
                   onMouseUp={e => { e.currentTarget.style.transform = "translateY(-2px) scale(1)"; e.currentTarget.style.boxShadow = "0 16px 36px -10px rgba(30,64,175,0.7)"; }}
                 >
-                  Start an assessment
+                  Start a drawing
                 </Link>
                 <Link href="#how"
                   style={{ textDecoration: "none", color: "var(--ink)", background: "transparent", border: "1px solid var(--line)", fontSize: "15.5px", fontWeight: 600, padding: "15px 24px", borderRadius: "11px", transition: "border-color 0.15s ease, color 0.15s ease", display: "inline-block" }}

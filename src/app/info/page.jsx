@@ -79,8 +79,7 @@ export default function TeamPage() {
 
         <div className={styles.content}>
           <section className={styles.section}>
-            <p className={styles.eyebrow}>Faculty</p>
-            <h2>Principal investigators.</h2>
+            <p className={styles.eyebrow}>Principal Investigators</p>
             <div className={styles.piGrid}>
               {principalInvestigators.map((person) => (
                 <Link
@@ -103,7 +102,6 @@ export default function TeamPage() {
 
           <section className={styles.section}>
             <p className={styles.eyebrow}>Alumni</p>
-            <h2>Researchers who built the method.</h2>
             <div className={styles.alumniGrid}>
               {alumni.map((person) => (
                 <div key={person} className={styles.alumniCard}>
@@ -115,7 +113,6 @@ export default function TeamPage() {
 
           <section className={styles.section}>
             <p className={styles.eyebrow}>Publications</p>
-            <h2>Selected articles.</h2>
             <div className={styles.publicationGrid}>
               {publications.map((article) => (
                 <Link
@@ -138,13 +135,6 @@ export default function TeamPage() {
           </section>
         </div>
 
-        <footer className={styles.footer}>
-          <div>
-            <span className={styles.footerLogo} aria-hidden="true">S</span>
-            <span>Spiral Analysis</span>
-          </div>
-          <p>&copy; 2026 - Non-invasive neuromotor assessment</p>
-        </footer>
       </main>
     </>
   );

@@ -49,7 +49,7 @@
 
 .hero h1 {
   max-width: 560px;
-  font-size: clamp(2.4rem, 5vw, 4.15rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
   font-weight: 800;
 }
 
