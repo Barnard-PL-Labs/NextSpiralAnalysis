@@ -15,6 +15,7 @@ export default function Header() {
   const pathname = usePathname();
   const { researcherMode } = useResearcherMode();
   const [isLoginOpen, setLoginOpen] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -30,6 +31,19 @@ export default function Header() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || user) return;
+
+    const currentUrl = new URL(window.location.href);
+    if (currentUrl.searchParams.get("confirmed") !== "true") return;
+
+    setLoginMessage("Email confirmed. Log in to continue.");
+    setLoginOpen(true);
+
+    currentUrl.searchParams.delete("confirmed");
+    router.replace(`${currentUrl.pathname}${currentUrl.search}`, { scroll: false });
+  }, [router, user]);
 
   const handleLogout = async () => {
     await logout();
@@ -107,7 +121,7 @@ export default function Header() {
                 </>
               ) : (
                 <button
-                  onClick={() => setLoginOpen(true)}
+                  onClick={() => { setLoginMessage(""); setLoginOpen(true); }}
                   style={{ background: "#1E40AF", border: "none", borderRadius: "7px", padding: "5px 16px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "13px", fontWeight: 600, color: "white", transition: "background 0.15s ease, opacity 0.15s ease" }}
                   onMouseEnter={e => { e.currentTarget.style.background = "#1634A0"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = "#1E40AF"; }}
@@ -145,7 +159,7 @@ export default function Header() {
                 </button>
               </>
             ) : (
-              <button onClick={() => { setLoginOpen(true); setDropdownOpen(false); }} className="w-full text-left">
+              <button onClick={() => { setLoginMessage(""); setLoginOpen(true); setDropdownOpen(false); }} className="w-full text-left">
                 <div className="mobile-nav-item">Login</div>
               </button>
             )}
@@ -153,7 +167,7 @@ export default function Header() {
         </div>
       )}
 
-      <LoginModal isOpen={isLoginOpen} closeModal={() => setLoginOpen(false)} />
+      <LoginModal isOpen={isLoginOpen} closeModal={() => setLoginOpen(false)} initialMessage={loginMessage} />
     </div>
   );
 }

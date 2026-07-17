@@ -37,6 +37,7 @@ function detectDevicePpi() {
 
 const SUPABASE_WRITE_TIMEOUT_MS = 20000;
 const ANALYSIS_TIMEOUT_MS = 70000;
+const ANALYSIS_MAX_ATTEMPTS = 3; // Initial request plus two retries
 
 const withTimeout = (promise, timeoutMs, label) => {
   let timeoutId;
@@ -335,26 +336,63 @@ export default function MachinePage() {
       console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
       console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
       console.log("====================================================");
-      const controller = new AbortController();
-      const fetchPromise = fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ drawData: scaledData }),
-        signal: controller.signal,
-      });
-      const response = await withTimeout(
-        fetchPromise,
-        ANALYSIS_TIMEOUT_MS,
-        "Analysis request"
-      ).catch((error) => {
-        controller.abort();
-        throw error;
-      });
-      const responseText = await response.text();
-      const data = JSON.parse(responseText);
-      if (!response.ok) throw new Error(data.error || `Analysis failed with status ${response.status}`);
-      if (!data.result || typeof data.result !== "object") throw new Error("Invalid analysis result received");
-      return data.result;
+      let lastError;
+      for (let attempt = 1; attempt <= ANALYSIS_MAX_ATTEMPTS; attempt += 1) {
+        const controller = new AbortController();
+        try {
+          console.log(`[analysis] attempt ${attempt}/${ANALYSIS_MAX_ATTEMPTS}`);
+          const response = await withTimeout(
+            fetch("/api/analyze", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ drawData: scaledData }),
+              signal: controller.signal,
+            }),
+            ANALYSIS_TIMEOUT_MS,
+            "Analysis request"
+          ).catch((error) => {
+            controller.abort();
+            throw error;
+          });
+
+          const responseText = await response.text();
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch {
+            const parseError = new Error("Invalid response received from analysis server");
+            parseError.retryable = response.status >= 500;
+            throw parseError;
+          }
+
+          if (!response.ok) {
+            const responseError = new Error(data.error || `Analysis failed with status ${response.status}`);
+            responseError.retryable = response.status >= 500;
+            throw responseError;
+          }
+          if (!data.result || typeof data.result !== "object") {
+            throw new Error("Invalid analysis result received");
+          }
+          return data.result;
+        } catch (error) {
+          lastError = error;
+          const message = error?.message?.toLowerCase() || "";
+          const retryable =
+            error?.retryable === true ||
+            error?.name === "TypeError" ||
+            error?.name === "AbortError" ||
+            message.includes("timeout") ||
+            message.includes("timed out") ||
+            message.includes("network");
+
+          if (!retryable || attempt === ANALYSIS_MAX_ATTEMPTS) throw error;
+          console.warn(`[analysis] attempt ${attempt} failed; retrying`, error);
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        } finally {
+          controller.abort();
+        }
+      }
+      throw lastError;
     } catch (error) {
       const message = error?.message?.toLowerCase() || "";
       if (message.includes("timeout") || message.includes("timed out")) {
@@ -469,7 +507,7 @@ export default function MachinePage() {
   };
 
   const handSideLabel = selectedHandSide === "L" ? "Left" : selectedHandSide === "R" ? "Right" : "";
-  const dominanceLabel = selectedHand === "dominant" ? "dominant" : selectedHand === "non-dominant" ? "non-dominant" : "";
+  const dominanceLabel = selectedHand === "dominant" ? "Dominant Hand" : selectedHand === "non-dominant" ? "Non-dominant Hand" : "";
   const activeHandSummary = handSideLabel && dominanceLabel ? `${handSideLabel} · ${dominanceLabel}` : "";
   const showActiveHandSummary = Boolean(activeHandSummary);
 
@@ -555,8 +593,7 @@ export default function MachinePage() {
 
         {/* Clinical study toggle — top of panel */}
         <div
-          className={styles.demographicsField}
-          style={{ cursor: "pointer" }}
+          className={styles.demographicsToggleField}
           onClick={() => setShowStudyDemographics(prev => !prev)}
         >
           <input
@@ -565,7 +602,6 @@ export default function MachinePage() {
             checked={showStudyDemographics}
             readOnly
             onChange={() => {}}
-            style={{ marginRight: "8px" }}
           />
           <label className={styles.demographicsFieldLabel} style={{ cursor: "pointer" }}>Clinical study</label>
         </div>
@@ -598,7 +634,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>
@@ -649,7 +684,6 @@ export default function MachinePage() {
                 value={demographics.sex}
                 onChange={(e) => setDemographics({ ...demographics, sex: e.target.value })}
                 className={styles.demographicsInput}
-                style={{ paddingRight: "6px" }}
               >
                 <option value="">Select</option>
                 <option value="M">Male</option>

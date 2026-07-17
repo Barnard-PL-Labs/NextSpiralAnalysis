@@ -71,20 +71,11 @@ const processTremorData = (result) => {
         powers.push(powerValue);
         polarities.push(polValue);
         frequencies.push(freqValue);
-        
-        console.log(`Added axis ${i}:`, { dirValue, powerValue, polValue, freqValue });
-      } else {
-        console.log(`Skipping axis ${i} - no valid data`);
       }
     }
   }
 
   // Extract amplitude data
-  console.log("[Tremor] raw amplitude fields:", {
-    "max amp. (cm)": result["max amp. (cm)"],
-    "mean amp. (cm)": result["mean amp. (cm)"],
-    "std of amp.": result["std of amp."],
-  });
   const maxAmplitude = parseFloat(result["max amp. (cm)"]) || 0;
   const meanAmplitude = parseFloat(result["mean amp. (cm)"]) || 0;
   const stdAmplitude = parseFloat(result["std of amp."]) || 0;
@@ -189,11 +180,6 @@ const TremorPolarPlot = ({ result }) => {
           // Apply offset to prevent visual overlap
           const offset = overlappingAxes.length * 8; // 8 degree offset per overlap
           const adjustedAxis = axis + offset;
-          
-          console.log(`Adjusted axis direction: ${adjustedAxis}°`);
-          console.log(`Offset applied: ${offset}°`);
-          console.log(`Final power value: ${powers[index]}`);
-          console.log(`Axis color: ${axisColors[index % axisColors.length]}`);
           
           // Create multiple points along the line for proper rendering
           const numPoints = 10;

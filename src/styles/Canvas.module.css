@@ -477,7 +477,7 @@
 }
 
 .cardSubtitle {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--color-text-secondary);
   margin: 0;
 }
@@ -586,6 +586,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
+  margin-bottom: 16px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-2);
   cursor: pointer;
@@ -596,6 +597,7 @@
 .demographicsRowOpen {
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   border: none;
+  margin-bottom: 0;
 }
 
 .demographicsRow:hover {
@@ -625,6 +627,7 @@
   background: var(--color-surface-2);
   border: none;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  margin-bottom: 16px;
 }
 
 .demographicsPanelOpen {
@@ -637,6 +640,18 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px 20px 20px;
+}
+
+.demographicsToggleField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  cursor: pointer;
+}
+
+.demographicsToggleField .demographicsFieldLabel {
+  text-align: left;
 }
 
 .demographicsField {
@@ -659,11 +674,13 @@
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 14px;
+  line-height: 1.25;
   font-family: var(--font-sans);
   color: var(--color-text-primary);
   background: var(--color-surface);
   transition: border-color 0.2s ease;
   width: 100%;
+  min-height: 42px;
   min-width: 0;
   box-sizing: border-box;
 }

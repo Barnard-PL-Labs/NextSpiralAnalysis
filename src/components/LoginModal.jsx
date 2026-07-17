@@ -30,7 +30,14 @@ const clearStoredSupabaseAuth = () => {
     .forEach((key) => window.localStorage.removeItem(key));
 };
 
-export default function LoginModal({ isOpen, closeModal }) {
+const getAuthRedirectBase = () => {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
+  if (typeof window !== "undefined") return window.location.origin;
+  return "";
+};
+
+export default function LoginModal({ isOpen, closeModal, initialMessage = "" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,6 +46,14 @@ export default function LoginModal({ isOpen, closeModal }) {
   const [isForgot, setIsForgot] = useState(false);
   const [signupMode, setSignupMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isOpen || !initialMessage) return;
+    setSignupMode(false);
+    setIsForgot(false);
+    setMessage(initialMessage);
+  }, [initialMessage, isOpen]);
+
   const handleCreateAccount = async () => {
     if (password != confirmPassword) {
       setMessage("Passwords don't match!");
@@ -50,8 +65,15 @@ export default function LoginModal({ isOpen, closeModal }) {
       } catch {}
       clearStoredSupabaseAuth();
 
+      const redirectBase = getAuthRedirectBase();
       const { data, error } = await withTimeout(
-        supabase.auth.signUp({ email, password }),
+        supabase.auth.signUp({
+          email,
+          password,
+          options: redirectBase
+            ? { emailRedirectTo: `${redirectBase}/machine?confirmed=true` }
+            : undefined,
+        }),
         AUTH_OPERATION_TIMEOUT_MS,
         "Sign up"
       );
@@ -61,6 +83,7 @@ export default function LoginModal({ isOpen, closeModal }) {
         if (data.user) {
           await supabase.from("profiles").upsert({
             id: data.user.id,
+            email: data.user.email || email,
             username: fullName.trim() || email.split("@")[0],
             created_at: new Date().toISOString(),
           });
@@ -111,8 +134,9 @@ export default function LoginModal({ isOpen, closeModal }) {
   };
 
   const handleForgotPassword = async () => {
+    const redirectBase = getAuthRedirectBase();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+      redirectTo: `${redirectBase}/reset-password`,
     });
 
     if (error) {

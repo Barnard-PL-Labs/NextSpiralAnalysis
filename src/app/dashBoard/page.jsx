@@ -52,6 +52,19 @@ const MiniSpiralThumb = ({ drawing }) => {
   );
 };
 
+const isFallbackPressureDrawing = (drawing) => {
+  if (!Array.isArray(drawing)) return false;
+
+  const pressures = drawing
+    .map((point) => Number(point?.p))
+    .filter((pressure) => Number.isFinite(pressure));
+
+  if (pressures.length < 10) return false;
+
+  const fallbackCount = pressures.filter((pressure) => pressure >= 495 && pressure <= 505).length;
+  return fallbackCount / pressures.length >= 0.9;
+};
+
 const SUPERUSER_EMAILS = (
   process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
   process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
@@ -73,6 +86,7 @@ const Dashboard = () => {
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const dosChartRef = useRef(null);
+  const [chartHand, setChartHand] = useState('L');
   const entriesPerPage = 7;
 
   useEffect(() => {
@@ -133,7 +147,8 @@ const Dashboard = () => {
         return {
           ...session,
           hand_side: uniqueHandSides.length === 1 ? uniqueHandSides[0] : uniqueHandSides.length > 1 ? "both" : null,
-          average_DOS: sessionAverageDOS
+          average_DOS: sessionAverageDOS,
+          pressure_incompatible: session.all_drawings.some(isFallbackPressureDrawing),
         };
       });
 
@@ -225,14 +240,32 @@ const Dashboard = () => {
     return null;
   };
 
-  const formatDashboardDate = (dateValue) =>
-    new Date(dateValue).toLocaleString([], {
+  const handAverages = (sides, results) => {
+    const pick = (hand) => (sides || [])
+      .map((hs, i) => hs === hand ? parseFloat(results?.[i]?.DOS) : NaN)
+      .filter(v => !isNaN(v));
+    const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    return { left: mean(pick('L')), right: mean(pick('R')) };
+  };
+
+  const handStat = (v, dark = false) => {
+    if (v == null) return { val: '—', color: dark ? '#5E7184' : '#0B1B2B' };
+    return { val: v.toFixed(2), color: dark ? '#FFFFFF' : '#0B1B2B' };
+  };
+
+  const formatDashboardDate = (dateValue) => {
+    const date = new Date(dateValue);
+    const datePart = date.toLocaleDateString([], {
       year: "numeric",
       month: "numeric",
       day: "numeric",
+    });
+    const timePart = date.toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
+    return `${datePart} · ${timePart}`;
+  };
 
   const ds = {
     pageContainer: {
@@ -430,13 +463,31 @@ const Dashboard = () => {
                       )}
                     </div>
 
-                    {/* AVG DOS SCORE */}
-                    <div style={{ fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.12em', color: '#8BBDD4', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      AVG DOS SCORE
-                    </div>
-                    <div style={{ fontSize: '68px', fontFamily: "'Manrope', sans-serif", fontWeight: '700', color: '#FFFFFF', lineHeight: '1' }}>
-                      {entries[0].average_DOS ?? 'N/A'}
-                    </div>
+                    {/* L / R DOS blocks */}
+                    {(() => {
+                      const avg = handAverages(entries[0].all_hand_sides, entries[0].all_results);
+                      const L = handStat(avg.left, true);
+                      const R = handStat(avg.right, true);
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '36px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '0.12em', color: '#8CA1B5' }}>AVG DOS</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', fontWeight: '700', letterSpacing: '0.08em', color: '#0E1A2B', background: '#7AAEE8', borderRadius: '4px', padding: '2px 7px' }}>LEFT</span>
+                            </div>
+                            <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '800', fontSize: '56px', letterSpacing: '-0.04em', lineHeight: '1', color: L.color }}>{L.val}</div>
+                          </div>
+                          <div style={{ width: '1px', height: '56px', background: 'rgba(255,255,255,0.16)', marginBottom: '4px' }} />
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '0.12em', color: '#8CA1B5' }}>AVG DOS</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', fontWeight: '700', letterSpacing: '0.08em', color: '#0E1A2B', background: '#3FD0B8', borderRadius: '4px', padding: '2px 7px' }}>RIGHT</span>
+                            </div>
+                            <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '800', fontSize: '56px', letterSpacing: '-0.04em', lineHeight: '1', color: R.color }}>{R.val}</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* ── Spiral row + View Analysis ── */}
@@ -494,12 +545,27 @@ const Dashboard = () => {
 
             {/* ── PAST RESULTS ── */}
             <div style={{ marginTop: "40px", marginBottom: "16px" }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#6A7A8A", marginBottom: "6px" }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#6A7A8A", marginBottom: "10px" }}>
                 Past Results
               </div>
-              <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: "700", fontSize: "17px", letterSpacing: "-0.01em", color: "#0B1B2B" }}>
-                Overall avg: <span style={{ color: "#4C5BD4" }}>{averageDOS || "N/A"}</span>
-              </div>
+              {(() => {
+                const allSides = entries.flatMap(e => e.all_hand_sides || []);
+                const allResults = entries.flatMap(e => e.all_results || []);
+                const avg = handAverages(allSides, allResults);
+                const L = handStat(avg.left, false);
+                const R = handStat(avg.right, false);
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: '#9AA6B2' }}>Avg DOS</span>
+                    {[['L', '#5B8FE0', L.val], ['R', '#13917F', R.val]].map(([hand, color, val]) => (
+                      <div key={hand} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '9px', padding: '5px 11px 5px 6px' }}>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', fontWeight: '700', color: '#fff', background: color, borderRadius: '4px', padding: '2px 6px' }}>{hand}</span>
+                        <span style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '16px', color: color }}>{val}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Results List */}
@@ -540,10 +606,22 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>AVERAGE DOS</div>
-                      <div style={{ fontSize: "0.88rem", fontWeight: "600", color: "#13917F" }}>
-                        {entry.average_DOS || "N/A"}
-                      </div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', color: '#9AA6B2', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '6px' }}>AVG DOS</div>
+                      {(() => {
+                        const avg = handAverages(entry.all_hand_sides, entry.all_results);
+                        const L = handStat(avg.left, false);
+                        const R = handStat(avg.right, false);
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            {[['L', '#5B8FE0', L.val], ['R', '#13917F', R.val]].map(([hand, color, val]) => (
+                              <div key={hand} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '8.5px', fontWeight: '700', color: '#fff', background: color, borderRadius: '3px', padding: '1px 5px' }}>{hand}</span>
+                                <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: '15px', fontWeight: '700', color: color }}>{val}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div style={{ flex: 0.5 }}>
                       <div style={{ fontSize: "0.68rem", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#9AA6B2", marginBottom: "3px" }}>COUNT</div>
@@ -632,67 +710,151 @@ const Dashboard = () => {
               const chartData = [...entries].reverse();
               if (chartData.length < 2) return null;
               const colW = 72, yAxisW = 40, pR = 16, pT = 30, pB = 36, H = 230, maxD = 4;
-              const n = chartData.length;
-              const bodyW = colW * n + pR;
               const pH = H - pT - pB;
-              // x coords are relative to the scrollable body SVG (no left offset)
               const xOf = (i) => colW * i + colW / 2;
               const yOf = (v) => pT + pH * (1 - Math.min(parseFloat(v) || 0, maxD) / maxD);
               const gridY = [0, 1, 2, 3, 4];
-              const pts = chartData.map((e, i) => [xOf(i), yOf(e.average_DOS)]);
-              const linePts = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`);
-              const areaPath = `M${linePts.join(' L')} L${pts[pts.length-1][0].toFixed(1)},${pT+pH} L0,${pT+pH} Z`;
-              const linePath = `M${linePts.join(' L')}`;
+
+              const getHandDOS = (session, hand) => {
+                const vals = (session.all_hand_sides || [])
+                  .map((hs, idx) => hs === hand ? parseFloat(session.all_results?.[idx]?.DOS) : NaN)
+                  .filter(v => !isNaN(v));
+                return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+              };
+
+              const isBoth = chartHand === 'both';
+              // Single-hand view: only sessions that have data for that hand
+              // Both view: all sessions (each hand connects across gaps independently)
+              const displayData = isBoth
+                ? chartData
+                : chartData.filter(e => getHandDOS(e, chartHand) !== null);
+              const n = displayData.length;
+              const bodyW = colW * n + pR;
+
+              const buildPath = (hand) => {
+                const pts = displayData
+                  .map((e, i) => { const d = getHandDOS(e, hand); return d !== null ? [xOf(i), yOf(d)] : null; })
+                  .filter(Boolean);
+                if (pts.length < 1) return '';
+                return `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}` +
+                  pts.slice(1).map(([x, y]) => ` L${x.toFixed(1)},${y.toFixed(1)}`).join('');
+              };
+
+              // In Both mode, push labels apart when L and R dots are within 22px
+              const getLabelY = (idx, hand, yPos) => {
+                if (!isBoth) return yPos - 16;
+                const otherDOS = getHandDOS(displayData[idx], hand === 'L' ? 'R' : 'L');
+                if (otherDOS === null) return yPos - 16;
+                const otherY = yOf(otherDOS);
+                if (Math.abs(yPos - otherY) >= 22) return yPos - 16;
+                return yPos <= otherY ? yPos - 24 : yPos - 16;
+              };
+
+              const HAND_COLOR = { L: '#5B8FE0', R: '#13917F' };
+              const handsToRender = isBoth ? ['L', 'R'] : [chartHand];
+
               return (
                 <div style={{ background: '#FFFFFF', border: '1px solid #E4E9EE', borderRadius: '18px', padding: '24px', marginTop: '24px' }}>
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.14em', color: '#6A7A8A', marginBottom: '6px', textTransform: 'uppercase' }}>
-                      TREND OVER TIME
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', letterSpacing: '0.14em', color: '#6A7A8A', marginBottom: '6px', textTransform: 'uppercase' }}>
+                        TREND OVER TIME
+                      </div>
+                      <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '17px', letterSpacing: '-0.01em', color: '#0B1B2B' }}>
+                        Degree of Severity by visit
+                      </div>
                     </div>
-                    <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: '700', fontSize: '17px', letterSpacing: '-0.01em', color: '#0B1B2B' }}>
-                      Degree of Severity by visit
+                    {/* Hand toggle — segmented tabs */}
+                    <div style={{ display: 'flex', background: '#F0F2F5', borderRadius: '10px', padding: '3px', gap: '2px' }}>
+                      {[['L', 'Left', '#5B8FE0'], ['R', 'Right', '#13917F'], ['both', 'Both', '#0B1B2B']].map(([hand, label, color]) => (
+                        <button
+                          key={hand}
+                          onClick={() => setChartHand(hand)}
+                          style={{
+                            padding: '6px 18px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: '11px',
+                            fontWeight: chartHand === hand ? '700' : '500',
+                            background: chartHand === hand ? '#FFFFFF' : 'transparent',
+                            color: chartHand === hand ? color : '#9AA6B2',
+                            boxShadow: chartHand === hand ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
-                    {/* Sticky Y-axis — never scrolls, soft right-edge fade to blend into chart */}
                     <div style={{ flexShrink: 0, position: 'relative', zIndex: 2 }}>
                       <svg width={yAxisW} height={H} style={{ display: 'block', background: '#FFFFFF' }}>
                         {gridY.map(v => (
                           <text key={v} x={yAxisW - 6} y={yOf(v) + 3.5} textAnchor="end" fontSize={9.5} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">{v}</text>
                         ))}
                       </svg>
-                      {/* Feathered right edge — blurs the axis/chart boundary */}
                       <div style={{ position: 'absolute', top: 0, right: -16, width: 16, height: H, background: 'linear-gradient(to right, #FFFFFF, rgba(255,255,255,0))', pointerEvents: 'none' }} />
                     </div>
 
-                    {/* Scrollable chart body */}
                     <div ref={dosChartRef} style={{ overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
-                      <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
-                        {gridY.map(v => (
-                          <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
-                        ))}
-                        <path d={areaPath} fill="rgba(30,64,175,0.06)" />
-                        <path d={linePath} fill="none" stroke="#1E40AF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                        {pts.map(([x, y], i) => {
-                          const val = parseFloat(chartData[i].average_DOS);
-                          const dateLabel = new Date(chartData[i].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                          return (
-                            <g key={i}>
-                              <circle cx={x} cy={y} r={7} fill="#13917F" fillOpacity={0.12} />
-                              <circle cx={x} cy={y} r={4} fill="#13917F" stroke="#FFFFFF" strokeWidth={2} />
-                              <text x={x} y={y - 12} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#13917F" fontWeight="600">
-                                {isNaN(val) ? '' : val.toFixed(2)}
-                              </text>
-                              <text x={x} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
-                                {dateLabel}
-                              </text>
-                            </g>
-                          );
-                        })}
-                      </svg>
+                      {n === 0 ? (
+                        <div style={{ height: H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: '#9AA6B2' }}>
+                            No {chartHand === 'L' ? 'left' : 'right'} hand data recorded yet
+                          </span>
+                        </div>
+                      ) : (
+                        <svg width={bodyW} height={H} style={{ display: 'block', overflow: 'visible' }}>
+                          {gridY.map(v => (
+                            <line key={v} x1={0} y1={yOf(v)} x2={bodyW} y2={yOf(v)} stroke="#EFF2F5" strokeWidth={1} />
+                          ))}
+                          {/* Lines */}
+                          {handsToRender.map(hand => {
+                            const p = buildPath(hand);
+                            return p ? <path key={hand} d={p} fill="none" stroke={HAND_COLOR[hand]} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> : null;
+                          })}
+                          {/* Dots — all hands first */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <g key={`dot-${hand}-${i}`}>
+                                  <circle cx={x} cy={y} r={7} fill={dotColor} fillOpacity={0.12} />
+                                  <circle cx={x} cy={y} r={4} fill={dotColor} stroke="#FFFFFF" strokeWidth={2} />
+                                </g>
+                              );
+                            })
+                          )}
+                          {/* Labels — rendered after all dots so they sit on top */}
+                          {handsToRender.map(hand =>
+                            displayData.map((e, i) => {
+                              const dos = getHandDOS(e, hand);
+                              if (dos === null) return null;
+                              const x = xOf(i), y = yOf(dos);
+                              const dotColor = e.pressure_incompatible ? '#9AA6B2' : HAND_COLOR[hand];
+                              return (
+                                <text key={`label-${hand}-${i}`} x={x} y={getLabelY(i, hand, y)} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill={dotColor} fontWeight="600">
+                                  {dos.toFixed(2)}
+                                </text>
+                              );
+                            })
+                          )}
+                          {/* Date x-axis */}
+                          {displayData.map((e, i) => (
+                            <text key={`date-${i}`} x={xOf(i)} y={H - 8} textAnchor="middle" fontSize={9} fontFamily="'IBM Plex Mono', monospace" fill="#9AA6B2">
+                              {new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </text>
+                          ))}
+                        </svg>
+                      )}
                     </div>
-                    {/* Right-edge fade — hints at more scrollable content */}
                     <div style={{ position: 'absolute', top: 0, right: 0, width: 40, height: H, background: 'linear-gradient(to right, rgba(255,255,255,0), #FFFFFF)', pointerEvents: 'none', zIndex: 1 }} />
                   </div>
                 </div>

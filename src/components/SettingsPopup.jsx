@@ -4,39 +4,33 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authProvider";
-import { FaUser, FaCog, FaFlask, FaBrain, FaIdCard } from "react-icons/fa";
-import { useResearcherMode } from "@/lib/researcherModeContext";
+import { FaUser, FaIdCard, FaEnvelope, FaLock, FaTrashAlt, FaChevronRight } from "react-icons/fa";
 import styles from "../styles/Settings.module.css";
+
+const ChevronLeft = () => (
+  <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="7,1 3,5 7,9" />
+  </svg>
+);
 
 export default function SettingsPopup({ isOpen, onClose }) {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [currentAction, setCurrentAction] = useState("");
   const [showEmailChange, setShowEmailChange] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [isConfirmEmailFocused, setIsConfirmEmailFocused] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
-  const [isConfirmNewPasswordFocused, setIsConfirmNewPasswordFocused] =
-    useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showWebsiteMode, setShowWebsiteMode] = useState(false);
-  const [websiteMode, setWebsiteMode] = useState("light"); // or "dark"
   const [showProfile, setShowProfile] = useState(false);
   const [profileUsername, setProfileUsername] = useState("");
   const [profileBio, setProfileBio] = useState("");
-  const { researcherMode, toggleResearcherMode } = useResearcherMode();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -51,37 +45,8 @@ export default function SettingsPopup({ isOpen, onClose }) {
         setProfileBio(profile.bio || "");
       }
     };
-
     if (isOpen) fetchProfile();
   }, [isOpen, user, router]);
-
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: oldPassword,
-      });
-      if (signInError) throw signInError;
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (updateError) throw updateError;
-
-      setMessage("Password updated successfully!");
-      setOldPassword("");
-      setNewPassword("");
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSignOut = async () => {
     await logout();
@@ -91,24 +56,16 @@ export default function SettingsPopup({ isOpen, onClose }) {
   const handleDeleteAccount = async () => {
     setLoading(true);
     setMessage("");
-
     try {
-      // Delete user profile data
       await supabase.from("profiles").delete().eq("id", user.id);
-
-      // Delete the user account
       const { error } = await supabase.auth.admin.deleteUser(user.id);
-
       if (error) {
         setMessage(error.message);
       } else {
         setMessage("Account deleted successfully");
-        setTimeout(() => {
-          supabase.auth.signOut();
-          router.push("/login");
-        }, 2000);
+        setTimeout(() => { supabase.auth.signOut(); router.push("/login"); }, 2000);
       }
-    } catch (error) {
+    } catch {
       setMessage("Error deleting account. Please try again.");
     } finally {
       setLoading(false);
@@ -119,45 +76,21 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setCurrentAction(action);
     setShowPasswordConfirm(true);
     setConfirmPassword("");
-    setIsPasswordFocused(false);
     setMessage("");
   };
 
   const handleConfirmPassword = async () => {
-    if (!confirmPassword.trim()) {
-      setMessage("Please enter your password");
-      return;
-    }
-
+    if (!confirmPassword.trim()) { setMessage("Please enter your password"); return; }
     setLoading(true);
     setMessage("");
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: confirmPassword,
-      });
-
+      const { error } = await supabase.auth.signInWithPassword({ email: user.email, password: confirmPassword });
       if (error) {
         setMessage("Incorrect password. Please try again.");
       } else {
-        if (currentAction === "Change Email") {
-          setShowEmailChange(true);
-          setShowPasswordConfirm(false);
-        } else if (currentAction === "Change Password") {
-          setShowPasswordChange(true);
-          setShowPasswordConfirm(false);
-        } else if (currentAction === "Delete Account") {
-          setShowDeleteConfirm(true);
-          setShowPasswordConfirm(false);
-        } else {
-          setMessage(
-            `Password confirmed! ${currentAction} functionality will be implemented here.`
-          );
-          setShowPasswordConfirm(false);
-          setConfirmPassword("");
-          setCurrentAction("");
-        }
+        if (currentAction === "Change Email") { setShowEmailChange(true); setShowPasswordConfirm(false); }
+        else if (currentAction === "Change Password") { setShowPasswordChange(true); setShowPasswordConfirm(false); }
+        else if (currentAction === "Delete Account") { setShowDeleteConfirm(true); setShowPasswordConfirm(false); }
       }
     } catch (err) {
       setMessage(err.message);
@@ -167,90 +100,37 @@ export default function SettingsPopup({ isOpen, onClose }) {
   };
 
   const handleEmailChange = async () => {
-    if (!newEmail.trim() || !confirmEmail.trim()) {
-      setMessage("Please fill in both email fields");
-      return;
-    }
-
-    if (newEmail !== confirmEmail) {
-      setMessage("Email addresses do not match");
-      return;
-    }
-
-    if (newEmail === user.email) {
-      setMessage("New email must be different from current email");
-      return;
-    }
-
+    if (!newEmail.trim() || !confirmEmail.trim()) { setMessage("Please fill in both email fields"); return; }
+    if (newEmail !== confirmEmail) { setMessage("Email addresses do not match"); return; }
+    if (newEmail === user.email) { setMessage("New email must be different from current email"); return; }
     setLoading(true);
     setMessage("");
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail,
-      });
-
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setMessage(
-          "Email updated successfully! Please check your new email for verification."
-        );
-        setShowEmailChange(false);
-        setNewEmail("");
-        setConfirmEmail("");
-        setCurrentAction("");
-        // Refresh user data
-        const { data } = await supabase.auth.getUser();
-        if (data?.user) {
-          setUser(data.user);
-        }
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) { setMessage(error.message); }
+      else {
+        setMessage("Email updated! Please check your new inbox for verification.");
+        setShowEmailChange(false); setNewEmail(""); setConfirmEmail(""); setCurrentAction("");
       }
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setMessage(err.message); }
+    finally { setLoading(false); }
   };
 
   const handlePasswordChangeSubmit = async () => {
-    if (!newPasswordValue.trim() || !confirmNewPassword.trim()) {
-      setMessage("Please fill in both password fields");
-      return;
-    }
-
-    if (newPasswordValue !== confirmNewPassword) {
-      setMessage("Passwords do not match");
-      return;
-    }
-
-    if (newPasswordValue.length < 6) {
-      setMessage("Password must be at least 6 characters long");
-      return;
-    }
-
+    if (!newPasswordValue.trim() || !confirmNewPassword.trim()) { setMessage("Please fill in both password fields"); return; }
+    if (newPasswordValue !== confirmNewPassword) { setMessage("Passwords do not match"); return; }
+    if (newPasswordValue.length < 6) { setMessage("Password must be at least 6 characters"); return; }
     setLoading(true);
     setMessage("");
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPasswordValue,
-      });
-
-      if (error) {
-        setMessage(error.message);
-      } else {
+      const { error } = await supabase.auth.updateUser({ password: newPasswordValue });
+      if (error) { setMessage(error.message); }
+      else {
         setMessage("Password updated successfully!");
-        setShowPasswordChange(false);
-        setNewPasswordValue("");
-        setConfirmNewPassword("");
-        setCurrentAction("");
+        setShowPasswordChange(false); setNewPasswordValue(""); setConfirmNewPassword(""); setCurrentAction("");
       }
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setMessage(err.message); }
+    finally { setLoading(false); }
   };
 
   const handleProfileSave = async () => {
@@ -258,9 +138,8 @@ export default function SettingsPopup({ isOpen, onClose }) {
     setLoading(true);
     setMessage("");
     const { error } = await supabase.from("profiles").upsert({
-      id: user.id,
-      username: profileUsername.trim(),
-      bio: profileBio.trim(),
+      id: user.id, email: user.email || "",
+      username: profileUsername.trim(), bio: profileBio.trim(),
     });
     setLoading(false);
     if (error) setMessage(error.message);
@@ -268,388 +147,199 @@ export default function SettingsPopup({ isOpen, onClose }) {
   };
 
   const handleBackToOptions = () => {
-    setShowPasswordConfirm(false);
-    setShowEmailChange(false);
-    setShowPasswordChange(false);
-    setShowDeleteConfirm(false);
-    setShowWebsiteMode(false);
-    setShowProfile(false);
-    setConfirmPassword("");
-    setNewEmail("");
-    setConfirmEmail("");
-    setNewPasswordValue("");
-    setConfirmNewPassword("");
-    setCurrentAction("");
-    setMessage("");
+    setShowPasswordConfirm(false); setShowEmailChange(false);
+    setShowPasswordChange(false); setShowDeleteConfirm(false);
+    setConfirmPassword(""); setNewEmail(""); setConfirmEmail("");
+    setNewPasswordValue(""); setConfirmNewPassword("");
+    setCurrentAction(""); setMessage("");
   };
 
-  const handleWebsiteModeChange = (mode) => {
-    setWebsiteMode(mode);
-    // Here you can add logic to actually change the website theme
-    // For example, updating localStorage, CSS variables, etc.
-    localStorage.setItem("websiteMode", mode);
-    setMessage(`Website mode changed to ${mode} mode`);
-    setTimeout(() => {
-      setShowWebsiteMode(false);
-      setMessage("");
-    }, 2000);
-  };
-
-  const handleResearcherModeToggle = () => {
-    toggleResearcherMode(!researcherMode);
-    setMessage(`Researcher mode ${!researcherMode ? "enabled" : "disabled"}`);
-    setTimeout(() => {
-      setMessage("");
-    }, 2000);
-  };
+  const isSubview = showPasswordConfirm || showEmailChange || showPasswordChange || showDeleteConfirm;
+  const emailPrefix = user?.email?.split("@")[0];
 
   if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div
-        className={styles.settingsPopupContainer}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button className={styles.closeButton} onClick={onClose}>
-          ×
-        </button>
+      <div className={styles.settingsPopupContainer} onClick={(e) => e.stopPropagation()}>
 
-        <h2 className={styles.settingsHeader}>Account Settings</h2>
+        {/* Header */}
+        <div className={styles.settingsPopupHeader}>
+          <div className={styles.avatarMark}>
+            <FaUser />
+          </div>
+          <div className={styles.headerText}>
+            <h2 className={styles.settingsHeader}>Account Settings</h2>
+            {user?.email && <p className={styles.headerEmail}>{user.email}</p>}
+          </div>
+          <button className={styles.closeButton} onClick={onClose}>×</button>
+        </div>
 
+        {/* Body */}
         <div className={styles.containersWrapper}>
+
+          {/* Left nav */}
           <div className={styles.accountContainer}>
             <div
-              className={`${styles.accountTitleRow} ${
-                !showWebsiteMode && !showProfile ? styles.active : ""
-              }`}
-              onClick={() => { setShowWebsiteMode(false); setShowProfile(false); setMessage(""); }}
+              className={`${styles.accountTitleRow} ${!showProfile ? styles.active : ""}`}
+              onClick={() => { setShowProfile(false); setMessage(""); handleBackToOptions(); }}
             >
               <div className={styles.accountTitleContent}>
                 <FaUser className={styles.personIcon} />
-                <span>Your Account</span>
+                <span>Account</span>
               </div>
-              <span className={styles.arrow}>{">"}</span>
+              <span className={styles.arrow}><FaChevronRight /></span>
             </div>
             <div
-              className={`${styles.accountSubsection} ${
-                showProfile ? styles.active : ""
-              }`}
-              onClick={() => { setShowProfile(true); setShowWebsiteMode(false); setMessage(""); }}
+              className={`${styles.accountSubsection} ${showProfile ? styles.active : ""}`}
+              onClick={() => { setShowProfile(true); setMessage(""); }}
             >
               <div className={styles.accountTitleContent}>
                 <FaIdCard className={styles.personIcon} />
                 <span>Profile</span>
               </div>
-              <span className={styles.arrow}>{">"}</span>
+              <span className={styles.arrow}><FaChevronRight /></span>
             </div>
-            <div
-              className={`${styles.accountSubsection} ${
-                showWebsiteMode ? styles.active : ""
-              }`}
-              onClick={() => { setShowWebsiteMode(true); setShowProfile(false); setMessage(""); }}
-            >
-              <div className={styles.accountTitleContent}>
-                <FaBrain className={styles.personIcon} />
-                <span>Website Mode</span>
-              </div>
-              <span className={styles.arrow}>{">"}</span>
-            </div>
-            <button className={styles.signOutButton} onClick={handleSignOut}>
-              Sign Out
-            </button>
+            <div className={styles.navSpacer} />
+            <button className={styles.signOutButton} onClick={handleSignOut}>Sign Out</button>
           </div>
 
+          {/* Right content */}
           <div className={styles.secondaryContainer}>
+
             {showProfile ? (
-              <div className={styles.emailChangeContent}>
-                <h3 className={styles.confirmPasswordTitle}>Profile</h3>
-                <p className={styles.actionDescription}>
-                  {user?.email}
-                </p>
+              <div className={styles.subviewContent}>
+                <div className={styles.subviewHeader}>
+                  <h3 className={styles.subviewTitle}>Profile</h3>
+                </div>
+                {user?.email && <div className={styles.emailChip}><FaEnvelope size={11} />{user.email}</div>}
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="text"
-                    className={styles.passwordInput}
-                    value={profileUsername}
-                    onChange={(e) => setProfileUsername(e.target.value)}
-                    placeholder="Display name"
-                    maxLength={50}
-                  />
+                  <label className={styles.inputLabel}>Display Name</label>
+                  <input type="text" className={styles.passwordInput} value={profileUsername}
+                    onChange={(e) => setProfileUsername(e.target.value)} placeholder="Your name" maxLength={50} />
                 </div>
                 <div className={styles.passwordInputContainer}>
-                  <textarea
-                    className={styles.passwordInput}
-                    value={profileBio}
-                    onChange={(e) => setProfileBio(e.target.value)}
-                    placeholder="Bio (optional)"
-                    rows={3}
-                    maxLength={200}
-                    style={{ resize: "none", lineHeight: 1.5 }}
-                  />
+                  <label className={styles.inputLabel}>Bio</label>
+                  <textarea className={styles.passwordInput} value={profileBio}
+                    onChange={(e) => setProfileBio(e.target.value)} placeholder="Short bio (optional)"
+                    rows={3} maxLength={200} style={{ resize: "none", lineHeight: 1.5 }} />
                 </div>
-                <button
-                  className={styles.confirmButton}
-                  onClick={handleProfileSave}
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save Profile"}
+                <button className={styles.confirmButton} onClick={handleProfileSave} disabled={loading}>
+                  {loading ? "Saving…" : "Save Profile"}
                 </button>
-                {message && (
-                  <div className={`${styles.settingsMessage} ${message.includes("Error") || message.includes("error") ? styles.errorMessage : styles.successMessage}`}>
-                    {message}
-                  </div>
-                )}
+                {message && <div className={`${styles.settingsMessage} ${message.toLowerCase().includes("error") ? styles.errorMessage : styles.successMessage}`}>{message}</div>}
               </div>
-            ) : !showPasswordConfirm &&
-            !showEmailChange &&
-            !showPasswordChange &&
-            !showDeleteConfirm &&
-            !showWebsiteMode ? (
+
+            ) : !isSubview ? (
               <div className={styles.secondaryContent}>
-                <p onClick={() => handleActionClick("Change Email")}>
-                  Change Email
-                </p>
-                <p onClick={() => handleActionClick("Change Password")}>
-                  Change Password
-                </p>
-                <p
-                  onClick={() => handleActionClick("Delete Account")}
-                  className={styles.deleteAccountText}
-                >
-                  Delete Account
-                </p>
-              </div>
-            ) : showWebsiteMode ? (
-              <div className={styles.emailChangeContent}>
-                <button
-                  className={styles.backArrow}
-                  onClick={handleBackToOptions}
-                >
-                  ←
-                </button>
-                <h3 className={styles.confirmPasswordTitle}>Website Mode</h3>
-                <p className={styles.actionDescription}>
-                  {" "}
-                  Enable Researcher Account Mode?{" "}
-                </p>
-                <div className={styles.toggleContainer}>
-                  <label className={styles.toggleLabel}>
-                    <input
-                      type="checkbox"
-                      checked={researcherMode}
-                      onChange={handleResearcherModeToggle}
-                      className={styles.toggleInput}
-                    />
-                    <span className={`${styles.toggleSlider} ${researcherMode ? styles.toggleActive : ''}`}></span>
-                  </label>
-                  <span className={styles.toggleText}>
-                    {researcherMode ? "Enabled" : "Disabled"}
-                  </span>
-                </div>
-                <div className={styles.websiteModeOptions}></div>
-                {message && (
-                  <div
-                    className={`${styles.settingsMessage} ${styles.successMessage}`}
-                  >
-                    {message}
+                <div className={styles.actionRow} onClick={() => handleActionClick("Change Email")}>
+                  <div className={styles.actionRowIcon}><FaEnvelope /></div>
+                  <div className={styles.actionRowLabel}>
+                    <div>Change Email</div>
+                    <div className={styles.actionRowDesc}>Update your login email</div>
                   </div>
-                )}
+                  <span className={styles.actionRowChevron}><FaChevronRight /></span>
+                </div>
+                <div className={styles.actionRow} onClick={() => handleActionClick("Change Password")}>
+                  <div className={styles.actionRowIcon}><FaLock /></div>
+                  <div className={styles.actionRowLabel}>
+                    <div>Change Password</div>
+                    <div className={styles.actionRowDesc}>Update your password</div>
+                  </div>
+                  <span className={styles.actionRowChevron}><FaChevronRight /></span>
+                </div>
+                <div className={`${styles.actionRow} ${styles.danger}`} onClick={() => handleActionClick("Delete Account")}>
+                  <div className={styles.actionRowIcon}><FaTrashAlt /></div>
+                  <div className={styles.actionRowLabel}>
+                    <div>Delete Account</div>
+                    <div className={styles.actionRowDesc}>Permanently remove your data</div>
+                  </div>
+                  <span className={styles.actionRowChevron}><FaChevronRight /></span>
+                </div>
               </div>
+
             ) : showDeleteConfirm ? (
               <div className={styles.deleteConfirmContent}>
                 <h3 className={styles.deleteConfirmTitle}>Delete Account</h3>
                 <p className={styles.deleteConfirmMessage}>
-                  Are you sure you want to delete your account? All medical data
-                  associated with this account will be permanently deleted.
+                  Are you sure? All medical data associated with this account will be permanently deleted and cannot be recovered.
                 </p>
                 <div className={styles.deleteConfirmButtons}>
-                  <button
-                    className={styles.cancelButton}
-                    onClick={handleBackToOptions}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className={styles.deleteConfirmButton}
-                    onClick={handleDeleteAccount}
-                    disabled={loading}
-                  >
-                    {loading ? "Deleting..." : "Delete Account"}
+                  <button className={styles.cancelButton} onClick={handleBackToOptions}>Cancel</button>
+                  <button className={styles.deleteConfirmButton} onClick={handleDeleteAccount} disabled={loading}>
+                    {loading ? "Deleting…" : "Delete Account"}
                   </button>
                 </div>
-                {message && (
-                  <div
-                    className={`${styles.settingsMessage} ${
-                      message.includes("Error")
-                        ? styles.errorMessage
-                        : styles.successMessage
-                    }`}
-                  >
-                    {message}
-                  </div>
-                )}
+                {message && <div className={`${styles.settingsMessage} ${message.includes("Error") ? styles.errorMessage : styles.successMessage}`}>{message}</div>}
               </div>
+
             ) : showPasswordConfirm ? (
-              <div className={styles.emailChangeContent}>
-                <button
-                  className={styles.backArrow}
-                  onClick={handleBackToOptions}
-                >
-                  ←
-                </button>
-                <h3 className={styles.confirmPasswordTitle}>
-                  Confirm Password
-                </h3>
-                <p className={styles.actionDescription}>
-                  Please confirm your password to {currentAction.toLowerCase()}
-                </p>
+              <div className={styles.subviewContent}>
+                <div className={styles.subviewHeader}>
+                  <button className={styles.backBtn} onClick={handleBackToOptions}><ChevronLeft /></button>
+                  <h3 className={styles.subviewTitle}>Confirm Password</h3>
+                </div>
+                <p className={styles.actionDescription}>Enter your current password to {currentAction.toLowerCase()}</p>
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="password"
-                    className={styles.passwordInput}
-                    value={confirmPassword}
+                  <label className={styles.inputLabel}>Current Password</label>
+                  <input type="password" className={styles.passwordInput} value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    onFocus={() => setIsPasswordFocused(true)}
-                    onBlur={() => setIsPasswordFocused(false)}
-                    placeholder={isPasswordFocused ? "" : "Password"}
-                  />
+                    onKeyDown={(e) => e.key === "Enter" && handleConfirmPassword()}
+                    placeholder="••••••••" />
                 </div>
-                <button
-                  className={styles.confirmButton}
-                  onClick={handleConfirmPassword}
-                  disabled={loading}
-                >
-                  {loading ? "Confirming..." : "Confirm"}
+                <button className={styles.confirmButton} onClick={handleConfirmPassword} disabled={loading}>
+                  {loading ? "Verifying…" : "Continue"}
                 </button>
-                {message && (
-                  <div
-                    className={`${styles.settingsMessage} ${
-                      message.includes("Incorrect") ||
-                      message.includes("Please")
-                        ? styles.errorMessage
-                        : styles.successMessage
-                    }`}
-                  >
-                    {message}
-                  </div>
-                )}
+                {message && <div className={`${styles.settingsMessage} ${message.includes("Incorrect") || message.includes("Please") ? styles.errorMessage : styles.successMessage}`}>{message}</div>}
               </div>
+
             ) : showEmailChange ? (
-              <div className={styles.emailChangeContent}>
-                <button
-                  className={styles.backArrow}
-                  onClick={handleBackToOptions}
-                >
-                  ←
-                </button>
-                <h3 className={styles.confirmPasswordTitle}>Change Email</h3>
-                <p className={styles.actionDescription}>
-                  Enter your new email address
-                </p>
+              <div className={styles.subviewContent}>
+                <div className={styles.subviewHeader}>
+                  <button className={styles.backBtn} onClick={handleBackToOptions}><ChevronLeft /></button>
+                  <h3 className={styles.subviewTitle}>Change Email</h3>
+                </div>
+                <p className={styles.actionDescription}>Enter your new email address below</p>
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="email"
-                    className={styles.passwordInput}
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    onFocus={() => setIsEmailFocused(true)}
-                    onBlur={() => setIsEmailFocused(false)}
-                    placeholder={isEmailFocused ? "" : "New Email"}
-                  />
+                  <label className={styles.inputLabel}>New Email</label>
+                  <input type="email" className={styles.passwordInput} value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)} placeholder="you@example.com" />
                 </div>
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="email"
-                    className={styles.passwordInput}
-                    value={confirmEmail}
-                    onChange={(e) => setConfirmEmail(e.target.value)}
-                    onFocus={() => setIsConfirmEmailFocused(true)}
-                    onBlur={() => setIsConfirmEmailFocused(false)}
-                    placeholder={
-                      isConfirmEmailFocused ? "" : "Confirm New Email"
-                    }
-                  />
+                  <label className={styles.inputLabel}>Confirm New Email</label>
+                  <input type="email" className={styles.passwordInput} value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)} placeholder="you@example.com" />
                 </div>
-                <button
-                  className={styles.confirmButton}
-                  onClick={handleEmailChange}
-                  disabled={loading}
-                >
-                  {loading ? "Updating..." : "Update Email"}
+                <button className={styles.confirmButton} onClick={handleEmailChange} disabled={loading}>
+                  {loading ? "Updating…" : "Update Email"}
                 </button>
-                {message && (
-                  <div
-                    className={`${styles.settingsMessage} ${
-                      message.includes("do not match") ||
-                      message.includes("Please") ||
-                      message.includes("different")
-                        ? styles.errorMessage
-                        : styles.successMessage
-                    }`}
-                  >
-                    {message}
-                  </div>
-                )}
+                {message && <div className={`${styles.settingsMessage} ${message.includes("do not match") || message.includes("Please") || message.includes("different") ? styles.errorMessage : styles.successMessage}`}>{message}</div>}
               </div>
+
             ) : (
-              <div className={styles.emailChangeContent}>
-                <button
-                  className={styles.backArrow}
-                  onClick={handleBackToOptions}
-                >
-                  ←
-                </button>
-                <h3 className={styles.confirmPasswordTitle}>Change Password</h3>
-                <p className={styles.actionDescription}>
-                  Enter your new password
-                </p>
+              <div className={styles.subviewContent}>
+                <div className={styles.subviewHeader}>
+                  <button className={styles.backBtn} onClick={handleBackToOptions}><ChevronLeft /></button>
+                  <h3 className={styles.subviewTitle}>Change Password</h3>
+                </div>
+                <p className={styles.actionDescription}>Choose a new password — at least 6 characters</p>
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="password"
-                    className={styles.passwordInput}
-                    value={newPasswordValue}
-                    onChange={(e) => setNewPasswordValue(e.target.value)}
-                    onFocus={() => setIsNewPasswordFocused(true)}
-                    onBlur={() => setIsNewPasswordFocused(false)}
-                    placeholder={isNewPasswordFocused ? "" : "New Password"}
-                  />
+                  <label className={styles.inputLabel}>New Password</label>
+                  <input type="password" className={styles.passwordInput} value={newPasswordValue}
+                    onChange={(e) => setNewPasswordValue(e.target.value)} placeholder="••••••••" />
                 </div>
                 <div className={styles.passwordInputContainer}>
-                  <input
-                    type="password"
-                    className={styles.passwordInput}
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    onFocus={() => setIsConfirmNewPasswordFocused(true)}
-                    onBlur={() => setIsConfirmNewPasswordFocused(false)}
-                    placeholder={
-                      isConfirmNewPasswordFocused ? "" : "Confirm New Password"
-                    }
-                  />
+                  <label className={styles.inputLabel}>Confirm Password</label>
+                  <input type="password" className={styles.passwordInput} value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" />
                 </div>
-                <button
-                  className={styles.confirmButton}
-                  onClick={handlePasswordChangeSubmit}
-                  disabled={loading}
-                >
-                  {loading ? "Updating..." : "Update Password"}
+                <button className={styles.confirmButton} onClick={handlePasswordChangeSubmit} disabled={loading}>
+                  {loading ? "Updating…" : "Update Password"}
                 </button>
-                {message && (
-                  <div
-                    className={`${styles.settingsMessage} ${
-                      message.includes("do not match") ||
-                      message.includes("Please") ||
-                      message.includes("characters")
-                        ? styles.errorMessage
-                        : styles.successMessage
-                    }`}
-                  >
-                    {message}
-                  </div>
-                )}
+                {message && <div className={`${styles.settingsMessage} ${message.includes("do not match") || message.includes("Please") || message.includes("characters") ? styles.errorMessage : styles.successMessage}`}>{message}</div>}
               </div>
             )}
+
           </div>
         </div>
       </div>
