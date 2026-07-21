@@ -35,8 +35,8 @@ const palette = {
 };
 
 const steps = [
-  { n: "01", title: "Draw the spiral", body: "An Archimedean spiral on a tablet — no wires, no specialist hardware. Takes under two minutes." },
-  { n: "02", title: "We analyze the trace", body: "Every point (x, y, pressure, time) is decomposed into smoothness, speed, pressure, and consistency indices." },
+  { n: "01", title: "Draw a spiral", body: "An Archimedean spiral on a tablet — no wires, no specialist hardware. Takes under two minutes." },
+  { n: "02", title: "Click to analyze the trace", body: "Every point (x, y, pressure, time) is decomposed into smoothness, speed, pressure, and consistency indices." },
   { n: "03", title: "Track over time", body: "Saved as an objective baseline so subtle change is visible session over session." },
 ];
 
@@ -78,7 +78,7 @@ export default function Home() {
               <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "62px", lineHeight: 1.02, letterSpacing: "-0.03em", margin: "0 0 22px", color: "var(--ink)" }}>
                 {researcherMode
                   ? "Spiral Analysis Tool"
-                  : "Drawing a spiral helps us track your tremor."}
+                  : "Drawing spirals helps track your symptoms."}
               </h1>
 
               <p style={{ fontSize: "19px", lineHeight: 1.6, color: "var(--ink-soft)", margin: "0 0 34px", maxWidth: "560px" }}>
