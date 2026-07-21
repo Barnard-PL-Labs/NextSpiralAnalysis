@@ -57,11 +57,8 @@ export default function TeamPage() {
       <Header showVideo={false} />
       <main className={styles.aboutPage}>
         {/* Hero */}
-        <div className={styles.content} style={{ paddingTop: "110px", paddingBottom: "60px" }}>
-          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.04, letterSpacing: "-0.03em", margin: "0 0 22px", color: "#0B1B2B" }}>
-            {"About Us"}
-          </h1>
-          <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "18.5px", lineHeight: 1.75, color: "#37485A", maxWidth: 600, margin: 0, textWrap: "pretty" }}>
+        <div className={styles.content} style={{ paddingTop: "60px", paddingBottom: "60px" }}>
+<p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "18.5px", lineHeight: 1.75, color: "#37485A", maxWidth: 600, margin: 0, textWrap: "pretty" }}>
             Originally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
           </p>
         </div>
@@ -74,15 +71,10 @@ export default function TeamPage() {
           <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E40AF", margin: "0 0 32px" }}>
             Developers
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", columnGap: 80 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             {developer.map(({ name, degree }) => (
-              <div key={name} style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, padding: "13px 0" }}>
-                <span style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 500, fontSize: 16, letterSpacing: "-0.005em", color: "#0B1B2B" }}>
-                  {name}
-                </span>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 400, fontSize: 11, letterSpacing: "0.06em", color: "#9AA7B4" }}>
-                  {degree}
-                </span>
+              <div key={name} style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 500, fontSize: 16, letterSpacing: "-0.005em", color: "#0B1B2B", padding: "3px 0" }}>
+                {name}, {degree}
               </div>
             ))}
           </div>

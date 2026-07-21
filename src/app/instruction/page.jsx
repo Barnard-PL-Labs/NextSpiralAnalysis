@@ -45,7 +45,7 @@ const METRICS = [
 ];
 
 const STEPS = [
-  { text: <>Draw at least <strong>3–4 complete revolutions</strong>.</> },
+  { text: <>Draw at least <strong>4-5 complete revolutions</strong>.</> },
   { text: <>Draw a spiral on the provided canvas using your mouse or touchscreen.</> },
   { text: <>Try to make the spiral as evenly spaced as possible.</> },
   { text: <>Try to maintain a consistent drawing speed and pressure.</> },
@@ -113,8 +113,8 @@ export default function DirectionsPage() {
 
             {/* 02 — How to use */}
             <section id="how" className={styles.section}>
-              <p className={styles.eyebrow}>02 — HOW TO USE THIS TOOL</p>
-              <h2 className={styles.sectionH2}>How to Use This Tool</h2>
+              <p className={styles.eyebrow}>02 — HOW TO USE TAKE THIS TEST</p>
+              <h2 className={styles.sectionH2}>How to Take This Test</h2>
               <div className={styles.stepsContainer}>
                 {STEPS.map((s, i) => (
                   <div
