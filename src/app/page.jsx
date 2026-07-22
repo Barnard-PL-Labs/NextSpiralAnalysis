@@ -1,1 +1,1 @@
-export { default } from "./machine/page";
+export { default } from "./home/page";
