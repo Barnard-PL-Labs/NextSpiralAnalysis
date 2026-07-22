@@ -35,9 +35,9 @@ const palette = {
 };
 
 const steps = [
-  { n: "01", title: "Draw a spiral", body: "An Archimedean spiral on a tablet — no wires, no specialist hardware. Takes under two minutes." },
-  { n: "02", title: "Click to analyze the trace", body: "Every point (x, y, pressure, time) is decomposed into smoothness, speed, pressure, and consistency indices." },
-  { n: "03", title: "Track over time", body: "Saved as an objective baseline so subtle change is visible session over session." },
+  { n: "01", title: "Draw a spiral", body: "An Archimedean spiral on a tablet — no wires, no special hardware." },
+  { n: "02", title: "Click to analyze the trace", body: "Every point (x, y, pressure, time) is transformed into severity, smoothness, speed, tremor, pressure, and consistency indices." },
+  { n: "03", title: "Track over time", body: "Create an account to save each drawing as an objective baseline — this lets us store your history and surface subtle changes session over session." },
 ];
 
 const conditionTags = ["Parkinson's disease", "Essential tremor", "Dystonia"];
@@ -75,7 +75,7 @@ export default function Home() {
                 SPIRAL ANALYSIS
               </div>
 
-              <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "62px", lineHeight: 1.02, letterSpacing: "-0.03em", margin: "0 0 22px", color: "var(--ink)" }}>
+              <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.1, letterSpacing: "-0.03em", margin: "0 0 22px", color: "var(--ink)" }}>
                 {researcherMode
                   ? "Spiral Analysis Tool"
                   : "Drawing spirals helps track your symptoms."}
@@ -87,7 +87,7 @@ export default function Home() {
                   : "Spiral Analysis turns a spiral drawn on any tablet into objective measures of smoothness, speed, and pressure. Whether you're a researcher, a medical professional, or just curious, this non-invasive tool makes it easy to gain insights into hand stability."}
               </p>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+              {/* <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
                 <Link href="/"
                   style={{ textDecoration: "none", color: "#fff", background: "var(--accent)", fontSize: "15.5px", fontWeight: 600, padding: "15px 26px", borderRadius: "11px", boxShadow: "0 12px 28px -12px rgba(30,64,175,0.55)", transition: "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease", display: "inline-block" }}
                   onMouseEnter={e => { e.currentTarget.style.background = "#1634A0"; e.currentTarget.style.boxShadow = "0 16px 36px -10px rgba(30,64,175,0.7)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
@@ -104,7 +104,7 @@ export default function Home() {
                 >
                   How it works →
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Home() {
             <div>
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", letterSpacing: "0.16em", color: "var(--accent)", marginBottom: "16px" }}>GROUNDED IN RESEARCH</div>
               <h2 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "40px", lineHeight: 1.08, letterSpacing: "-0.025em", margin: "0 0 20px", color: "var(--ink)" }}>
-                Built on a clinically validated method.
+                Based on a clinically validated methods.
               </h2>
               <p style={{ fontSize: "16px", lineHeight: 1.65, color: "var(--ink-soft)", margin: "0 0 26px", maxWidth: "480px" }}>
                 Digitized spiral drawing is an established, non-invasive technique for characterizing upper-limb motor performance and detecting subtle change — studied across movement disorders for over two decades.
@@ -148,23 +148,8 @@ export default function Home() {
 
             <div ref={evidenceRef} style={{ display: "flex", justifyContent: "center" }}>
               <svg viewBox="-100 -100 200 200" width="340" height="340">
-                <defs>
-                  <clipPath id="spiral-reveal">
-                    <motion.circle
-                      cx="0" cy="0"
-                      initial={{ r: 0 }}
-                      animate={evidenceInView ? { r: 105 } : { r: 0 }}
-                      transition={{ duration: 5, ease: "linear" }}
-                    />
-                  </clipPath>
-                </defs>
                 {/* Faint template */}
                 <path d={heroSpiralPath} stroke="var(--line)" strokeWidth="0.8" fill="none" />
-                {/* Accent trace — revealed by expanding circle from center out */}
-                <g clipPath="url(#spiral-reveal)">
-                  <path d={jitteredTracePath} stroke="#1E40AF" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                </g>
-                <circle cx="0" cy="0" r="2.6" fill="#13917F" />
               </svg>
             </div>
           </div>

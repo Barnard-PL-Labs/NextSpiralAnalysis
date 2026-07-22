@@ -621,7 +621,7 @@ export default function MachinePage() {
 
     {/* Page header */}
     <div className={styles.cardHeader}>
-      <h1 className={styles.cardTitle}>Spiral Analysis 2.0</h1>
+      <h1 className={styles.cardTitle}>Spiral Analysis Test</h1>
       <p className={styles.cardSubtitle}>Please provide the following information to begin the drawing</p>
     </div>
 

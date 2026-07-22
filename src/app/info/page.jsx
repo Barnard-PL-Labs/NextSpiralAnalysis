@@ -57,28 +57,31 @@ export default function TeamPage() {
       <Header showVideo={false} />
       <main className={styles.aboutPage}>
         {/* Hero */}
-        <div className={styles.content} style={{ paddingTop: "60px", paddingBottom: "60px" }}>
-<p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "18.5px", lineHeight: 1.75, color: "#37485A", maxWidth: 600, margin: 0, textWrap: "pretty" }}>
-            Originally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
+        <div className={styles.content} style={{ paddingTop: "56px", paddingBottom: "56px" }}>
+          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.1, letterSpacing: "-0.03em", color: "#0B1B2B", margin: "0 0 16px" }}>
+            Origin
+          </h1>
+          <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "19px", lineHeight: 1.6, color: "#37485A", maxWidth: 600, margin: 0 }}>
+            Spiral Analysis orginally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
           </p>
         </div>
 
-        {/* Full-width divider */}
         <hr style={{ margin: 0, border: "none", borderTop: "1px solid #E4E9EE" }} />
 
-        {/* Developers */}
-        <div className={styles.content} style={{ paddingTop: "64px", paddingBottom: "100px" }}>
-          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E40AF", margin: "0 0 32px" }}>
-            Developers
+        {/* Researchers and Developers */}
+        <div className={styles.content} style={{ paddingTop: "56px", paddingBottom: "100px" }}>
+          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E40AF", margin: "0 0 14px" }}>
+            Researchers and Developers
           </p>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {developer.map(({ name, degree }) => (
-              <div key={name} style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 500, fontSize: 16, letterSpacing: "-0.005em", color: "#0B1B2B", padding: "3px 0" }}>
+              <div key={name} style={{ fontFamily: "'Public Sans', sans-serif", fontWeight: 400, fontSize: 16.5, lineHeight: 1.7, color: "#0B1B2B", padding: "3px 0" }}>
                 {name}, {degree}
               </div>
             ))}
           </div>
         </div>
+
       </main>
     </>
   );

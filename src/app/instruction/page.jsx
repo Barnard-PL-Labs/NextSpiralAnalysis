@@ -46,7 +46,7 @@ const METRICS = [
 
 const STEPS = [
   { text: <>Draw at least <strong>4-5 complete revolutions</strong>.</> },
-  { text: <>Draw a spiral on the provided canvas using your mouse or touchscreen.</> },
+  { text: <>Using a tablet and stylus, draw a spiral within the 10x10 box.</> },
   { text: <>Try to make the spiral as evenly spaced as possible.</> },
   { text: <>Try to maintain a consistent drawing speed and pressure.</> },
   { text: <>For best results, try to <strong>draw in a single, continuous motion</strong>.</> },
@@ -82,7 +82,6 @@ export default function DirectionsPage() {
           <main>
             {/* 01 — What it is */}
             <section id="what" className={styles.section}>
-              <p className={styles.eyebrow}>01 — WHAT IT IS</p>
               <h2 className={styles.sectionH2}>What is Spiral Analysis?</h2>
               <p className={styles.bodyText}>
                 Spiral Analysis is a non-invasive system of quantifying motor function based on kinematic and physiologic features derived from handwritten spirals. Spiral Analysis uses a digitizing tablet and writing pen to record position, force and time measurements.
@@ -113,7 +112,7 @@ export default function DirectionsPage() {
 
             {/* 02 — How to use */}
             <section id="how" className={styles.section}>
-              <p className={styles.eyebrow}>02 — HOW TO USE TAKE THIS TEST</p>
+              <p className={styles.eyebrow} style={{ visibility: "hidden" }}>02 — HOW TO USE</p>
               <h2 className={styles.sectionH2}>How to Take This Test</h2>
               <div className={styles.stepsContainer}>
                 {STEPS.map((s, i) => (
@@ -130,10 +129,10 @@ export default function DirectionsPage() {
 
             {/* 03 — Key metrics */}
             <section id="metrics" className={`${styles.section} ${styles.lastSection}`}>
-              <p className={styles.eyebrow}>03 — KEY METRICS</p>
+              <p className={styles.eyebrow} style={{ visibility: "hidden" }}>03 — KEY METRICS</p>
               <h2 className={styles.sectionH2}>Key Metrics in Spiral Analysis</h2>
               <p className={styles.metricsIntro}>
-                Each card shows a <strong>normal reference range</strong> — the value expected for a healthy adult. Use these to interpret where your results fall.
+                Each card shows a <strong>normal reference range</strong> — the value expected for a healthy person. Use these to interpret where your results fall.
               </p>
               <div className={styles.metricsGrid}>
                 {METRICS.map((m) => (
@@ -149,14 +148,7 @@ export default function DirectionsPage() {
               </div>
             </section>
 
-            {/* Disclaimer */}
-            <div className={styles.disclaimer}>
-              <span className={styles.disclaimerIcon}>⚠</span>
-              <p className={styles.disclaimerText}>
-                Note: This tool is for educational purposes only. For medical concerns, always consult
-                with a healthcare professional.
-              </p>
-            </div>
+            
           </main>
 
           <aside>
