@@ -45,8 +45,8 @@ const METRICS = [
 ];
 
 const STEPS = [
-  { text: <>Draw at least <strong>3–4 complete revolutions</strong>.</> },
-  { text: <>Draw a spiral on the provided canvas using your mouse or touchscreen.</> },
+  { text: <>Draw at least <strong>4-5 complete revolutions</strong>.</> },
+  { text: <>Using a tablet and stylus, draw a spiral within the 10x10 box.</> },
   { text: <>Try to make the spiral as evenly spaced as possible.</> },
   { text: <>Try to maintain a consistent drawing speed and pressure.</> },
   { text: <>For best results, try to <strong>draw in a single, continuous motion</strong>.</> },
@@ -82,7 +82,6 @@ export default function DirectionsPage() {
           <main>
             {/* 01 — What it is */}
             <section id="what" className={styles.section}>
-              <p className={styles.eyebrow}>01 — WHAT IT IS</p>
               <h2 className={styles.sectionH2}>What is Spiral Analysis?</h2>
               <p className={styles.bodyText}>
                 Spiral Analysis is a non-invasive system of quantifying motor function based on kinematic and physiologic features derived from handwritten spirals. Spiral Analysis uses a digitizing tablet and writing pen to record position, force and time measurements.
@@ -91,17 +90,19 @@ export default function DirectionsPage() {
                 Spiral Analysis is based on &ldquo;unraveling&rdquo; the two-dimensional drawn spiral picture into a data series that captures its original kinematic information and allows for further computational manipulations and clinical correlations. Spiral data are collected in the X, Y and pressure axes providing virtual &ldquo;tri-axial&rdquo; recordings. This effectively extends spiral drawing - a standard clinical test - into an objective and accurate measure of motor control. Mathematical formulations are used to create into indices that quantify the kinematic parameters, and assess many spiral features including overall degree of severity, shape, drawing speed, tightness of loops, irregularity and tremor. Over 70 indices are created, and multiple spirals can be averaged.
               </p>
               <p className={styles.bodyText}>
-                Spiral Analysis provides more accuracy and objectivity than the clinical exam alone. It has already been used to study the details of normal motor control, to quantify normal and abnormal motor development and analyze movement disorders such as Parkinson&apos;s disease, tremors, dystonia, ataxia and functional movements. Because of its precision and reproducibility, Spiral Analysis is also useful in quantifying changes before and after medical or surgical treatments.
+                Spiral Analysis provides additional accuracy and objectivity than the clinical exam alone. It has already been used to study the details of normal motor control, to quantify normal and abnormal motor development and analyze movement disorders such as Parkinson&apos;s disease, tremors, dystonia, ataxia and functional movements. Because of its precision and reproducibility, Spiral Analysis is also useful in quantifying changes before and after medical or surgical treatments.
               </p>
 
               <p className={styles.cardGroupLabel}>Why use it</p>
               <div className={styles.benefitGrid}>
                 {[
-                  "Non-invasive and easy to administer",
-                  "Provides real-time feedback",
-                  "Tracks motor function over time",
-                  "Highly sensitive to neuromotor changes",
-                  "Useful for research and clinical assessments",
+                  "Standard neurological test",
+                  "No time constraints",
+                  "Non-invasive: no attachments, no wires",
+                  "Visuomotor task—with/without feedback",
+                  "Free-form, or trace path",
+                  "Distal and proximal muscles",
+                  "Multi-jointed task",
                 ].map((text) => (
                   <div key={text} className={styles.benefitCard}>
                     <div className={styles.bullet} />
@@ -113,8 +114,8 @@ export default function DirectionsPage() {
 
             {/* 02 — How to use */}
             <section id="how" className={styles.section}>
-              <p className={styles.eyebrow}>02 — HOW TO USE THIS TOOL</p>
-              <h2 className={styles.sectionH2}>How to Use This Tool</h2>
+              <p className={styles.eyebrow} style={{ visibility: "hidden" }}>02 — HOW TO USE</p>
+              <h2 className={styles.sectionH2}>How to Take This Test</h2>
               <div className={styles.stepsContainer}>
                 {STEPS.map((s, i) => (
                   <div
@@ -130,10 +131,10 @@ export default function DirectionsPage() {
 
             {/* 03 — Key metrics */}
             <section id="metrics" className={`${styles.section} ${styles.lastSection}`}>
-              <p className={styles.eyebrow}>03 — KEY METRICS</p>
+              <p className={styles.eyebrow} style={{ visibility: "hidden" }}>03 — KEY METRICS</p>
               <h2 className={styles.sectionH2}>Key Metrics in Spiral Analysis</h2>
               <p className={styles.metricsIntro}>
-                Each card shows a <strong>normal reference range</strong> — the value expected for a healthy adult. Use these to interpret where your results fall.
+                Each card shows a <strong>normal reference range</strong> — the value expected for a healthy person. Use these to interpret where your results fall.
               </p>
               <div className={styles.metricsGrid}>
                 {METRICS.map((m) => (
@@ -149,14 +150,7 @@ export default function DirectionsPage() {
               </div>
             </section>
 
-            {/* Disclaimer */}
-            <div className={styles.disclaimer}>
-              <span className={styles.disclaimerIcon}>⚠</span>
-              <p className={styles.disclaimerText}>
-                Note: This tool is for educational purposes only. For medical concerns, always consult
-                with a healthcare professional.
-              </p>
-            </div>
+            
           </main>
 
           <aside>

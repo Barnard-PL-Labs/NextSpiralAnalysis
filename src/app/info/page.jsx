@@ -21,15 +21,19 @@ const principalInvestigators = [
   },
 ];
 
-const alumni = [
-  "Yiping Wang, MS",
-  "Qiping Yu, PhD",
-  "Jianqin Qu, MS",
-  "Mehmet Can Isik, MEng",
-  "Alicia Floyd, MD",
-  "Annie Hsu, MD",
-  "Audrey Rakovich Seville, BA",
-  "Jonathan A. Sisti, MD",
+const developer = [
+  { name: "Seth L. Pullman",         degree: "MD"   },
+  { name: "Mark Santolucito",        degree: "PhD"  },
+  { name: "Yiping Wang",             degree: "MS"   },
+  { name: "Qiping Yu",               degree: "PhD"  },
+  { name: "Jianqin Qu",              degree: "MS"   },
+  { name: "Mehmet Can Isik",         degree: "MEng" },
+  { name: "Alicia Floyd",            degree: "MD"   },
+  { name: "Annie Hsu",               degree: "MD"   },
+  { name: "Audrey Rakovich Seville", degree: "BA"   },
+  { name: "Jonathan A. Sisti",       degree: "MD"   },
+  { name: "Alisha Chang",            degree: "BA"   },
+  { name: "Eileen Zalavarria",       degree: "BA"   },
 ];
 
 const publications = [
@@ -52,87 +56,30 @@ export default function TeamPage() {
     <>
       <Header showVideo={false} />
       <main className={styles.aboutPage}>
-        <section className={styles.hero}>
-          <div className={styles.heroInner}>
-            <div className={styles.heroCopy}>
-              <p className={styles.eyebrow}>About</p>
-              <h1>Making motor function measurable.</h1>
-              <p className={styles.heroText}>
-                Spiral Analysis began with a simple clinical observation: a drawn
-                spiral holds far more information than the eye can read. We built
-                the tools to extract it.
-              </p>
-            </div>
-            <div className={styles.spiralMark} aria-hidden="true">
-              <svg viewBox="0 0 520 520" role="img">
-                <path
-                  d="M258 260c-14 0-23-12-19-25 5-18 31-25 52-8 27 22 19 68-21 89-55 29-126-9-139-75-17-84 52-161 139-159 107 3 186 102 158 207-34 126-189 187-300 107-128-92-132-286-6-386 147-117 366-38 409 145"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeWidth="2.2"
-                />
-              </svg>
-            </div>
+        {/* Hero */}
+        <div className={styles.content} style={{ paddingTop: "56px", paddingBottom: "56px" }}>
+          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.1, letterSpacing: "-0.03em", color: "#0B1B2B", margin: "0 0 16px" }}>
+            Origin
+          </h1>
+          <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "19px", lineHeight: 1.6, color: "#37485A", maxWidth: 600, margin: 0 }}>
+            Spiral Analysis orginally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
+          </p>
+        </div>
+
+        <hr style={{ margin: 0, border: "none", borderTop: "1px solid #E4E9EE" }} />
+
+        {/* Researchers and Developers */}
+        <div className={styles.content} style={{ paddingTop: "56px", paddingBottom: "100px" }}>
+          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#1E40AF", margin: "0 0 14px" }}>
+            Researchers and Developers
+          </p>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {developer.map(({ name, degree }) => (
+              <div key={name} style={{ fontFamily: "'Public Sans', sans-serif", fontWeight: 400, fontSize: 16.5, lineHeight: 1.7, color: "#0B1B2B", padding: "3px 0" }}>
+                {name}, {degree}
+              </div>
+            ))}
           </div>
-        </section>
-
-        <div className={styles.content}>
-          <section className={styles.section}>
-            <p className={styles.eyebrow}>Principal Investigators</p>
-            <div className={styles.piGrid}>
-              {principalInvestigators.map((person) => (
-                <Link
-                  key={person.name}
-                  href={person.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.piCard}
-                >
-                  <span className={styles.avatar}>{person.initials}</span>
-                  <span>
-                    <strong>{person.name}</strong>
-                    <span>{person.role}</span>
-                    <small>{person.institution}</small>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className={styles.section}>
-            <p className={styles.eyebrow}>Alumni</p>
-            <div className={styles.alumniGrid}>
-              {alumni.map((person) => (
-                <div key={person} className={styles.alumniCard}>
-                  <strong>{person}</strong>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className={styles.section}>
-            <p className={styles.eyebrow}>Publications</p>
-            <div className={styles.publicationGrid}>
-              {publications.map((article) => (
-                <Link
-                  key={article.title}
-                  href={article.linkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.publicationCard}
-                >
-                  <span className={styles.articleMeta}>
-                    <span>Journal Article</span>
-                    <small>{article.year}</small>
-                  </span>
-                  <strong>{article.title}</strong>
-                  <em>{article.meta}</em>
-                  <span className={styles.readLink}>Read article -&gt;</span>
-                </Link>
-              ))}
-            </div>
-          </section>
         </div>
 
       </main>

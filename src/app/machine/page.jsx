@@ -100,7 +100,7 @@ export default function MachinePage() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [userFinished, setUserFinished] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
-  const [selectedHand, setSelectedHand] = useState(null); // 'dominant' | 'non-dominant'
+  const [dominantHandSide, setDominantHandSide] = useState(null); // 'L' | 'R' — which physical hand is dominant
   const [selectedHandSide, setSelectedHandSide] = useState(null); // 'L' | 'R'
   const [showDemographics, setShowDemographics] = useState(false);
   const [showStudyDemographics, setShowStudyDemographics] = useState(false);
@@ -127,7 +127,7 @@ export default function MachinePage() {
           });
         }
         if (s.isConfirmed) setIsConfirmed(true);
-        if (s.selectedHand) setSelectedHand(s.selectedHand);
+        if (s.dominantHandSide) setDominantHandSide(s.dominantHandSide);
         if (s.selectedHandSide) setSelectedHandSide(s.selectedHandSide);
         if (s.currentSessionId) setCurrentSessionId(s.currentSessionId);
         if (s.demographics) setDemographics(s.demographics);
@@ -138,8 +138,8 @@ export default function MachinePage() {
     } catch {
       // corrupt storage — fall through to fresh reset
     }
-    setSelectedHand(null);
-    localStorage.removeItem("selectedHand");
+    setDominantHandSide(null);
+    localStorage.removeItem("dominantHandSide");
     localStorage.removeItem("anonymous_session_id");
     localStorage.removeItem("anonymous_session_timestamp");
   }, []);
@@ -150,7 +150,7 @@ export default function MachinePage() {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
         savedDrawings,
         isConfirmed,
-        selectedHand,
+        dominantHandSide,
         selectedHandSide,
         currentSessionId,
         demographics,
@@ -160,7 +160,7 @@ export default function MachinePage() {
     } catch {
       // quota exceeded — ignore
     }
-  }, [savedDrawings, isConfirmed, selectedHand, selectedHandSide, currentSessionId, demographics, showDemographics, warningAcknowledged]);
+  }, [savedDrawings, isConfirmed, dominantHandSide, selectedHandSide, currentSessionId, demographics, showDemographics, warningAcknowledged]);
 
   useEffect(() => {
     const meta = document.querySelector("meta[name='viewport']");
@@ -559,9 +559,9 @@ export default function MachinePage() {
     if (canvasRef.current?.clearCanvas) canvasRef.current.clearCanvas();
   };
 
-  const handleHandSelection = (hand) => {
-    setSelectedHand(hand);
-    localStorage.setItem("selectedHand", hand);
+  const handleHandSelection = (side) => {
+    setDominantHandSide(side);
+    localStorage.setItem("dominantHandSide", side);
   };
   const handleHandSideSelection = (side) => {
     setSelectedHandSide(side);
@@ -575,6 +575,10 @@ export default function MachinePage() {
     }
     setIsConfirmed(true);
   };
+
+  const selectedHand = dominantHandSide && selectedHandSide
+    ? (dominantHandSide === selectedHandSide ? "dominant" : "non-dominant")
+    : null;
 
   const handSideLabel = selectedHandSide === "L" ? "Left" : selectedHandSide === "R" ? "Right" : "";
   const dominanceLabel = selectedHand === "dominant" ? "Dominant Hand" : selectedHand === "non-dominant" ? "Non-dominant Hand" : "";
@@ -612,12 +616,12 @@ export default function MachinePage() {
     setSavedDrawings([]);
     setUserFinished(false);
     setCurrentSessionId(null);
-    setSelectedHand(null);
+    setDominantHandSide(null);
     setSelectedHandSide(null);
     setIsConfirmed(false);
     setShowDemographics(false);
     sessionStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem("selectedHand");
+    localStorage.removeItem("dominantHandSide");
     localStorage.removeItem("selectedHandSide");
 
     if (sessionId) {
@@ -648,7 +652,7 @@ export default function MachinePage() {
 
     {/* Page header */}
     <div className={styles.cardHeader}>
-      <h1 className={styles.cardTitle}>Spiral Analysis 2.0</h1>
+      <h1 className={styles.cardTitle}>Spiral Analysis Test</h1>
       <p className={styles.cardSubtitle}>Please provide the following information to begin the drawing</p>
     </div>
 
@@ -767,28 +771,26 @@ export default function MachinePage() {
 	      </div>
 	    </div>
 
-	    <div className={styles.selectionDivider} />
-
 	    {/* Dominance */}
 	    <div className={styles.selectionGroup}>
 	      <label className={styles.sectionLabel}>
 	        <span className={styles.sectionDot} />
-	        Is this your dominant hand?
+	        What is your dominant hand?
 	      </label>
 	      <div className={styles.handOptionsGrid}>
 	        <button
-	          onClick={() => handleHandSelection("dominant")}
-	          className={styles.handOptionCard + (selectedHand === "dominant" ? " " + styles.handOptionCardActive : "")}
-	          aria-pressed={selectedHand === "dominant"}
+	          onClick={() => handleHandSelection("L")}
+	          className={styles.handOptionCard + (dominantHandSide === "L" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={dominantHandSide === "L"}
 	        >
-	          Dominant
+	          Left Hand
 	        </button>
 	        <button
-	          onClick={() => handleHandSelection("non-dominant")}
-	          className={styles.handOptionCard + (selectedHand === "non-dominant" ? " " + styles.handOptionCardActive : "")}
-	          aria-pressed={selectedHand === "non-dominant"}
+	          onClick={() => handleHandSelection("R")}
+	          className={styles.handOptionCard + (dominantHandSide === "R" ? " " + styles.handOptionCardActive : "")}
+	          aria-pressed={dominantHandSide === "R"}
 	        >
-	          Non-Dominant
+	          Right Hand
 	        </button>
 	      </div>
 	    </div>
@@ -797,7 +799,7 @@ export default function MachinePage() {
 	    <div className={styles.selectionGroup}>
 	      <label className={styles.sectionLabel}>
 	        <span className={styles.sectionDot} />
-	        Which hand will be tested?
+	        Which hand will be tested first?
 	      </label>
 	      <div className={styles.handOptionsGrid}>
 	        <button
@@ -822,7 +824,7 @@ export default function MachinePage() {
 	    {/* Continue button */}
     <button
       onClick={handleContinue}
-      disabled={!selectedHand || !selectedHandSide}
+      disabled={!dominantHandSide || !selectedHandSide}
       className={styles.continueButton}
     >
       Continue to Spiral Analysis →
@@ -868,12 +870,12 @@ export default function MachinePage() {
 	                    <span className={styles.controlsGroupLabel}>Dominance</span>
 	                    <div className={styles.segmentedPill}>
                       <button
-                        onClick={() => handleHandSelection("dominant")}
+                        onClick={() => setDominantHandSide(selectedHandSide)}
                         aria-pressed={selectedHand === "dominant"}
                         className={styles.handButton + (selectedHand === "dominant" ? " " + styles.handButtonActive : "")}
                       >Dom</button>
                       <button
-                        onClick={() => handleHandSelection("non-dominant")}
+                        onClick={() => setDominantHandSide(selectedHandSide === "L" ? "R" : "L")}
                         aria-pressed={selectedHand === "non-dominant"}
                         className={styles.handButton + (selectedHand === "non-dominant" ? " " + styles.handButtonActive : "")}
                       >Non</button>

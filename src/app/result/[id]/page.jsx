@@ -282,7 +282,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 16px" }}>
           <HandMetric label="Avg DOS" value={formatNum(stats.avgDOS, 4)} />
           <HandMetric label="Avg Tremor (Hz)" value={formatNum(stats.avgTremor, 2)} />
-          <HandMetric label="Avg Tightness (cycles)" value={formatNum(stats.avgTightness, 4)} />
+          <HandMetric label="Avg Tightness" value={formatNum(stats.avgTightness, 4)} />
           <HandMetric label="Avg 2nd Order Smoothness" value={formatNum(stats.avgSecondOSm, 4)} />
         </div>
       </div>
@@ -636,7 +636,7 @@ export default function UnifiedResultPage() {
                       <div style={{ display: "flex", alignItems: "stretch", padding: "20px 28px" }}>
                         {[
                           { label: "DOS Score", value: getDVal((r) => r?.DOS) },
-                          { label: "Tightness (cycles)", value: getDVal((r) => pickTightness(r)) },
+                          { label: "Tightness", value: getDVal((r) => pickTightness(r)) },
                           { label: "2nd Order Smoothness", value: getDVal((r) => pickSecondOSM(r)) },
                           { label: "COV of Width", value: getDVal((r) => pickCOV(r)) },
                         ].map(({ label, value }, i) => (
