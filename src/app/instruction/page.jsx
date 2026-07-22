@@ -96,11 +96,13 @@ export default function DirectionsPage() {
               <p className={styles.cardGroupLabel}>Why use it</p>
               <div className={styles.benefitGrid}>
                 {[
-                  "Non-invasive and easy to administer",
-                  "Provides real-time feedback",
-                  "Tracks motor function over time",
-                  "Highly sensitive to neuromotor changes",
-                  "Useful for research and clinical assessments",
+                  "Standard neurological test",
+                  "No time constraints",
+                  "Non-invasive: no attachments, no wires",
+                  "Visuomotor task—with/without feedback",
+                  "Free-form, or trace path",
+                  "Distal and proximal muscles",
+                  "Multi-jointed task",
                 ].map((text) => (
                   <div key={text} className={styles.benefitCard}>
                     <div className={styles.bullet} />

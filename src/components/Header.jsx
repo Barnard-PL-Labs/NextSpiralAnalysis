@@ -160,9 +160,9 @@ export default function Header() {
 
               <Link href="/machine" style={{ textDecoration: "none" }}>
                 <button
-                  style={{ background: "#1E40AF", border: "none", borderRadius: "9px", padding: "9px 20px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "13.5px", fontWeight: 600, color: "#fff", transition: "background 0.15s ease" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#1634A0"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#1E40AF"}
+                  style={{ background: "#1E40AF", border: "none", borderRadius: "9px", padding: "9px 20px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: "13.5px", fontWeight: 600, color: "#fff", boxShadow: "0 4px 14px -4px rgba(30,64,175,0.5)", transition: "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#1634A0"; e.currentTarget.style.boxShadow = "0 8px 20px -6px rgba(30,64,175,0.7)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#1E40AF"; e.currentTarget.style.boxShadow = "0 4px 14px -4px rgba(30,64,175,0.5)"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >Start Test</button>
               </Link>
             </div>
