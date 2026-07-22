@@ -40,7 +40,6 @@ const steps = [
   { n: "03", title: "Track over time", body: "Create an account to save each drawing as an objective baseline — this lets us store your history and surface subtle changes session over session." },
 ];
 
-const conditionTags = ["Parkinson's disease", "Essential tremor", "Dystonia"];
 
 export default function Home() {
   const { researcherMode } = useResearcherMode();
@@ -84,7 +83,7 @@ export default function Home() {
               <p style={{ fontSize: "19px", lineHeight: 1.6, color: "var(--ink-soft)", margin: "0 0 34px", maxWidth: "560px" }}>
                 {researcherMode
                   ? "Medical technology for neuromotor assessment."
-                  : "Spiral Analysis turns a spiral drawn on any tablet into objective measures of smoothness, speed, and pressure. Whether you're a researcher, a medical professional, or just curious, this non-invasive tool makes it easy to gain insights into hand stability."}
+                  : "Spiral Analysis quantifies spiral drawing into objective measures of severity, smoothness, tremor, speed, and pressure. Whether you're a researcher, a medical professional, or just curious, this non-invasive tool makes it easy to gain insights into your motor performance."}
               </p>
 
               {/* <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
@@ -139,11 +138,6 @@ export default function Home() {
               <p style={{ fontSize: "16px", lineHeight: 1.65, color: "var(--ink-soft)", margin: "0 0 26px", maxWidth: "480px" }}>
                 Digitized spiral drawing is an established, non-invasive technique for characterizing upper-limb motor performance and detecting subtle change — studied across movement disorders for over two decades.
               </p>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {conditionTags.map(tag => (
-                  <span key={tag} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px", color: "var(--ink)", border: "1px solid var(--line)", padding: "8px 14px", borderRadius: "100px" }}>{tag}</span>
-                ))}
-              </div>
             </div>
 
             <div ref={evidenceRef} style={{ display: "flex", justifyContent: "center" }}>
