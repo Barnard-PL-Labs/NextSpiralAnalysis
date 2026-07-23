@@ -14,8 +14,8 @@ const TOC = [
 const METRICS = [
   {
     name: "DOS · Degree of Severity",
-    pill: "0 – 4", type: "blue",
-    body: "A comprehensive measure of overall spiral drawing performance, indicating the severity of motor impairment.",
+    pill: "0 – 1", type: "blue",
+    body: "A comprehensive measure of overall spiral drawing performance that correlates with a 0 - 4 clinical rating scale.",
   },
   {
     name: "Smoothness",
@@ -29,8 +29,8 @@ const METRICS = [
   },
   {
     name: "Pressure",
-    pill: "qualitative", type: "gray",
-    body: "Analyzes the force applied while drawing the spiral, which can reveal tremors or muscle weakness.",
+    pill: "Dependent on the drawing tablet", type: "gray",
+    body: "Measure of the pen force applied while drawing the spiral.",
   },
   {
     name: "Speed",
@@ -39,8 +39,8 @@ const METRICS = [
   },
   {
     name: "Frequency Analysis",
-    pill: "qualitative", type: "gray",
-    body: "Examines the rhythmic components of the drawing, which can help identify specific types of tremors.",
+    pill: "None or low amplitude tremor", type: "gray",
+    body: "Measure the amplitude, rhythm and axis components of the spiral drawing. This can help identify specific types of tremors.",
   },
 ];
 
