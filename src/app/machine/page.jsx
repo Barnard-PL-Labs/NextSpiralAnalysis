@@ -35,8 +35,9 @@ function detectDevicePpi() {
   return { ppi: 264, recognized: false };
 }
 
+const STORAGE_KEY = "machinePageState";
 const SUPABASE_WRITE_TIMEOUT_MS = 20000;
-const ANALYSIS_TIMEOUT_MS = 70000;
+const ANALYSIS_TIMEOUT_MS = 55000;
 const ANALYSIS_MAX_ATTEMPTS = 3; // Initial request plus two retries
 
 const withTimeout = (promise, timeoutMs, label) => {
@@ -96,7 +97,6 @@ export default function MachinePage() {
   const removedLocalIds = useRef(new Set()); // localIds removed by user before pipeline completes
   const [savedDrawings, setSavedDrawings] = useState([]); // stores {points, handSide, handUsed}
   const [currentDrawing, setCurrentDrawing] = useState([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [userFinished, setUserFinished] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
@@ -114,14 +114,53 @@ export default function MachinePage() {
 
   
   useEffect(() => {
-    setDominantHandSide(null);
     setIsSaving(false);
-    setIsAnalyzing(false);
+    console.log("[device] devicePixelRatio:", window.devicePixelRatio);
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const s = JSON.parse(stored);
+        if (Array.isArray(s.savedDrawings) && s.savedDrawings.length > 0) {
+          setSavedDrawings(s.savedDrawings);
+          s.savedDrawings.forEach(d => {
+            if (d.localId && d.drawingId) drawingIdMap.current[d.localId] = d.drawingId;
+          });
+        }
+        if (s.isConfirmed) setIsConfirmed(true);
+        if (s.dominantHandSide) setDominantHandSide(s.dominantHandSide);
+        if (s.selectedHandSide) setSelectedHandSide(s.selectedHandSide);
+        if (s.currentSessionId) setCurrentSessionId(s.currentSessionId);
+        if (s.demographics) setDemographics(s.demographics);
+        if (s.showDemographics) setShowDemographics(true);
+        if (s.warningAcknowledged) setWarningAcknowledged(true);
+        return;
+      }
+    } catch {
+      // corrupt storage — fall through to fresh reset
+    }
+    setDominantHandSide(null);
     localStorage.removeItem("dominantHandSide");
     localStorage.removeItem("anonymous_session_id");
     localStorage.removeItem("anonymous_session_timestamp");
-    console.log("[device] devicePixelRatio:", window.devicePixelRatio);
   }, []);
+
+  useEffect(() => {
+    if (!isConfirmed && savedDrawings.length === 0) return;
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        savedDrawings,
+        isConfirmed,
+        dominantHandSide,
+        selectedHandSide,
+        currentSessionId,
+        demographics,
+        showDemographics,
+        warningAcknowledged,
+      }));
+    } catch {
+      // quota exceeded — ignore
+    }
+  }, [savedDrawings, isConfirmed, dominantHandSide, selectedHandSide, currentSessionId, demographics, showDemographics, warningAcknowledged]);
 
   useEffect(() => {
     const meta = document.querySelector("meta[name='viewport']");
@@ -154,12 +193,8 @@ export default function MachinePage() {
 
   // ——— Leave-page warnings (no autosave) ———
   const hasUnsavedWork = useMemo(() => {
-    return (
-      currentDrawing.length > 0 ||
-      (savedDrawings.length > 0 && !userFinished) ||
-      isAnalyzing
-    );
-  }, [currentDrawing.length, savedDrawings.length, userFinished, isAnalyzing]);
+    return currentDrawing.length > 0;
+  }, [currentDrawing.length]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -186,22 +221,12 @@ export default function MachinePage() {
       if (samePath) return;
       e.preventDefault();
       e.stopPropagation();
-      const ok = window.confirm("You have unsaved work. Leave this page?");
+      const ok = window.confirm("You have an unsubmitted drawing. Leave this page?");
       if (ok) router.push(url.pathname + url.search + url.hash);
     };
     document.addEventListener("click", onClickCapture, true);
     return () => document.removeEventListener("click", onClickCapture, true);
   }, [hasUnsavedWork, router]);
-
-  useEffect(() => {
-    const onPopState = () => {
-      if (!hasUnsavedWork) return;
-      const ok = window.confirm("You have unsaved work. Leave this page?");
-      if (!ok) history.forward();
-    };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, [hasUnsavedWork]);
   // ————————————————————————————————
 
   const getOrCreateAnonymousSession = () => {
@@ -295,7 +320,6 @@ export default function MachinePage() {
     };
     setSavedDrawings((prev) => [...prev, labeled]);
 
-    setIsAnalyzing(true);
     setIsSaving(true);
     const sessionId = getOrCreateSessionId();
 
@@ -329,10 +353,15 @@ export default function MachinePage() {
       if (!drawingIdMap.current[localId]) {
         setSavedDrawings((prev) => prev.filter((d) => d.localId !== localId));
       }
-      alert(error?.message || "Unable to save this drawing. Please try again.");
+      const msg = error?.message || "";
+      const isNetworkDrop = msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("networkerror");
+      alert(
+        isNetworkDrop
+          ? "The analysis server did not respond. This may be a temporary issue — please try drawing again in a moment."
+          : msg || "Unable to save this drawing. Please try again."
+      );
     } finally {
       setIsSaving(false);
-      setIsAnalyzing(false);
     }
   };
 
@@ -518,6 +547,7 @@ export default function MachinePage() {
     }
     setUserFinished(true);
     localStorage.removeItem("pendingDemographics");
+    sessionStorage.removeItem(STORAGE_KEY);
     const sessionId = getOrCreateSessionId();
     const isAuthenticated = user?.id;
     const params = new URLSearchParams({ session: sessionId, anon: (!isAuthenticated).toString() });
@@ -590,6 +620,7 @@ export default function MachinePage() {
     setSelectedHandSide(null);
     setIsConfirmed(false);
     setShowDemographics(false);
+    sessionStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem("dominantHandSide");
     localStorage.removeItem("selectedHandSide");
 
