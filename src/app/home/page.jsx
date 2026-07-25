@@ -133,7 +133,7 @@ export default function Home() {
             <div>
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", letterSpacing: "0.16em", color: "var(--accent)", marginBottom: "16px" }}>GROUNDED IN RESEARCH</div>
               <h2 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "40px", lineHeight: 1.08, letterSpacing: "-0.025em", margin: "0 0 20px", color: "var(--ink)" }}>
-                Based on a clinically validated methods.
+                Based on clinically validated methods.
               </h2>
               <p style={{ fontSize: "16px", lineHeight: 1.65, color: "var(--ink-soft)", margin: "0 0 26px", maxWidth: "480px" }}>
                 Digitized spiral drawing is an established, non-invasive technique for characterizing upper-limb motor performance and detecting subtle change — studied across movement disorders for over two decades.
