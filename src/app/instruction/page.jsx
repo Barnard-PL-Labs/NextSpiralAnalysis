@@ -45,7 +45,7 @@ const METRICS = [
 ];
 
 const STEPS = [
-  { text: <>Draw at least <strong>4-5 complete revolutions</strong>.</> },
+  { text: <>Draw about <strong>4-5 complete revolutions</strong>.</> },
   { text: <>Using a tablet and stylus, draw a spiral within the 10x10 box.</> },
   { text: <>Try to make the spiral as evenly spaced as possible.</> },
   { text: <>Try to maintain a consistent drawing speed and pressure.</> },
