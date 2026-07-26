@@ -631,6 +631,14 @@ export default function UnifiedResultPage() {
                             );
                           })}
                         </div>
+                        {isReady && curTyped?.["Sampling frequency"] != null && (
+                          <div style={{ marginLeft: "auto", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+                            <span style={{ ...mono, fontSize: 8, letterSpacing: "0.12em", color: C.muted, textTransform: "uppercase" }}>Sampling Rate</span>
+                            <span style={{ ...manrope, fontSize: 13, fontWeight: 600, color: C.muted }}>
+                              {formatNum(curTyped["Sampling frequency"], 1)} Hz
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ display: "flex", alignItems: "stretch", padding: "20px 28px" }}>

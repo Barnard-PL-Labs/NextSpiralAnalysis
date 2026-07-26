@@ -62,7 +62,7 @@ export default function TeamPage() {
             Origin
           </h1>
           <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "19px", lineHeight: 1.6, color: "#37485A", maxWidth: 600, margin: 0 }}>
-            Spiral Analysis orginally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
+            Spiral Analysis was orginally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
           </p>
         </div>
 
