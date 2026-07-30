@@ -599,15 +599,10 @@ export default function UnifiedResultPage() {
                   return null;
                 };
                 const isReady = curRaw && !curRaw.status && !curRaw.error;
-                const PendingValue = ({ label, status }) => (
-                  <span className={`${styles.pendingMetric} ${status === "processing" ? styles.pendingMetricAnalyzing : ""}`}>
-                    <span className={styles.processingDot} />
-                    {label}
-                  </span>
+                const PendingValue = () => (
+                  <span style={{ fontSize: 18 }}>Analyzing<AnimatedEllipsis /></span>
                 );
-                const pendingStatus = curRaw?.status === "processing" ? "processing" : "waiting";
-                const pendingLabel = pendingStatus === "processing" ? "Analyzing result" : "Waiting for analysis";
-                const getDVal = (pick, d = 4) => isReady ? formatNum(pick(curTyped), d) : (curRaw?.error ? "Failed" : curRaw?.status === "timeout" ? "Timeout" : <PendingValue label={pendingLabel} status={pendingStatus} />);
+                const getDVal = (pick, d = 4) => isReady ? formatNum(pick(curTyped), d) : (curRaw?.error ? "Failed" : curRaw?.status === "timeout" ? "Timeout" : <PendingValue />);
                 const valColor = !curRaw ? "#92400e" : curRaw.error || curRaw.status === "timeout" ? "#991b1b" : curRaw.status ? "#92400e" : C.ink;
 
                 return (
