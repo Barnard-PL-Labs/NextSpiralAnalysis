@@ -185,6 +185,9 @@ export default function Header() {
                 <div className="mobile-nav-item">{item.label}</div>
               </Link>
             ))}
+            <Link href="/machine" onClick={() => setDropdownOpen(false)}>
+              <div className="mobile-nav-item">Start Test</div>
+            </Link>
             {user ? (
               <>
                 <Link href="/dashBoard" onClick={() => setDropdownOpen(false)}>
