@@ -94,33 +94,41 @@ export const AuthProvider = ({ children }) => {
   }, [clearLocalSession]);
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const u = session?.user || null;
-      setUser(u);
-      fetchUsername(u);
-
-      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-        if (event === "SIGNED_IN" && u) {
-          const { data: existing } = await supabase
-            .from("profiles")
-            .select("id, email")
-            .eq("id", u.id)
-            .maybeSingle();
-          if (!existing) {
-            await supabase.from("profiles").insert({
-              id: u.id,
-              email: u.email || "",
-              username: u.email?.split("@")[0] || "",
-              created_at: new Date().toISOString(),
-            });
-          } else if (u.email && existing.email !== u.email) {
-            await supabase
-              .from("profiles")
-              .update({ email: u.email })
-              .eq("id", u.id);
-          }
-        }
+    const syncProfile = async (u) => {
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("id", u.id)
+        .maybeSingle();
+      if (!existing) {
+        await supabase.from("profiles").insert({
+          id: u.id,
+          email: u.email || "",
+          username: u.email?.split("@")[0] || "",
+          created_at: new Date().toISOString(),
+        });
+      } else if (u.email && existing.email !== u.email) {
+        await supabase
+          .from("profiles")
+          .update({ email: u.email })
+          .eq("id", u.id);
       }
+    };
+
+    // The callback must stay synchronous and cheap: supabase-js emits auth
+    // events while holding its cross-tab auth lock, and any Supabase call
+    // triggered before the lock is released (directly, or indirectly via a
+    // React effect reacting to setUser) deadlocks the client. Deferring to a
+    // macrotask lets the lock release first.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      const u = session?.user || null;
+      setTimeout(() => {
+        setUser(u);
+        fetchUsername(u);
+        if (event === "SIGNED_IN" && u) {
+          syncProfile(u).catch(() => {});
+        }
+      }, 0);
     });
 
     validateSession();
@@ -143,7 +151,11 @@ export const AuthProvider = ({ children }) => {
       }
     } finally {
       try {
-        await supabase.auth.signOut({ scope: "local" });
+        await withTimeout(
+          supabase.auth.signOut({ scope: "local" }),
+          AUTH_OPERATION_TIMEOUT_MS,
+          "Local sign out"
+        );
       } catch {}
       clearLocalSession();
     }
