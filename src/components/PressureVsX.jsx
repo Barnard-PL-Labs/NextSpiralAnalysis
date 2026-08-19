@@ -204,26 +204,8 @@ export function PressureVsX({
   const pMin = Math.min(...pArr);
   const pMax = Math.max(...pArr);
 
-  // Side metrics (narrower column + smaller font)
-  const sideStats = [
-    `Cone Index: ${Number.isFinite(cone.coneIndex) ? cone.coneIndex.toFixed(2) : 'n/a'}`,
-    `Central IQR: ${Number.isFinite(cone.centralIQR) ? cone.centralIQR.toFixed(2) : 'n/a'}`,
-    `Edge IQR: ${Number.isFinite(cone.edgeIQR) ? cone.edgeIQR.toFixed(2) : 'n/a'}`,
-    `corr(p,r): ${Number.isFinite(corr_p_r) ? corr_p_r.toFixed(2) : 'n/a'}`,
-    `Spearman ρ(r,t): ${Number.isFinite(rho_r_t) ? rho_r_t.toFixed(2) : 'n/a'}`,
-  ];
-  const sideAnnots = sideStats.map((text, i) => ({
-    xref: 'paper', yref: 'paper',
-    x: 1.01, y: 1 - i * 0.07,            // tighter spacing
-    xanchor: 'left', yanchor: 'top',
-    showarrow: false,
-    text,
-    font: { size: 11 },                   // smaller font
-    align: 'left',
-  }));
-
   const layout = {
-    margin: { l: 60, r: 110, b: 48, t: 16 }, // ~half the previous right margin
+    margin: { l: 60, r: 20, b: 48, t: 16 },
     xaxis: { title: 'X', zeroline: false },
     yaxis: { title: 'Pressure', zeroline: false },
     showlegend: false,                      // remove legends
@@ -234,7 +216,6 @@ export function PressureVsX({
       y0: pMin, y1: pMax,
       line: { width: 1, dash: 'dot' },
     }] : [],
-    annotations: sideAnnots,
   };
 
   const config = { responsive: true, displayModeBar: false, scrollZoom: false };
