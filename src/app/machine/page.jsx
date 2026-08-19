@@ -492,6 +492,14 @@ export default function MachinePage() {
       } catch {}
     }
 
+    const cssPpi = +(devicePpi / (window.devicePixelRatio || 1)).toFixed(2);
+    let pathPx = 0;
+    for (let i = 1; i < drawingData.length; i++) {
+      const dx = drawingData[i].x - drawingData[i - 1].x;
+      const dy = drawingData[i].y - drawingData[i - 1].y;
+      pathPx += Math.sqrt(dx * dx + dy * dy);
+    }
+
     const { data: savedDrawing, error } = await withTimeout(
       supabase
         .from("drawings")
@@ -500,7 +508,8 @@ export default function MachinePage() {
           email,
           username,
           drawing_data: drawingData,
-          css_ppi: +(devicePpi / (window.devicePixelRatio || 1)).toFixed(2),
+          css_ppi: cssPpi,
+          path_length_cm: +((pathPx * 2.54) / cssPpi).toFixed(2),
           session_id: sessionId,
           is_anonymous: !isAuthenticated,
           hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
