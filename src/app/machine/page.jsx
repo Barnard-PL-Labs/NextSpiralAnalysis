@@ -500,6 +500,7 @@ export default function MachinePage() {
           email,
           username,
           drawing_data: drawingData,
+          css_ppi: +(devicePpi / (window.devicePixelRatio || 1)).toFixed(2),
           session_id: sessionId,
           is_anonymous: !isAuthenticated,
           hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null

@@ -343,6 +343,7 @@ export default function UnifiedResultPage() {
   const [loadingResult, setLoadingResult] = useState(true);
   const [error, setError] = useState(null);
   const [drawData, setDrawData] = useState([]);
+  const [drawPpi, setDrawPpi] = useState(undefined);
   const [result, setResult] = useState(null);
   const [speedData, setSpeedData] = useState([]);
   const [angleData, setAngleData] = useState([]);
@@ -358,8 +359,10 @@ export default function UnifiedResultPage() {
   const updateCharts = (index, drawingsArray, resultsArray) => {
     const drawingData = drawingsArray[index]?.drawing_data;
     if (!drawingData) return;
+    const ppi = drawingsArray[index]?.css_ppi ?? undefined; // stored per drawing; charts fall back to iPad default
+    setDrawPpi(ppi);
     setDrawData(drawingData);
-    setSpeedData(calculateSpeed(drawingData));
+    setSpeedData(calculateSpeed(drawingData, ppi));
     setAngleData(processData(drawingData));
     setPData(CanIAvoidBugByThis(drawingData));
     const currentDrawing = drawingsArray[index];
@@ -656,7 +659,7 @@ export default function UnifiedResultPage() {
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12 }}>
                       {[
-                        { label: "ORIGINAL SPIRAL", content: <LineGraph data={drawData} /> },
+                        { label: "ORIGINAL SPIRAL", content: <LineGraph data={drawData} devicePpi={drawPpi} /> },
                         { label: "SPEED VS. TIME", content: <SpeedTimeChart speedData={speedData} /> },
                         { label: "3D SPIRAL VIEW", content: <SpiralPlot data={drawData} /> },
                         { label: "PRESSURE VS TIME", content: <PTChart data={drawData} /> },
