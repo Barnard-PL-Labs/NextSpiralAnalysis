@@ -660,8 +660,8 @@ export default function UnifiedResultPage() {
                         { label: "SPEED VS. TIME", content: <SpeedTimeChart speedData={speedData} /> },
                         { label: "3D SPIRAL VIEW", content: <SpiralPlot data={drawData} /> },
                         { label: "PRESSURE VS TIME", content: <PTChart data={drawData} /> },
-                        { label: "TREMOR AXES", content: loadingResult ? <p style={{ color: C.muted, fontSize: 13 }}>Loading tremor data...</p> : <TremorPolarPlot result={result} /> },
                         { label: "PRESSURE VS X", content: <PressureVsX data={drawData} bins={60} minPerBin={12} samplePoints={500} splitByQuadrant={false} /> },
+                        { label: "TREMOR AXES", content: loadingResult ? <p style={{ color: C.muted, fontSize: 13 }}>Loading tremor data...</p> : <TremorPolarPlot result={result} /> },
                       ].map(({ label, content }) => (
                         <div key={label} style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(199,210,254,0.5)", borderRadius: 14, boxShadow: "0 2px 12px rgba(99,102,241,0.06), 0 1px 3px rgba(0,0,0,0.03)", padding: "16px 16px 14px", display: "flex", flexDirection: "column", minHeight: 360 }}>
                           <div style={{ ...mono, fontSize: 9.5, letterSpacing: "0.12em", color: C.muted, marginBottom: 12, textTransform: "uppercase" }}>{label}</div>
