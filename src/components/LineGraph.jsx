@@ -13,15 +13,15 @@ const DEFAULT_CSS_PPI = 132;
 // drawings render at a comparable real-world scale. Expands if a spiral is larger.
 const ABS_SPAN_CM = 14;
 
-// View modes: Fit zooms to the spiral's extent (original behavior);
-// Actual Size uses a fixed cm window centered on the spiral.
+// View modes: Actual Size (default) uses a fixed cm window centered on the
+// spiral; Fit zooms to the spiral's extent.
 const MODES = {
-  fit:    { label: "Fit" },
   actual: { label: "Actual Size" },
+  fit:    { label: "Fit" },
 };
 
 export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
-    const [mode, setMode] = useState("fit");
+    const [mode, setMode] = useState("actual");
 
     if (!data || data.length < 2) return (
         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#888" }}>
@@ -29,13 +29,21 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
         </div>
     );
 
+    // Convert to cm and re-origin at the spiral's center, so 0 on each axis is
+    // the middle of the spiral ("cm from center") rather than the arbitrary
+    // canvas corner the drawing happened to be placed against.
     const pxToCm = 2.54 / devicePpi;
-    const points = data.map((p) => ({ ...p, x: p.x * pxToCm, y: p.y * pxToCm }));
+    const rawCm = data.map((p) => ({ x: p.x * pxToCm, y: p.y * pxToCm }));
+    const rawXs = rawCm.map((p) => p.x);
+    const rawYs = rawCm.map((p) => p.y);
+    const originX = (Math.min(...rawXs) + Math.max(...rawXs)) / 2;
+    const originY = (Math.min(...rawYs) + Math.max(...rawYs)) / 2;
+    const points = data.map((p, i) => ({ ...p, x: rawCm[i].x - originX, y: rawCm[i].y - originY }));
 
     const xs = points.map((p) => p.x);
     const ys = points.map((p) => p.y);
-    const centerX = (Math.min(...xs) + Math.max(...xs)) / 2;
-    const centerY = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const centerX = 0;
+    const centerY = 0;
 
     // Actual Size: same fixed span on both axes, centered on the spiral,
     // grown if the spiral exceeds the default window. Bounds snap outward to
@@ -103,11 +111,11 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
                         <CartesianGrid strokeDasharray="3 3" stroke="gray" />
 
                         <XAxis type="number" dataKey="x" name="X" domain={axes.x.domain} ticks={axes.x.ticks} tickFormatter={(v) => (Number.isInteger(v) ? String(v) : v.toFixed(1))}>
-                            <Label value="X Coordinate (cm)" offset={-20} position="insideBottom" fill="black" />
+                            <Label value="X (cm from center)" offset={-20} position="insideBottom" fill="black" />
                         </XAxis>
 
                         <YAxis type="number" dataKey="y" name="Y" reversed={true} domain={axes.y.domain} ticks={axes.y.ticks} tickFormatter={(v) => (Number.isInteger(v) ? String(v) : v.toFixed(1))}>
-                            <Label value="Y Coordinate (cm)" angle={-90} position="insideLeft" style={{ textAnchor: "middle" }} fill="black" />
+                            <Label value="Y (cm from center)" angle={-90} position="insideLeft" style={{ textAnchor: "middle" }} fill="black" />
                         </YAxis>
 
                         <Tooltip
