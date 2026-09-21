@@ -37,7 +37,7 @@ const palette = {
 const steps = [
   { n: "01", title: "Draw a spiral", body: "An Archimedean spiral on a tablet — no wires, no special hardware." },
   { n: "02", title: "Click to analyze the trace", body: "Every point (x, y, pressure, time) is transformed into severity, smoothness, speed, tremor, pressure, and consistency indices." },
-  { n: "03", title: "Track over time", body: "Create an account to save each drawing as an objective baseline — this lets us store your history and surface subtle changes session over session." },
+  { n: "03", title: "Track over time", body: "If you create an account to save your drawings, your baseline and subsequent spiral drawings can be used for comparisons to track your symptoms." },
 ];
 
 
@@ -69,11 +69,6 @@ export default function Home() {
 
           <div style={{ maxWidth: "1180px", margin: "0 auto", padding: "104px 32px 96px", position: "relative" }}>
             <div style={{ maxWidth: "660px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "9px", fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent-ink)", background: "var(--accent-soft)", padding: "7px 13px", borderRadius: "100px", marginBottom: "26px" }}>
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--teal)", flexShrink: 0 }} />
-                SPIRAL ANALYSIS
-              </div>
-
               <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.1, letterSpacing: "-0.03em", margin: "0 0 22px", color: "var(--ink)" }}>
                 {researcherMode
                   ? "Spiral Analysis Tool"
@@ -111,16 +106,15 @@ export default function Home() {
         {/* ── HOW IT WORKS ── */}
         <div id="how" style={{ background: "var(--ink)", color: "#fff", padding: "96px 32px" }}>
           <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", letterSpacing: "0.16em", color: "#8FB4EE", marginBottom: "14px" }}>HOW IT WORKS</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "20px", letterSpacing: "0.16em", color: "#8FB4EE", marginBottom: "18px" }}>HOW IT WORKS</div>
             <h2 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "42px", lineHeight: 1.06, letterSpacing: "-0.025em", margin: "0 0 52px", maxWidth: "520px" }}>
               From pen stroke to longitudinal record in three steps.
             </h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px", overflow: "hidden" }}>
               {steps.map((step, i) => (
                 <div key={step.n} style={{ padding: "38px 32px", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "13px", color: "#8FB4EE", marginBottom: "22px" }}>{step.n}</div>
-                  <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "22px", marginBottom: "10px" }}>{step.title}</div>
-                  <div style={{ fontSize: "14.5px", lineHeight: 1.6, color: "#B9C6D4" }}>{step.body}</div>
+                  <div style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "25px", marginBottom: "12px" }}>{step.title}</div>
+                  <div style={{ fontSize: "17px", lineHeight: 1.65, color: "#B9C6D4" }}>{step.body}</div>
                 </div>
               ))}
             </div>
@@ -131,7 +125,6 @@ export default function Home() {
         <div id="evidence" style={{ background: "var(--bg)", color: "var(--ink)", borderTop: "1px solid var(--line)" }}>
           <div style={{ maxWidth: "1180px", margin: "0 auto", padding: "92px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
             <div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", letterSpacing: "0.16em", color: "var(--accent)", marginBottom: "16px" }}>GROUNDED IN RESEARCH</div>
               <h2 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "40px", lineHeight: 1.08, letterSpacing: "-0.025em", margin: "0 0 20px", color: "var(--ink)" }}>
                 Based on clinically validated methods.
               </h2>

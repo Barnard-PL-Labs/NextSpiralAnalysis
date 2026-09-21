@@ -229,7 +229,7 @@ export default function LearnMorePage() {
                   { n: "01", body: <><strong>3–4 complete revolutions</strong> on the canvas with a mouse or touchscreen.</> },
                   { n: "02", body: <>Keep the spiral as round and evenly spaced as possible, at a <strong>consistent speed and pressure</strong>.</> },
                   { n: "03", body: <>For best results, draw in a <strong>single, continuous motion</strong>. Click Save to proceed to the next drawing.</> },
-                  { n: "04", body: <>Click <strong>Finish Analysis</strong> to process your spirals, then review the results and graphs.</> },
+                  { n: "04", body: <>Click <strong>Start Analysis</strong> to process your spirals, then review the results and graphs.</> },
                   { n: "05", body: <>Compare results over time to <strong>track changes</strong> in motor function.</> },
                 ].map((s, i) => (
                   <div key={s.n} className={`${styles.step} ${i % 2 === 0 ? styles.stepOdd : styles.stepEven}`}>

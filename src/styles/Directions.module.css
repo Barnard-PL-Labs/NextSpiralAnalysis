@@ -248,30 +248,32 @@
 
 .pillBlue {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  padding: 3px 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 4px 9px;
   border-radius: 5px;
   background: var(--color-blue-bg);
-  color: var(--color-blue-dark);
+  color: #12306E;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .pillGray {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  padding: 3px 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 4px 9px;
   border-radius: 5px;
   background: #EEF2F6;
-  color: #4A5A6A;
+  color: #1B2836;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .metricBody {
   font-family: 'Public Sans', sans-serif;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.65;
   color: #37485A;
   margin: 0 0 12px;
   flex: 1;
@@ -287,9 +289,9 @@
 
 .metricRangeLabel {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 11.5px;
+  font-size: 13.5px;
   letter-spacing: 0.08em;
-  color: #4A5A6A;
+  color: #1B2836;
   text-transform: uppercase;
   flex: 1;
 }

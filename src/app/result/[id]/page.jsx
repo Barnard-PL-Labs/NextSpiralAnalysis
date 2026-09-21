@@ -175,10 +175,10 @@ function TremorAxesSplit({ drawings, typedResults }) {
           <div style={{ minHeight: 0 }}>
             <Plot data={traces} layout={mkLayout()} config={{ displayModeBar: false, responsive: true }} style={{ width: "100%", height: "100%" }} />
           </div>
-          <div style={{ textAlign: "center", fontSize: 11, color: C.muted, paddingTop: 6 }}>{caption}</div>
+          <div style={{ textAlign: "center", fontSize: 12.5, color: "#000", paddingTop: 6 }}>{caption}</div>
         </div>
       ) : (
-        <div style={{ width: "100%", height: 320, display: "flex", alignItems: "center", justifyContent: "center", color: C.muted, textAlign: "center", fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}>No axes yet.</div>
+        <div style={{ width: "100%", height: 320, display: "flex", alignItems: "center", justifyContent: "center", color: "#000", textAlign: "center", fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 700 }}>No tremor</div>
       )}
     </div>
   );
@@ -228,14 +228,14 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
 
   const HeroStat = ({ label, value, valueColor }) => (
     <div style={{ flex: 1, padding: "0 20px" }}>
-      <div style={{ ...mono, fontSize: 9.5, letterSpacing: "0.1em", color: "#A8B8CC", marginBottom: 5 }}>{label}</div>
-      <div style={{ ...manrope, fontWeight: 700, fontSize: 18, color: valueColor || "#fff" }}>{value}</div>
+      <div style={{ ...mono, fontSize: 12, letterSpacing: "0.1em", color: "#DCE6F2", marginBottom: 5 }}>{label}</div>
+      <div style={{ ...manrope, fontWeight: 700, fontSize: 20, color: valueColor || "#fff" }}>{value}</div>
     </div>
   );
 
   const HandMetric = ({ label, value }) => (
     <div>
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 14, color: "#000", marginBottom: 5 }}>{label}</div>
       <div style={{ ...mono, fontSize: 20, fontWeight: 500, color: C.ink }}>{value}</div>
     </div>
   );
@@ -253,7 +253,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
             <div style={{ width: 26, height: 26, borderRadius: 7, background: letterBg, display: "flex", alignItems: "center", justifyContent: "center", ...manrope, fontWeight: 700, fontSize: 11, color: letterColor }}>{side}</div>
             <span style={{ ...manrope, fontWeight: 700, fontSize: 14, color: C.ink }}>{side === "L" ? "Left Hand" : "Right Hand"}</span>
           </div>
-          <span style={{ ...mono, fontSize: 10, color: isActive ? C.teal : C.muted, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 20, padding: "3px 10px" }}>
+          <span style={{ ...mono, fontSize: 12, color: isActive ? C.teal : "#000", background: C.bg, border: `1px solid ${C.line}`, borderRadius: 20, padding: "3px 10px" }}>
             {isActive ? `${stats.completed} completed` : "No data"}
           </span>
         </div>
@@ -277,7 +277,7 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
             })}
           </div>
           <span style={{ ...mono, fontSize: 12, fontWeight: 500, color: isActive ? C.teal : C.muted }}>{stats.completed}/{stats.count}</span>
-          <span style={{ fontSize: 11, color: C.muted }}>processed</span>
+          <span style={{ fontSize: 12.5, color: "#000" }}>processed</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 16px" }}>
           <HandMetric label="Avg DOS" value={formatNum(stats.avgDOS, 4)} />
@@ -295,9 +295,9 @@ function SummaryPanel({ drawings, typedResults, perStatusCounts }) {
         {/* Dark hero */}
         <div style={{ background: C.hero, padding: "32px 40px 36px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9.5, letterSpacing: "0.14em", color: "#7A94AA" }}>SESSION RESULT</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, letterSpacing: "0.14em", color: "#C7D6E6" }}>SESSION RESULT</span>
             <span style={{ width: 1, height: 10, background: "rgba(255,255,255,0.08)" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9.5, color: "#7A94AA" }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "#C7D6E6" }}>
               {drawings[0]?.created_at ? new Date(drawings[0].created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
             </span>
             <span style={{ marginLeft: "auto", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#9EF2D6", background: "rgba(27,146,127,0.16)", border: "1px solid rgba(158,242,214,0.34)", borderRadius: 20, padding: "4px 12px", boxShadow: "0 0 18px rgba(27,146,127,0.24), inset 0 0 10px rgba(158,242,214,0.08)", textShadow: "0 0 10px rgba(158,242,214,0.45)" }}>
@@ -612,7 +612,7 @@ export default function UnifiedResultPage() {
                   <>
                     <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 0 rgba(0,0,0,0.03), 0 8px 24px -12px rgba(11,27,43,0.1)", marginBottom: 12 }}>
                       <div style={{ padding: "14px 24px", borderBottom: `1px solid ${C.line}`, display: "flex", alignItems: "center", gap: 16 }}>
-                        <span style={{ ...mono, fontSize: 9.5, letterSpacing: "0.14em", color: C.accent, flexShrink: 0 }}>INDIVIDUAL DRAWINGS</span>
+                        <span style={{ ...mono, fontSize: 12, letterSpacing: "0.1em", color: C.accent, flexShrink: 0 }}>INDIVIDUAL DRAWINGS</span>
                         <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                           {drawings.map((d, i) => {
                             const active = selectedDrawingIndex === i;
@@ -631,8 +631,8 @@ export default function UnifiedResultPage() {
                         </div>
                         {isReady && curTyped?.["Sampling frequency"] != null && (
                           <div style={{ marginLeft: "auto", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-                            <span style={{ ...mono, fontSize: 8, letterSpacing: "0.12em", color: C.muted, textTransform: "uppercase" }}>Sampling Rate</span>
-                            <span style={{ ...manrope, fontSize: 13, fontWeight: 600, color: C.muted }}>
+                            <span style={{ ...mono, fontSize: 11, letterSpacing: "0.08em", color: "#000", textTransform: "uppercase" }}>Sampling Rate</span>
+                            <span style={{ ...manrope, fontSize: 14, fontWeight: 600, color: "#000" }}>
                               {formatNum(curTyped["Sampling frequency"], 1)} Hz
                             </span>
                           </div>
@@ -649,7 +649,7 @@ export default function UnifiedResultPage() {
                           <div key={i} style={{ flex: 1, display: "flex", alignItems: "stretch" }}>
                             {i > 0 && <div style={{ width: 1, background: C.line, margin: "0 20px" }} />}
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 12, color: C.muted, marginBottom: 5 }}>{label}</div>
+                              <div style={{ fontSize: 14.5, color: "#000", marginBottom: 5 }}>{label}</div>
                               <div style={{ ...manrope, fontWeight: 700, fontSize: 22, letterSpacing: "-0.02em", color: valColor }}>{value}</div>
                             </div>
                           </div>
@@ -664,10 +664,10 @@ export default function UnifiedResultPage() {
                         { label: "3D SPIRAL VIEW", content: <SpiralPlot data={drawData} /> },
                         { label: "PRESSURE VS TIME", content: <PTChart data={drawData} /> },
                         { label: "PRESSURE VS X", content: <PressureVsX data={drawData} bins={60} minPerBin={12} samplePoints={500} splitByQuadrant={false} /> },
-                        { label: "TREMOR AXES", content: loadingResult ? <p style={{ color: C.muted, fontSize: 13 }}>Loading tremor data...</p> : <TremorPolarPlot result={result} /> },
+                        { label: "Tremor frequency, amplitude, and axis direction", content: loadingResult ? <p style={{ color: C.muted, fontSize: 13 }}>Loading tremor data...</p> : <TremorPolarPlot result={result} /> },
                       ].map(({ label, content }) => (
                         <div key={label} style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(199,210,254,0.5)", borderRadius: 14, boxShadow: "0 2px 12px rgba(99,102,241,0.06), 0 1px 3px rgba(0,0,0,0.03)", padding: "16px 16px 14px", display: "flex", flexDirection: "column", minHeight: 360 }}>
-                          <div style={{ ...mono, fontSize: 9.5, letterSpacing: "0.12em", color: C.muted, marginBottom: 12, textTransform: "uppercase" }}>{label}</div>
+                          <div style={{ ...mono, fontSize: 13, letterSpacing: "0.04em", color: "#000", fontWeight: 600, marginBottom: 12 }}>{label}</div>
                           <div style={{ flex: 1, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(180deg,rgba(248,250,252,0.95),rgba(255,255,255,0.98))", border: "1px solid rgba(226,232,240,0.8)", borderRadius: 10, padding: 8 }}>
                             {content}
                           </div>

@@ -300,7 +300,7 @@ export default function MachinePage() {
     }
     if (currentDrawing.length < 150) {
       alert(
-        "Your spiral doesn't have enough points for accurate analysis. Please draw a spiral that:\n\n• Makes at least 3-4 complete revolutions\n• Fills most of the drawing area\n• Is drawn in a continuous motion"
+        "Not enough points for analysis. Please re-draw with 4-5 loops and take 4-5 seconds to complete each spiral."
       );
       return;
     }
@@ -669,7 +669,7 @@ export default function MachinePage() {
 	    {/* Demographics toggle */}
 	    <div className={`${styles.demographicsRow} ${showDemographics ? styles.demographicsRowOpen : ""}`} onClick={() => setShowDemographics(prev => !prev)}>
 	      <input type="checkbox" className={styles.demographicsCheckbox} checked={showDemographics} readOnly onChange={() => {}} />
-	      <span className={styles.demographicsLabel}>Include optional demographics</span>
+	      <span className={styles.demographicsLabel}>Include demographics</span>
 	    </div>
 
     {/* Inline demographics panel */}
@@ -837,7 +837,7 @@ export default function MachinePage() {
       disabled={!dominantHandSide || !selectedHandSide}
       className={styles.continueButton}
     >
-      Continue to Spiral Analysis →
+      Begin the Test
     </button>
 
   </div>
@@ -847,10 +847,9 @@ export default function MachinePage() {
           {/* Title + Canvas + Controls */}
           {showCanvas && (
             <>
-              <h1 className={styles.title} style={{ marginBottom: 6, fontSize: "1.85rem" }}>Draw Your Spiral</h1>
-              <p style={{ color: "#545e6f", fontSize: "1.15rem", fontWeight: 600, marginBottom: 28, marginTop: 0 }}>
-                Select your preferences and draw a spiral from the center outward
-              </p>
+              <h1 className={styles.title} style={{ marginBottom: 28, fontSize: "1.15rem", lineHeight: 1.55, maxWidth: 640 }}>
+                Draw spirals in the 10x10 cm box below. Click Save after each drawing you want to keep. Click Start Analysis after you have saved all the spiral drawings
+              </h1>
 
               {/* White card containing controls + canvas + action buttons */}
 <div className={styles.drawingCard} style={!deviceRecognized && !warningAcknowledged ? {
@@ -959,7 +958,7 @@ export default function MachinePage() {
                   <div style={{ display: "flex", gap: 8 }}>
                     {!userFinished && savedDrawings.length > 0 && (
                       <button className={styles.button} onClick={handleFinishEarly}>
-                        Finish Analysis
+                        Start Analysis
                         <span className={styles.countBadge}>{savedDrawings.length}</span>
                       </button>
                     )}

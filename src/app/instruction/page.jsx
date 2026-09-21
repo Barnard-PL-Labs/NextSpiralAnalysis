@@ -18,7 +18,7 @@ const METRICS = [
     body: "A comprehensive measure of overall spiral drawing performance that correlates with a 0 - 4 clinical rating scale.",
   },
   {
-    name: "Smoothness",
+    name: "2nd Order Smoothness",
     pill: "< −4", type: "blue",
     body: "Evaluates the continuity and fluidity of the drawn spiral, reflecting the steadiness of hand movements.",
   },
@@ -38,22 +38,24 @@ const METRICS = [
     body: "Measures the velocity of drawing at different points in the spiral, providing insights into motor planning and execution.",
   },
   {
-    name: "Frequency Analysis",
+    name: "Tremor Analysis",
     pill: "None or low amplitude tremor", type: "gray",
     body: "Measure the amplitude, rhythm and axis components of the spiral drawing. This can help identify specific types of tremors.",
+  },
+  {
+    name: "COV of Width",
+    pill: "< 0.25", type: "blue",
+    body: "A measure of loop-to-loop variability that correlates with ataxia or unsteadiness.",
   },
 ];
 
 const STEPS = [
-  { text: <>Draw about <strong>4-5 complete revolutions</strong>.</> },
-  { text: <>Using a tablet and stylus, draw a spiral within the 10x10 box.</> },
-  { text: <>Try to make the spiral as evenly spaced as possible.</> },
-  { text: <>Try to maintain a consistent drawing speed and pressure.</> },
-  { text: <>For best results, try to <strong>draw in a single, continuous motion</strong>.</> },
-  { text: <>Click Save to proceed on to the next drawing.</> },
-  { text: <>Click the &ldquo;Finish Analysis&rdquo; button to process your spiral.</> },
-  { text: <>Review the results and graphs provided for insights into your upper limb motor control.</> },
-  { text: <>Compare your results over time to track changes in your motor function!</> },
+  { text: <>Using your finger on a mouse pad, or a stylus on a tablet, draw spirals within the 10x10 cm box.</> },
+  { text: <>Start from the center of the box and draw spirals of about 4-5 loops.</> },
+  { text: <>Be sure to draw for about 4-5 seconds to complete each spiral.</> },
+  { text: <>Try to make the loops as evenly spaced as possible.</> },
+  { text: <>Click &ldquo;Save&rdquo; after each spiral drawing.</> },
+  { text: <>Click &ldquo;Analyze&rdquo; when you have finished.</> },
 ];
 
 export default function DirectionsPage() {
@@ -90,26 +92,9 @@ export default function DirectionsPage() {
                 Spiral Analysis is based on &ldquo;unraveling&rdquo; the two-dimensional drawn spiral picture into a data series that captures its original kinematic information and allows for further computational manipulations and clinical correlations. Spiral data are collected in the X, Y and pressure axes providing virtual &ldquo;tri-axial&rdquo; recordings. This effectively extends spiral drawing - a standard clinical test - into an objective and accurate measure of motor control. Mathematical formulations are used to create indices that quantify the kinematic parameters, and assess many spiral features including overall degree of severity, shape, drawing speed, tightness of loops, irregularity and tremor. Over 70 indices are created, and multiple spirals can be averaged.
               </p>
               <p className={styles.bodyText}>
-                Spiral Analysis provides additional accuracy and objectivity than the clinical exam alone. It has already been used to study the details of normal motor control, to quantify normal and abnormal motor development and analyze movement disorders such as Parkinson&apos;s disease, tremors, dystonia, ataxia and functional movements. Because of its precision and reproducibility, Spiral Analysis is also useful in quantifying changes before and after medical or surgical treatments.
+                Spiral Analysis provides accuracy and objectivity to the clinical exam. It has already been used to study the details of normal motor control, to quantify normal and abnormal motor development and analyze movement disorders such as Parkinson&apos;s disease, tremors, dystonia, ataxia and functional movements. Spiral Analysis is also useful in quantifying changes before and after medical, surgical, and other treatments.
               </p>
 
-              <p className={styles.cardGroupLabel}>Why use it</p>
-              <div className={styles.benefitGrid}>
-                {[
-                  "Standard neurological test",
-                  "No time constraints",
-                  "Non-invasive: no attachments, no wires",
-                  "Visuomotor task—with/without feedback",
-                  "Free-form, or trace path",
-                  "Distal and proximal muscles",
-                  "Multi-jointed task",
-                ].map((text) => (
-                  <div key={text} className={styles.benefitCard}>
-                    <div className={styles.bullet} />
-                    <span className={styles.benefitText}>{text}</span>
-                  </div>
-                ))}
-              </div>
             </section>
 
             {/* 02 — How to use */}

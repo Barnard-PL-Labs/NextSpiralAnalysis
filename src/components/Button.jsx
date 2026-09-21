@@ -12,7 +12,7 @@ export default function Buttons({
     <div className={styles.buttonContainer}>
       {!userFinished && !isProcessingFinal && savedDrawingsCount > 0 && (
         <button className={styles.button} onClick={onFinishEarly}>
-          Finish Analysis
+          Start Analysis
           <span className={styles.countBadge}>{savedDrawingsCount}</span>
         </button>
       )}

@@ -188,6 +188,45 @@ export default function LoginModal({ isOpen, closeModal, initialMessage = "" }) 
                   : "Login"}
               </h2>
 
+              {/* Short how-to so first-time users know what the flow is */}
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.82rem",
+                  lineHeight: 1.55,
+                  color: "var(--color-text-secondary, #4A5A6A)",
+                  textAlign: "left",
+                  maxWidth: 420,
+                  margin: "0 auto 14px",
+                }}
+              >
+                {isForgot ? (
+                  <ol style={{ margin: 0, paddingLeft: "1.2rem", listStyle: "decimal outside" }}>
+                    <li>Enter the email address you signed up with.</li>
+                    <li>Click <strong>Send Reset Email</strong>.</li>
+                    <li>Open the link in that email to choose a new password, then come back and log in.</li>
+                  </ol>
+                ) : signupMode ? (
+                  <ol style={{ margin: 0, paddingLeft: "1.2rem", listStyle: "decimal outside" }}>
+                    <li>Enter your name, email, and a password of at least 6 characters.</li>
+                    <li>Click <strong>Create Account</strong>.</li>
+                    <li>
+                      Open the confirmation email we send you and click its link. You must confirm
+                      your email before you can log in. Check your spam folder if it does not arrive.
+                    </li>
+                  </ol>
+                ) : (
+                  <ol style={{ margin: 0, paddingLeft: "1.2rem", listStyle: "decimal outside" }}>
+                    <li>Enter the email address and password you used to sign up, then click <strong>Login</strong>.</li>
+                    <li>
+                      No account yet? Click <strong>Sign Up</strong>, then confirm your email using
+                      the link we send you before logging in.
+                    </li>
+                    <li>Forgot your password? Use <strong>Forgot Password?</strong> to get a reset link by email.</li>
+                  </ol>
+                )}
+              </div>
+
               <div className="modal-form-wrapper">
                 <div className="modal-form">
                   {message && (

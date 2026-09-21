@@ -283,7 +283,8 @@ const TremorPolarPlot = ({ result }) => {
       },
       bgcolor: "rgba(0,0,0,0.1)",
     },
-    margin: { l: 2, r: 20, b: 20, t: 30 },
+    // Extra right/top room so the always-on readout does not cover the axis.
+    margin: { l: 2, r: 64, b: 20, t: 52 },
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
@@ -358,6 +359,7 @@ const TremorPolarPlot = ({ result }) => {
       style={{
         width: "100%",
         height: "100%",
+        position: "relative",
         textAlign: "center",
         color: "#333",
         fontFamily: "monospace",
@@ -369,18 +371,46 @@ const TremorPolarPlot = ({ result }) => {
       }}
     >
       {hasAxes ? (
-        <div style={{ width: "100%", height: "100%", minHeight: "140px" }}>
-          <Plot
-            data={plotData}
-            layout={layout}
-            config={{ displayModeBar: false, responsive: true }}
-            style={{ width: "100%", height: "100%", minHeight: "140px" }}
-          />
-        </div>
+        <>
+          {/* Dominant-axis readout, always visible (no hover needed) */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              zIndex: 5,
+              textAlign: "left",
+              background: "rgba(255,255,255,0.92)",
+              border: "1px solid #cbd5e1",
+              borderRadius: 8,
+              padding: "5px 8px",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              lineHeight: 1.5,
+              color: "#111827",
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 2 }}>{clinicalMetrics.title}</div>
+            {clinicalMetrics.data.map(({ label, value }) => (
+              <div key={label}>
+                {label}: <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+          <div style={{ width: "100%", height: "100%", minHeight: "140px" }}>
+            <Plot
+              data={plotData}
+              layout={layout}
+              config={{ displayModeBar: false, responsive: true }}
+              style={{ width: "100%", height: "100%", minHeight: "140px" }}
+            />
+          </div>
+        </>
       ) : (
         <div
           style={{
-            color: "#333",
+            color: "#111827",
             fontSize: "16px",
             fontWeight: "bold",
             display: "flex",
@@ -390,7 +420,7 @@ const TremorPolarPlot = ({ result }) => {
             width: "100%",
           }}
         >
-          No tremor axes detected
+          No tremor
         </div>
       )}
     </div>

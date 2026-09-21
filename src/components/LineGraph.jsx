@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
+import { useEffect, useRef, useState } from "react";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, ReferenceArea } from "recharts";
 
 const LEFT_COLOR  = "#3b82f6";  // blue
 const RIGHT_COLOR = "#ec80ff";  // light pink
@@ -13,6 +13,10 @@ const DEFAULT_CSS_PPI = 132;
 // drawings render at a comparable real-world scale. Expands if a spiral is larger.
 const ABS_SPAN_CM = 14;
 
+// The drawing canvas is a 10 cm x 10 cm square; outline it so the spiral can be
+// read against the box it was actually drawn in.
+const BOX_HALF_CM = 5;
+
 // View modes: Actual Size (default) uses a fixed cm window centered on the
 // spiral; Fit zooms to the spiral's extent.
 const MODES = {
@@ -20,8 +24,26 @@ const MODES = {
   fit:    { label: "Fit" },
 };
 
+const BASE_MARGIN = { top: 20, right: 30, bottom: 30, left: 20 };
+
 export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
     const [mode, setMode] = useState("actual");
+    const chartBoxRef = useRef(null);
+    const [boxSize, setBoxSize] = useState(null);
+
+    // Track the chart box so Actual Size can pad the margins into a square
+    // plotting area — otherwise 1 cm on X wouldn't equal 1 cm on Y and the
+    // 10x10 cm reference box would render as a rectangle.
+    useEffect(() => {
+        const el = chartBoxRef.current;
+        if (!el || typeof ResizeObserver === "undefined") return;
+        const obs = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect;
+            setBoxSize({ width, height });
+        });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
 
     if (!data || data.length < 2) return (
         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#888" }}>
@@ -38,7 +60,7 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
     const rawYs = rawCm.map((p) => p.y);
     const originX = (Math.min(...rawXs) + Math.max(...rawXs)) / 2;
     const originY = (Math.min(...rawYs) + Math.max(...rawYs)) / 2;
-    const points = data.map((p, i) => ({ ...p, x: rawCm[i].x - originX, y: rawCm[i].y - originY }));
+    const points = data.map((p, i) => ({ ...p, x: rawCm[i].x - originX, y: -(rawCm[i].y - originY) }));
 
     const xs = points.map((p) => p.x);
     const ys = points.map((p) => p.y);
@@ -60,6 +82,20 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
         for (let t = lo; t <= hi; t += 2) ticks.push(t);
         return { domain: [lo, hi], ticks };
     };
+    // Equal cm-per-pixel on both axes in Actual Size mode.
+    const margin = (() => {
+        if (mode !== "actual" || !boxSize) return BASE_MARGIN;
+        const plotW = boxSize.width - BASE_MARGIN.left - BASE_MARGIN.right;
+        const plotH = boxSize.height - BASE_MARGIN.top - BASE_MARGIN.bottom;
+        if (!(plotW > 0) || !(plotH > 0)) return BASE_MARGIN;
+        if (plotW > plotH) {
+            const pad = (plotW - plotH) / 2;
+            return { ...BASE_MARGIN, left: BASE_MARGIN.left + pad, right: BASE_MARGIN.right + pad };
+        }
+        const pad = (plotH - plotW) / 2;
+        return { ...BASE_MARGIN, top: BASE_MARGIN.top + pad, bottom: BASE_MARGIN.bottom + pad };
+    })();
+
     const axes = mode === "actual"
         ? { x: evenWindow(centerX), y: evenWindow(centerY) }
         : { x: { domain: ["auto", "auto"] }, y: { domain: ["auto", "auto"] } };
@@ -105,16 +141,16 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
                 })}
             </div>
 
-            <div style={{ width: "100%", height: "100%", paddingTop: 32 }}>
+            <div ref={chartBoxRef} style={{ width: "100%", height: "100%", paddingTop: 32 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={{ top: 20, right: 30, bottom: 30, left: 20 }}>
+                    <ScatterChart margin={margin}>
                         <CartesianGrid strokeDasharray="3 3" stroke="gray" />
 
                         <XAxis type="number" dataKey="x" name="X" domain={axes.x.domain} ticks={axes.x.ticks} tickFormatter={(v) => (Number.isInteger(v) ? String(v) : v.toFixed(1))}>
                             <Label value="X (cm from center)" offset={-20} position="insideBottom" fill="black" />
                         </XAxis>
 
-                        <YAxis type="number" dataKey="y" name="Y" reversed={true} domain={axes.y.domain} ticks={axes.y.ticks} tickFormatter={(v) => (Number.isInteger(v) ? String(v) : v.toFixed(1))}>
+                        <YAxis type="number" dataKey="y" name="Y" domain={axes.y.domain} ticks={axes.y.ticks} tickFormatter={(v) => (Number.isInteger(v) ? String(v) : v.toFixed(1))}>
                             <Label value="Y (cm from center)" angle={-90} position="insideLeft" style={{ textAnchor: "middle" }} fill="black" />
                         </YAxis>
 
@@ -122,6 +158,18 @@ export default function LineGraph({ data, devicePpi = DEFAULT_CSS_PPI }) {
                             cursor={{ strokeDasharray: "3 3" }}
                             formatter={(value, name) => [`${value.toFixed(2)} cm`, name]}
                         />
+
+                        {mode === "actual" && (
+                            <ReferenceArea
+                                x1={-BOX_HALF_CM} x2={BOX_HALF_CM}
+                                y1={-BOX_HALF_CM} y2={BOX_HALF_CM}
+                                stroke="#4b5563"
+                                strokeWidth={1}
+                                fill="none"
+                                fillOpacity={0}
+                                ifOverflow="extendDomain"
+                            />
+                        )}
 
                         {segments.map((seg, i) => (
                             <Scatter

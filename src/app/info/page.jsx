@@ -28,10 +28,12 @@ const developer = [
   { name: "Qiping Yu",               degree: "PhD"  },
   { name: "Jianqin Qu",              degree: "MS"   },
   { name: "Mehmet Can Isik",         degree: "MEng" },
+  { name: "Hongzhi Wang",            degree: "PhD"  },
   { name: "Alicia Floyd",            degree: "MD"   },
   { name: "Annie Hsu",               degree: "MD"   },
   { name: "Audrey Rakovich Seville", degree: "BA"   },
   { name: "Jonathan A. Sisti",       degree: "MD"   },
+  { name: "Yunde Shi",               degree: "MS"   },
   { name: "Alisha Chang",            degree: "BA"   },
   { name: "Eileen Zalavarria",       degree: "BA"   },
 ];
@@ -58,11 +60,11 @@ export default function TeamPage() {
       <main className={styles.aboutPage}>
         {/* Hero */}
         <div className={styles.content} style={{ paddingTop: "56px", paddingBottom: "56px" }}>
-          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "56px", lineHeight: 1.1, letterSpacing: "-0.03em", color: "#0B1B2B", margin: "0 0 16px" }}>
+          <h1 style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "28px", lineHeight: 1.15, letterSpacing: "-0.02em", color: "#0B1B2B", margin: "0 0 16px" }}>
             Origin
           </h1>
-          <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "19px", lineHeight: 1.6, color: "#37485A", maxWidth: 600, margin: 0 }}>
-            Spiral Analysis was orginally designed in the Clinical Motor Physiology Laboratory, Department of Neurology, Columbia University Irving Medical Center.
+          <p style={{ fontFamily: "'Public Sans', sans-serif", fontSize: "16.5px", lineHeight: 1.7, color: "#37485A", maxWidth: 640, margin: 0 }}>
+            Spiral Analysis was originally designed and developed in the Clinical Motor Physiology Laboratory at the Columbia University Irving Medical Center. The online version was developed in the Department of Computer Science at Barnard College, Columbia University.
           </p>
         </div>
 

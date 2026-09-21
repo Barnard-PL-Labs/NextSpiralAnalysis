@@ -135,7 +135,7 @@ const Tutorial = ({ onClose, forceShow = false }) => {
             {currentPage === 2 && (
               <div className={styles.fakeButtons}>
                 <button className={styles.fakeFinishButton}>
-                  Finish Analysis
+                  Start Analysis
                   <span className={styles.fakeCountBadge}>1</span>
                 </button>
                 <button className={styles.fakeSaveButton}>Save</button>
