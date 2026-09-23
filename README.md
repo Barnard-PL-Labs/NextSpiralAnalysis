@@ -91,26 +91,29 @@ To grant superuser access, insert emails into the `app_superusers` table:
 INSERT INTO app_superusers (email) VALUES ('admin@example.com');
 ```
 
-Also set the `NEXT_PUBLIC_SUPERUESERS` environment variable (in Vercel or `.env.local`) with the superuser emails.
+Also set the `SUPERUSER_EMAILS` environment variable (in Vercel or `.env.local`)
+with a comma-separated list of the superuser emails.
+
+> **Note:** this variable must **not** have a `NEXT_PUBLIC_` prefix. It is read
+> only by server-side code (`src/lib/superusers.js`); a `NEXT_PUBLIC_` version
+> would be inlined into the browser bundle and publish everyone's address.
+>
+> The table and the environment variable are currently two separate, unconnected
+> mechanisms — see [DEPLOY.md](./DEPLOY.md#superusers) before changing either.
 
 ## Deployment
 
-We use [Vercel](https://vercel.com) for deployment.
-
-### Install & log in to the Vercel CLI
-
-```bash
-npm i -g vercel
-vercel login
-```
-
-### Deploy
+Hosted on [Vercel](https://vercel.com). **Pushing to `main` deploys to
+production automatically** — no CLI step required.
 
 ```bash
-vercel
+git push origin main      # builds and goes live in about a minute
 ```
 
-Set the Supabase environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPERUESERS`) in the Vercel dashboard under Project Settings > Environment Variables.
+See **[DEPLOY.md](./DEPLOY.md)** for environment variables, how to force a
+rebuild, rollbacks, Supabase auth URL configuration, and the gotchas worth
+knowing before you debug a deploy (notably: raw `*.vercel.app` URLs are behind
+SSO, and `NEXT_PUBLIC_*` values are frozen at build time).
 
 ## Project Structure
 
