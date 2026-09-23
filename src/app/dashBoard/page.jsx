@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authProvider";
+import { useSuperuser } from "@/lib/useSuperuser";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
 import Pagination from "../../components/Pagination";
@@ -65,15 +66,6 @@ const isFallbackPressureDrawing = (drawing) => {
   return fallbackCount / pressures.length >= 0.9;
 };
 
-const SUPERUSER_EMAILS = (
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
-  ""
-)
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter((email) => email !== "");
-
 const Dashboard = () => {
   const { user } = useAuth();
   const [entries, setEntries] = useState([]);
@@ -82,6 +74,7 @@ const Dashboard = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewAll, setViewAll] = useState(false);
+  const { isSuperuser, loading: superuserLoading } = useSuperuser(user);
   const [isMobile, setIsMobile] = useState(false);
   const [averageDOS, setAverageDOS] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -164,8 +157,6 @@ const Dashboard = () => {
         return;
       }
 
-      const isSuperuser = SUPERUSER_EMAILS.includes(user.email.toLowerCase());
-
       let query = supabase
         .from("api_results")
         .select(`
@@ -204,13 +195,15 @@ const Dashboard = () => {
       setLoading(false);
     };
 
-    fetchData();
+    // Hold off until the server has answered the superuser question, so the
+    // first query already has the right scope instead of running twice.
+    if (!superuserLoading) fetchData();
 
     const handleResize = () => setIsMobile(window.innerWidth <= 640);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [viewAll, user]);
+  }, [viewAll, user, isSuperuser, superuserLoading]);
 
   useEffect(() => {
     if (dosChartRef.current) {
@@ -224,7 +217,6 @@ const Dashboard = () => {
 
   const paginatedEntries = entries.slice(1).slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
   const pageCount = Math.max(1, Math.ceil((entries.length - 1) / entriesPerPage));
-  const isSuperuser = SUPERUSER_EMAILS.includes(user?.email?.toLowerCase() ?? "");
   const accountEmailPrefix = user?.email?.split("@")[0] || "";
 
   const getHandLabel = (handSide) => {

@@ -1,14 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-
-const SUPERUSER_EMAILS = (
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
-  ""
-)
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+import { isSuperuserEmail } from "@/lib/superusers";
 
 // Supabase caps each select at 1000 rows; page through to get every row.
 async function fetchAllRows(supabase, table, columns, applyFilters = (q) => q) {
@@ -40,7 +32,7 @@ export async function GET(req) {
     if (!token) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     const email = userData?.user?.email?.toLowerCase();
-    if (userError || !email || !SUPERUSER_EMAILS.includes(email)) {
+    if (userError || !email || !isSuperuserEmail(email)) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 

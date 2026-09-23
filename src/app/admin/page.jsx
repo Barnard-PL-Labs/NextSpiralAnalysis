@@ -2,16 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
+import { useSuperuser } from "@/lib/useSuperuser";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const SUPERUSER_EMAILS = (
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
-  process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
-  ""
-)
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
 
 const C = {
   bg: "#E8ECF5",
@@ -54,7 +46,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
-  const isSuperuser = SUPERUSER_EMAILS.includes(user?.email?.toLowerCase() ?? "");
+  const { isSuperuser, loading: checkingAccess } = useSuperuser(user);
 
   useEffect(() => {
     if (!isSuperuser) return;
@@ -73,6 +65,14 @@ export default function AdminPage() {
     };
     load();
   }, [isSuperuser]);
+
+  if (checkingAccess) {
+    return (
+      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
+        <p style={{ color: C.muted, fontSize: 14 }}>Checking access…</p>
+      </div>
+    );
+  }
 
   if (!user || !isSuperuser) {
     return (
