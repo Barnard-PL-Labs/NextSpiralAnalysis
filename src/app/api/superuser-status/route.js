@@ -19,5 +19,5 @@ export async function GET(req) {
   const email = data?.user?.email;
   if (error || !email) return NextResponse.json({ isSuperuser: false }, { status: 401 });
 
-  return NextResponse.json({ isSuperuser: isSuperuserEmail(email) });
+  return NextResponse.json({ isSuperuser: await isSuperuserEmail(email) });
 }

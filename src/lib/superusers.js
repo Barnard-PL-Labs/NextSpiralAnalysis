@@ -1,26 +1,54 @@
-// Server-only. Do NOT import this from a Client Component: the whole point is
-// that the superuser list never reaches the browser bundle.
+// Server-only. Do NOT import this from a Client Component.
 //
-// Reads SUPERUSER_EMAILS (server-only). The NEXT_PUBLIC_* names are kept as a
-// fallback so the app keeps working until that variable is retired in Vercel;
-// they are safe to read here because this module is only ever imported by
-// server code, so Next never inlines them into client output.
-const parseList = (raw) =>
-  (raw || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
+// The superuser list lives in the app_superusers table, which is the single
+// source of truth: the same table backs the is_superuser() SQL function that
+// the RLS policies on drawings and api_results call. Keeping the app and the
+// database on one list means the UI can no longer offer a view that RLS will
+// refuse to return.
+//
+// The table has RLS enabled with no policies, so it is readable only by the
+// service role (used here) and by is_superuser(), which is SECURITY DEFINER.
+// Membership therefore never reaches the browser -- the property the old
+// NEXT_PUBLIC_SUPERUSER_EMAILS variable could not provide, since anything with
+// that prefix is inlined into the client bundle.
+//
+// To grant access: INSERT INTO app_superusers (email) VALUES ('...'); no
+// redeploy needed. Addresses are stored lower case (enforced by a CHECK
+// constraint) because auth.email() is lower case.
+import { createClient } from "@supabase/supabase-js";
 
-export function superuserEmails() {
-  return parseList(
-    process.env.SUPERUSER_EMAILS ||
-      process.env.NEXT_PUBLIC_SUPERUSER_EMAILS ||
-      process.env.NEXT_PUBLIC_SUPERUSER_EMAIL ||
-      ""
-  );
+let client = null;
+
+function adminClient() {
+  if (client) return client;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) return null;
+  client = createClient(url, serviceKey, { auth: { persistSession: false } });
+  return client;
 }
 
-export function isSuperuserEmail(email) {
+// Fails closed: any misconfiguration or lookup error denies access rather than
+// granting it.
+export async function isSuperuserEmail(email) {
   if (!email) return false;
-  return superuserEmails().includes(email.toLowerCase());
+
+  const supabase = adminClient();
+  if (!supabase) {
+    console.error("[superusers] Missing Supabase credentials; denying access.");
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from("app_superusers")
+    .select("email")
+    .eq("email", email.trim().toLowerCase())
+    .maybeSingle();
+
+  if (error) {
+    console.error("[superusers] Lookup failed; denying access:", error.message);
+    return false;
+  }
+
+  return Boolean(data);
 }

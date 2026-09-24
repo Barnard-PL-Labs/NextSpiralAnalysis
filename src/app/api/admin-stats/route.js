@@ -32,7 +32,7 @@ export async function GET(req) {
     if (!token) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     const email = userData?.user?.email?.toLowerCase();
-    if (userError || !email || !isSuperuserEmail(email)) {
+    if (userError || !email || !(await isSuperuserEmail(email))) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 

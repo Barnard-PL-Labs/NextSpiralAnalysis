@@ -3,7 +3,7 @@
 How this app gets from a commit to `www.spiralanalysis.com`, and the things
 that have tripped people up.
 
-*Verified 2026-09-23.*
+*Verified 2026-09-24.*
 
 ## The short version
 
@@ -101,43 +101,66 @@ Then **redeploy** for it to take effect.
 
 ## Superusers
 
-> ⚠️ There are currently **two** unconnected superuser mechanisms, and they
-> disagree with each other. Read this before changing either.
+The `app_superusers` table is the **single source of truth**. Nothing else
+grants superuser access, and no redeploy is needed to change it.
 
-**1. `SUPERUSER_EMAILS` (env var) — drives the UI and the stats API.**
+```sql
+INSERT INTO app_superusers (email) VALUES ('someone@example.com');
+DELETE FROM app_superusers WHERE email = 'someone@example.com';
+```
 
-A comma-separated, case-insensitive list. Read only by
-`src/lib/superusers.js`, which is **server-only**. Consumers:
+Addresses are stored lower case; a CHECK constraint enforces it, because
+`auth.email()` is lower case.
 
+**How it hangs together:**
+
+- `is_superuser()` — a `SECURITY DEFINER` SQL function that looks the caller up
+  in the table. RLS policies on `drawings` and `api_results`
+  (`user_id = auth.uid() OR is_superuser()`) call it, so superusers can read
+  every row.
+- `src/lib/superusers.js` — server-only; reads the same table with the service
+  role key. Fails closed on any error.
 - `GET /api/superuser-status` — validates the caller's Supabase token and
   returns `{ isSuperuser }` about *that caller only*. Never returns the list.
-- `GET /api/admin-stats` — server-side authorization for the admin stats.
-- `src/lib/useSuperuser.js` — the client hook the `/admin` and `/dashBoard`
-  pages use, which just calls the route above.
+- `src/lib/useSuperuser.js` — the hook `/admin` and `/dashBoard` use, which just
+  calls that route.
 
-This used to be `NEXT_PUBLIC_SUPERUSER_EMAILS` compared inside Client
-Components, which published every maintainer's email address in the JS bundle.
-That variable has been removed. **Do not reintroduce a `NEXT_PUBLIC_` version.**
+**Why the table and not an environment variable.** The list used to live in
+`NEXT_PUBLIC_SUPERUSER_EMAILS`, which Next inlined into the JS bundle served to
+every visitor, publishing everyone's address. The table has RLS enabled with no
+policies, so only the service role and the definer function can read it —
+membership never reaches the browser. Do not reintroduce an env-var path.
 
-To grant access: update `SUPERUSER_EMAILS` in all three Vercel targets, then
-redeploy.
+> Historical note: before 2026-09-24 these were two separate mechanisms that had
+> drifted apart, and the table half had never worked. `is_superuser()` was
+> `SECURITY INVOKER`, so its own read of `app_superusers` was blocked by that
+> table's RLS and the function always returned `false`. Every "superuser or
+> owner" policy silently degraded to "owner": the UI offered a "view all"
+> toggle that returned nothing extra. Fixed in
+> `20260924135535_consolidate_superusers.sql`.
 
-**2. `app_superusers` (database table) — intended to drive RLS.**
+## Database migrations
 
-A table keyed by email, plus an `is_superuser()` function that **exists in the
-live database but is not present in `supabase/migrations/`** — the schema has
-drifted. No policy in the migrations references it.
+Migrations live in `supabase/migrations/` and are applied with the Supabase CLI:
 
-As of this writing the table holds exactly one address, which appears in
-**neither** the env list nor anywhere else in the app. The practical effect is
-that the dashboard's "view all" toggle is gated by the env list in the UI, while
-the rows actually returned are gated by RLS, which does not know about that
-list. Someone on the env list will see the toggle but may get only their own
-rows back.
+```bash
+supabase db push
+```
 
-Worth reconciling: pick one source of truth (the table is the better candidate,
-since RLS is the real boundary), capture `is_superuser()` and its policies in a
-migration, and delete the other path.
+**The live schema had drifted.** Several migrations were applied by hand without
+being recorded, and `is_superuser()` plus its policies existed in the database
+but in no migration file. That was reconciled on 2026-09-24: the function and
+policies are now captured in a migration, and
+`supabase_migrations.schema_migrations` was backfilled so the recorded history
+matches what is actually applied.
+
+If you apply something by hand, record it:
+
+```sql
+INSERT INTO supabase_migrations.schema_migrations (version) VALUES ('<version>');
+```
+
+Otherwise the next `supabase db push` will try to replay it and fail.
 
 ## Supabase auth configuration
 

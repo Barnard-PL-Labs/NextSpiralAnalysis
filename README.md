@@ -85,21 +85,20 @@ Create a **private** bucket called `avatars` in the Supabase dashboard (Storage 
 
 ### 5. Superusers
 
-To grant superuser access, insert emails into the `app_superusers` table:
+Superuser access is controlled entirely by the `app_superusers` table:
 
 ```sql
 INSERT INTO app_superusers (email) VALUES ('admin@example.com');
 ```
 
-Also set the `SUPERUSER_EMAILS` environment variable (in Vercel or `.env.local`)
-with a comma-separated list of the superuser emails.
+That is the only step — no environment variable, and no redeploy. The same
+table backs the `is_superuser()` function used by the RLS policies on
+`drawings` and `api_results`, so the UI and the data layer always agree.
 
-> **Note:** this variable must **not** have a `NEXT_PUBLIC_` prefix. It is read
-> only by server-side code (`src/lib/superusers.js`); a `NEXT_PUBLIC_` version
-> would be inlined into the browser bundle and publish everyone's address.
->
-> The table and the environment variable are currently two separate, unconnected
-> mechanisms — see [DEPLOY.md](./DEPLOY.md#superusers) before changing either.
+> Do **not** add a `NEXT_PUBLIC_` variable holding these addresses. Anything
+> with that prefix is inlined into the browser bundle, which is how this list
+> was previously published to every visitor. See
+> [DEPLOY.md](./DEPLOY.md#superusers).
 
 ## Deployment
 
