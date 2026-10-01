@@ -112,6 +112,28 @@ DELETE FROM app_superusers WHERE email = 'someone@example.com';
 Addresses are stored lower case; a CHECK constraint enforces it, because
 `auth.email()` is lower case.
 
+**Checking who currently has access.** The list is intentionally not readable
+from the app or committed to this repo, so inspect it against the database:
+
+```bash
+PGURL=$(grep '^POSTGRES_URL_NON_POOLING=' .env.local | cut -d= -f2- | tr -d '"')
+psql "$PGURL" -c "SELECT email FROM app_superusers ORDER BY email;"
+```
+
+To confirm the whole chain works for one address (returns `t` or `f`):
+
+```bash
+psql "$PGURL" -Atc "BEGIN;
+  SET LOCAL role authenticated;
+  SET LOCAL request.jwt.claims='{\"role\":\"authenticated\",\"email\":\"someone@example.com\"}';
+  SELECT public.is_superuser();
+ROLLBACK;"
+```
+
+An entry whose address has no Supabase auth account is inert — it grants nothing
+until somebody registers with that address. Worth checking before assuming a
+listed person actually has access.
+
 **How it hangs together:**
 
 - `is_superuser()` — a `SECURITY DEFINER` SQL function that looks the caller up
@@ -138,6 +160,15 @@ membership never reaches the browser. Do not reintroduce an env-var path.
 > owner" policy silently degraded to "owner": the UI offered a "view all"
 > toggle that returned nothing extra. Fixed in
 > `20260924135535_consolidate_superusers.sql`.
+
+### A note on anonymous rows
+
+Separately from superusers, `drawings` and `api_results` each carry a policy
+allowing any authenticated user to read rows where `is_anonymous = true`. As of
+2026-09-24 that was 983 of 1293 `api_results` rows readable by anyone with an
+account. This predates the superuser work and may be intentional for the
+research use case, but it is a deliberate decision worth revisiting rather than
+something to discover by accident.
 
 ## Database migrations
 
