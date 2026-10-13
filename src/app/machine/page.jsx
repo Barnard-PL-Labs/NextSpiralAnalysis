@@ -289,6 +289,43 @@ export default function MachinePage() {
     }
   };
 
+  // Every row must belong to a real auth user so RLS can scope reads to its
+  // owner. A visitor who has not signed up gets a Supabase *anonymous user* --
+  // a genuine auth.users row with its own JWT, not the shared `anon` API key.
+  // Before this, such rows were written with user_id = null, which forced the
+  // read policy to be "anyone may read any anonymous row".
+  const ensureWriteIdentity = async () => {
+    if (user?.id) return { userId: user.id, isAnon: false };
+
+    // Reuse a session from an earlier visit rather than minting another user.
+    const { data: existing } = await supabase.auth.getSession();
+    const existingUser = existing?.session?.user;
+    if (existingUser?.id) {
+      return { userId: existingUser.id, isAnon: existingUser.is_anonymous === true };
+    }
+
+    const { data, error } = await withTimeout(
+      supabase.auth.signInAnonymously(),
+      SUPABASE_WRITE_TIMEOUT_MS,
+      "Anonymous sign-in"
+    );
+
+    if (error) {
+      // Supabase caps anonymous sign-ins per hour per IP, so a whole clinic or
+      // classroom behind one address can hit it together.
+      if (error.status === 429) {
+        throw new Error(
+          "Too many people have started a test from this network in the past hour. Please wait a few minutes and try again."
+        );
+      }
+      throw error;
+    }
+    if (!data?.user?.id) {
+      throw new Error("Could not start a session. Please reload the page and try again.");
+    }
+    return { userId: data.user.id, isAnon: true };
+  };
+
   const saveAndAnalyzeCurrentDrawing = async () => {
     if (!selectedHandSide) {
       alert("Please select Left (L) or Right (R) hand first.");
@@ -472,9 +509,9 @@ export default function MachinePage() {
   };
 
   const saveSingleDrawingToDatabase = async (drawingData, sessionId) => {
-    const isAuthenticated = user?.id;
-    const email = isAuthenticated ? user.email || "anonymous@example.com" : "anonymous@example.com";
-    const username = isAuthenticated ? email.split("@")[0] : `anonymous_${sessionId.slice(-8)}`;
+    const { userId, isAnon } = await ensureWriteIdentity();
+    const email = isAnon ? "anonymous@example.com" : user.email || "anonymous@example.com";
+    const username = isAnon ? `anonymous_${sessionId.slice(-8)}` : email.split("@")[0];
     
 
     // Include pending demographics if any
@@ -504,14 +541,14 @@ export default function MachinePage() {
       supabase
         .from("drawings")
         .insert({
-          user_id: isAuthenticated ? user.id : null,
+          user_id: userId,
           email,
           username,
           drawing_data: drawingData,
           css_ppi: cssPpi,
           path_length_cm: +((pathPx * 2.54) / cssPpi).toFixed(2),
           session_id: sessionId,
-          is_anonymous: !isAuthenticated,
+          is_anonymous: isAnon,
           hand_used: selectedHand,       // 'dominant' | 'non-dominant' | null
           hand_side: selectedHandSide,   // 'L' | 'R'
           created_at: new Date().toISOString(),
@@ -528,19 +565,19 @@ export default function MachinePage() {
   };
 
   const saveSingleAnalysisResult = async (drawingId, analysisResult, sessionId) => {
-    const isAuthenticated = user?.id;
-    const email = isAuthenticated ? user.email || "anonymous@example.com" : "anonymous@example.com";
-    const username = isAuthenticated ? email.split("@")[0] : `anonymous_${sessionId.slice(-8)}`;
+    const { userId, isAnon } = await ensureWriteIdentity();
+    const email = isAnon ? "anonymous@example.com" : user.email || "anonymous@example.com";
+    const username = isAnon ? `anonymous_${sessionId.slice(-8)}` : email.split("@")[0];
     const status = analysisResult.status === "timeout" ? "timeout" : "completed";
 
     const { error } = await withTimeout(
       supabase.from("api_results").insert({
-        user_id: isAuthenticated ? user.id : null,
+        user_id: userId,
         email,
         username,
         drawing_id: drawingId,
         session_id: sessionId,
-        is_anonymous: !isAuthenticated,
+        is_anonymous: isAnon,
         status,
         result_data: { ...analysisResult, completed_at: new Date().toISOString() },
       }),
