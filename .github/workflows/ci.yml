@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first; no point finishing a run
+# for a commit nobody is waiting on.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the Node version the Vercel project builds with.
+          node-version: 22.x
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      # No Supabase credentials are provided on purpose: src/lib/supabaseClient.js
+      # falls back to a mock client when they are absent, so the build verifies
+      # the code compiles without reaching a real project. Vercel supplies the
+      # real values for the deploy that follows.
+      - name: Build
+        run: npm run build
+
+# Not run here, deliberately:
+#   npm run lint -- there is no ESLint config in the repo, so `next lint`
+#   prompts interactively and would hang the runner. Adding a config is
+#   worthwhile but would land a backlog of existing violations, so it should be
+#   its own piece of work rather than something that arrives red.

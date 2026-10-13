@@ -8,7 +8,6 @@ import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
 import Pagination from "../../components/Pagination";
 import Link from "next/link";
-import HorizontalSpiralHistory from "../../components/HorizontalSpiralHistory";
 import SettingsPopup from "../../components/SettingsPopup";
 
 // Archimedean reference spiral — same parameters as the template shown during drawing

@@ -18,6 +18,24 @@ git push origin main      # ~7 seconds later a build starts, ~1 min to live
 You do **not** normally need the Vercel CLI. Reach for it only to change
 environment variables or to force a rebuild without a new commit.
 
+## CI
+
+`.github/workflows/ci.yml` runs on every push to `main`, on pull requests, and
+on demand: `npm ci`, `npm test`, `npm run build` on Node 22 (matching Vercel).
+
+It runs **alongside** the Vercel deploy, not before it -- the Git integration
+deploys regardless of whether CI passes. Gating deploys on a green run would
+mean moving to pull requests instead of pushing straight to `main`.
+
+The build step is given no Supabase credentials on purpose:
+`src/lib/supabaseClient.js` falls back to a mock client when they are missing,
+so the build checks that the code compiles without touching a real project.
+
+`npm run lint` is deliberately not in the workflow: there is no ESLint config in
+the repo, so `next lint` prompts interactively and would hang the runner. Adding
+one is worth doing, but it would arrive with a backlog of existing violations,
+so it belongs in its own change rather than landing CI red.
+
 ## Where things live
 
 | Thing | Value |
