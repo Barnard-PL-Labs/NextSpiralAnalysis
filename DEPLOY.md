@@ -64,6 +64,20 @@ It is inlined into the JavaScript served to every visitor. Never put a secret,
 an allowlist, or anything you would not print on the homepage behind that
 prefix. (This bit us once — see *Superusers* below.)
 
+### Never run `supabase config push`
+
+`supabase/config.toml` configures the **local** dev stack. Its `site_url` is
+`http://127.0.0.1:3000`, so pushing it would reset production auth to localhost
+and silently break every confirmation and password-reset email. Change
+production in the Supabase dashboard, or via the Management API:
+
+```bash
+curl -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"rate_limit_anonymous_users": 150}' \
+  https://api.supabase.com/v1/projects/acpxyuiututudgpxcwey/config/auth
+```
+
 ### The bundled Vercel CLI may be stale
 
 A globally installed v50 in this environment gave wrong deployment listings and
@@ -161,14 +175,35 @@ membership never reaches the browser. Do not reintroduce an env-var path.
 > toggle that returned nothing extra. Fixed in
 > `20260924135535_consolidate_superusers.sql`.
 
-### A note on anonymous rows
+### Anonymous visitors
 
-Separately from superusers, `drawings` and `api_results` each carry a policy
-allowing any authenticated user to read rows where `is_anonymous = true`. As of
-2026-09-24 that was 983 of 1293 `api_results` rows readable by anyone with an
-account. This predates the superuser work and may be intentional for the
-research use case, but it is a deliberate decision worth revisiting rather than
-something to discover by accident.
+Visitors who have not signed up are given a **Supabase anonymous user** --
+a real `auth.users` row with its own JWT, created by `signInAnonymously()` in
+`src/app/machine/page.jsx`. Their drawings are owned like anyone else's, so RLS
+is plain `user_id = auth.uid() OR is_superuser()` everywhere.
+
+This replaced a model where anonymous rows had `user_id = NULL` and the policies
+compensated with `OR is_anonymous = true`. Because the `anon` API key ships in
+the JS bundle, that clause meant **anyone on the internet** could read all 1068
+anonymous drawings (30 of which carried a real name, age and sex), modify any of
+them, and delete every one. Closed on 2026-10-13 by
+`20261013000000_scope_anonymous_rows_to_owner.sql`.
+
+Things to know:
+
+- **Rate limit:** anonymous sign-ins are capped per hour **per IP**, raised from
+  30 to 150 because a clinic or classroom behind one address would otherwise hit
+  it together. A 429 is surfaced to the user as a "too many people on this
+  network" message rather than a generic save failure.
+- **Cleanup:** Supabase does not prune abandoned anonymous users. At roughly
+  150 sessions/month they accumulate; a periodic delete of anonymous users older
+  than 30 days is worth scheduling.
+- **Legacy rows:** 1068 drawings predating the change still have
+  `user_id = NULL` and are readable only by superusers. Their owners cannot
+  return to them anyway -- the `session_id` lived in browser storage.
+- **`is_anonymous` is two different things:** the column on `drawings` is
+  descriptive only; the JWT claim of the same name is what Supabase sets. Do not
+  write policies against the column.
 
 ## Database migrations
 
