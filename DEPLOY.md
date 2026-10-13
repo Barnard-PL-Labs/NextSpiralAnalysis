@@ -64,18 +64,33 @@ It is inlined into the JavaScript served to every visitor. Never put a secret,
 an allowlist, or anything you would not print on the homepage behind that
 prefix. (This bit us once — see *Superusers* below.)
 
-### Never run `supabase config push`
+### `supabase config push` overwrites production auth
 
-`supabase/config.toml` configures the **local** dev stack. Its `site_url` is
-`http://127.0.0.1:3000`, so pushing it would reset production auth to localhost
-and silently break every confirmation and password-reset email. Change
-production in the Supabase dashboard, or via the Management API:
+`supabase/config.toml` configures the **local** dev stack, but
+`supabase config push` applies that same file to the linked cloud project --
+one routine-looking command, and no `--dry-run`.
+
+Its `site_url` used to be `http://127.0.0.1:3000`, so a push would have reset
+production auth to localhost and broken every confirmation and password-reset
+email. As of 2026-10-13 `site_url` and `additional_redirect_urls` in that file
+hold the **production** values (with localhost kept in the redirect list so
+local auth still works), which defuses the worst case.
+
+Other fields there still may not match production, so prefer the dashboard or
+the Management API:
 
 ```bash
 curl -X PATCH -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rate_limit_anonymous_users": 150}' \
   https://api.supabase.com/v1/projects/acpxyuiututudgpxcwey/config/auth
+```
+
+The CLI stores that token in the macOS keychain, go-keyring base64-wrapped:
+
+```bash
+RAW=$(security find-generic-password -s "Supabase CLI" -a supabase -w)
+TOKEN=$(printf '%s' "${RAW#go-keyring-base64:}" | base64 -d)
 ```
 
 ### The bundled Vercel CLI may be stale
@@ -195,9 +210,18 @@ Things to know:
   30 to 150 because a clinic or classroom behind one address would otherwise hit
   it together. A 429 is surfaced to the user as a "too many people on this
   network" message rather than a generic save failure.
-- **Cleanup:** Supabase does not prune abandoned anonymous users. At roughly
-  150 sessions/month they accumulate; a periodic delete of anonymous users older
-  than 30 days is worth scheduling.
+- **Cleanup:** Supabase does not prune abandoned anonymous users; at roughly
+  150 sessions/month they accumulate. Prune them with:
+
+  ```sql
+  SELECT prune_anonymous_users('30 days');   -- returns how many were removed
+  ```
+
+  Their drawings are **kept**. The foreign keys were `ON DELETE CASCADE` until
+  2026-10-13, which would have deleted the research data along with the user;
+  they are now `ON DELETE SET NULL`, so a pruned user's rows survive with no
+  owner and land in the same superuser-only state as the legacy rows. Do not
+  delete from `auth.users` directly without checking that constraint first.
 - **Legacy rows:** 1068 drawings predating the change still have
   `user_id = NULL` and are readable only by superusers. Their owners cannot
   return to them anyway -- the `session_id` lived in browser storage.

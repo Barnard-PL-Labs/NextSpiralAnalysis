@@ -143,19 +143,27 @@ max_indexes = 5
 # Vector Buckets is available to Supabase Pro plan.
 # [storage.vector.buckets.documents-openai]
 
-# WARNING: this file configures the LOCAL dev stack (`supabase start`).
-# Do NOT run `supabase config push` against the linked project: site_url and
-# additional_redirect_urls below point at localhost, and pushing would reset
-# production auth to them -- which is exactly the bug that made every
-# confirmation email send users to their own machine. Change production in the
-# dashboard or via the Management API instead.
+# This file configures the LOCAL dev stack (`supabase start`). The app itself
+# talks to the cloud project even in development (see .env.local), so this is
+# only exercised if someone deliberately runs the local stack.
+#
+# site_url and additional_redirect_urls are deliberately set to the PRODUCTION
+# values rather than localhost. They used to say 127.0.0.1, which made
+# `supabase config push` a loaded gun: one routine-looking command would have
+# reset production auth to localhost and broken every confirmation email -- the
+# exact failure this project already lost a day to. Keeping them aligned means
+# an accidental push cannot cause that. localhost stays in the redirect list so
+# local auth still works.
+#
+# Still prefer the dashboard or the Management API for production changes:
+# other values here (email rate limits, templates) are not guaranteed to match.
 [auth]
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+site_url = "https://www.spiralanalysis.com"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = ["https://www.spiralanalysis.com/**", "http://localhost:3000/**", "http://127.0.0.1:3000/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
