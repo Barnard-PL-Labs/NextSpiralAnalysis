@@ -55,7 +55,12 @@ export default function Header() {
   };
 
   const navLinks = [
-    ...(!researcherMode ? [{ label: "Learn More", href: "/instruction" }] : []),
+    ...(!researcherMode
+      ? [
+          { label: "How to Take This Test", href: "/how-to-take-this-test" },
+          { label: "Learn More", href: "/instruction" },
+        ]
+      : []),
     { label: "About Us", href: "/info" },
   ];
 

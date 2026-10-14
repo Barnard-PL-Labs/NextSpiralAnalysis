@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import styles from "@/styles/Directions.module.css";
+import TestSteps from "@/components/TestSteps";
 
 const TOC = [
   { id: "what",    label: "What it is"  },
@@ -49,14 +50,6 @@ const METRICS = [
   },
 ];
 
-const STEPS = [
-  { text: <>Using your finger on a mouse pad, or a stylus on a tablet, draw spirals within the 10x10 cm box.</> },
-  { text: <>Start from the center of the box and draw spirals of about 4-5 loops.</> },
-  { text: <>Be sure to draw for about 4-5 seconds to complete each spiral.</> },
-  { text: <>Try to make the loops as evenly spaced as possible.</> },
-  { text: <>Click &ldquo;Save&rdquo; after each spiral drawing.</> },
-  { text: <>Click &ldquo;Analyze&rdquo; when you have finished.</> },
-];
 
 export default function DirectionsPage() {
   const [active, setActive] = useState("what");
@@ -101,17 +94,7 @@ export default function DirectionsPage() {
             <section id="how" className={styles.section}>
               <p className={styles.eyebrow} style={{ visibility: "hidden" }}>02 — HOW TO USE</p>
               <h2 className={styles.sectionH2}>How to Take This Test</h2>
-              <div className={styles.stepsContainer}>
-                {STEPS.map((s, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.step} ${i % 2 === 0 ? styles.stepOdd : styles.stepEven}`}
-                  >
-                    <span className={styles.stepNum}>{String(i + 1).padStart(2, "0")}</span>
-                    <p className={styles.stepText}>{s.text}</p>
-                  </div>
-                ))}
-              </div>
+              <TestSteps />
             </section>
 
             {/* 03 — Key metrics */}
