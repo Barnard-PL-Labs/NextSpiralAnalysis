@@ -4,7 +4,8 @@ import { useState } from "react";
 
 // Draws a filled arrowhead triangle at (R, thetaDeg) pointing outward.
 // Returns a scatterpolar trace with fill:"toself".
-// Coordinate system: clockwise from north (matches angularaxis rotation=90, direction="clockwise").
+// The triangle is symmetric about its own axis, so it renders identically
+// whichever handedness the angular axis uses.
 const arrowheadTrace = (R, thetaDeg, len, halfWidth, color) => {
   const θ = (thetaDeg * Math.PI) / 180;
   // Cartesian tip and base in our polar system (x=R·sinθ, y=R·cosθ)
@@ -274,17 +275,21 @@ const TremorPolarPlot = ({ result }) => {
         tickangle: 0,
       },
       angularaxis: {
-        direction: "clockwise",
+        // Standard orientation: 0 deg at the right, increasing counterclockwise,
+        // so 0-180 runs horizontally and 90-270 vertically. The analysis
+        // reports traxis_dir in this convention; rendering it clockwise from
+        // vertical (as this did until 2026-10-15) drew every axis rotated.
+        direction: "counterclockwise",
         tickmode: "linear",
         dtick: 30,
-        rotation: 90,
+        rotation: 0,
         tickfont: { color: "#000000", size: 7, weight: "bold" },
         gridcolor: "#444444",
       },
       bgcolor: "rgba(0,0,0,0.1)",
     },
     // Extra right/top room so the always-on readout does not cover the axis.
-    margin: { l: 2, r: 64, b: 20, t: 52 },
+    margin: { l: 34, r: 64, b: 24, t: 52 },
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",

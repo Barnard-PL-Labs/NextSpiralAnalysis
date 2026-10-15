@@ -156,8 +156,8 @@ function TremorAxesSplit({ drawings, typedResults }) {
   const leftTraces = buildAxesTraces(L.angles, L.powers, "#0f766e");
   const rightTraces = buildAxesTraces(R.angles, R.powers, "#1d4ed8");
   const mkLayout = () => ({
-    polar: { radialaxis: { visible: false, range: [0, 1.35] }, angularaxis: { direction: "clockwise", tickmode: "linear", dtick: 30, rotation: 90, tickfont: { size: 10, color: "#222" } }, bgcolor: "rgba(0,0,0,0)" },
-    margin: { l: 8, r: 8, b: 8, t: 8 },
+    polar: { radialaxis: { visible: false, range: [0, 1.35] }, angularaxis: { direction: "counterclockwise", tickmode: "linear", dtick: 30, rotation: 0, tickfont: { size: 10, color: "#222" } }, bgcolor: "rgba(0,0,0,0)" },
+    margin: { l: 26, r: 26, b: 20, t: 20 },
     showlegend: false,
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
