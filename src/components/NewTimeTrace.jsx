@@ -13,7 +13,11 @@ const SpiralPlot = ({ data }) => {
   const plotData = [
     {
       x: data.map((d) => d.x),
-      y: data.map((d) => d.y),
+      // Canvas y grows downward while Plotly's y axis grows upward, so plotting
+      // it raw mirrors the spiral vertically against what the person actually
+      // drew -- and against the Original Spiral chart beside it. Negate to
+      // match. (Only the picture changes; no stored value is affected.)
+      y: data.map((d) => -d.y),
       z: data.map((d) => d.t),
       type: 'scatter3d',
       mode: 'lines',
