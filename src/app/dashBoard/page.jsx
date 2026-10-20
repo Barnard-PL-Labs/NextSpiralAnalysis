@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authProvider";
+import { isFallbackPressureDrawing } from "@/lib/pressure";
 import { useSuperuser } from "@/lib/useSuperuser";
 import Sidebar from "../../components/SideBar";
 import BottomNav from "../../components/BottomNav";
@@ -50,19 +51,6 @@ const MiniSpiralThumb = ({ drawing }) => {
       <polyline points={points} fill="none" stroke="#4f46e5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
-};
-
-const isFallbackPressureDrawing = (drawing) => {
-  if (!Array.isArray(drawing)) return false;
-
-  const pressures = drawing
-    .map((point) => Number(point?.p))
-    .filter((pressure) => Number.isFinite(pressure));
-
-  if (pressures.length < 10) return false;
-
-  const fallbackCount = pressures.filter((pressure) => pressure >= 495 && pressure <= 505).length;
-  return fallbackCount / pressures.length >= 0.9;
 };
 
 const Dashboard = () => {
