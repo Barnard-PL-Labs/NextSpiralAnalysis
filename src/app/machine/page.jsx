@@ -17,7 +17,6 @@ function detectDevicePpi() {
   const height = window.screen.height * dpr;
   const maxDim = Math.max(width, height);
   const minDim = Math.min(width, height);
-  console.log("MAX DIM", maxDim, "MIN DIM", minDim, navigator.userAgent);
   if (navigator.userAgent.includes("Macintosh")) {
     if (maxDim === 2420 && minDim === 1668) return { ppi: 264, recognized: true }; // iPad Pro 11" M4
     if (maxDim === 2752 && minDim === 2064) return { ppi: 264, recognized: true }; // iPad Pro 13" M4
@@ -115,7 +114,6 @@ export default function MachinePage() {
   
   useEffect(() => {
     setIsSaving(false);
-    console.log("[device] devicePixelRatio:", window.devicePixelRatio);
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -363,9 +361,7 @@ export default function MachinePage() {
     try {
       await refreshAuthBeforeWrite();
 
-      console.log("[1/3] Saving drawing to Supabase...", { sessionId, points: drawingPoints.length });
       const drawingId = await saveSingleDrawingToDatabase(drawingPoints, sessionId);
-      console.log("[1/3] Drawing saved:", drawingId);
       drawingIdMap.current[localId] = drawingId;
       // If user deleted this drawing while we were saving, clean it up and bail
       if (removedLocalIds.current.has(localId)) {
@@ -375,18 +371,14 @@ export default function MachinePage() {
       setSavedDrawings((prev) => prev.map(d => d.localId === localId ? { ...d, drawingId } : d));
       setIsSaving(false);
 
-      console.log("[2/3] Sending to analysis API...");
       const result = await backgroundAnalysis(drawingPoints);
       if (result === null || result === "error") throw new Error("Analysis failed to produce valid results");
-      console.log("[2/3] Analysis returned:", result);
 
       // Skip save if user removed this drawing during the analysis
       if (removedLocalIds.current.has(localId)) return;
-      console.log("[3/3] Saving result to Supabase...");
       await saveSingleAnalysisResult(drawingId, result, sessionId);
-      console.log("[3/3] Result saved. Pipeline complete.");
     } catch (error) {
-      console.error("Drawing analysis failed:", error?.message || error?.details || JSON.stringify(error) || error);
+      console.error("Drawing analysis failed:", error?.message || error?.details || "unknown error");
       if (!drawingIdMap.current[localId]) {
         setSavedDrawings((prev) => prev.filter((d) => d.localId !== localId));
       }
@@ -410,43 +402,21 @@ export default function MachinePage() {
       // After dataconvert multiplies by 8, effective scale = 200/cssPpi as intended.
       // y-center is 150 (= 1200/8) so after ×8 it maps to 1200, the center of
       // MATLAB's hardcoded 2400-unit canvas height used in the y-flip (y2 = 2400 - y).
-      console.log("[device] using PPI:", devicePpi);
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = devicePpi / (window.devicePixelRatio || 1);
       const scale = 200 / cssPpi / 8;
       const cleanedData = cleanPointsForMatlabTimestamps(drawingData);
       if (cleanedData.length < 3) throw new Error("Drawing does not have enough valid timed points for analysis");
-      console.log("[cleanup] raw points:", drawingData.length, "submitted points:", cleanedData.length, "removed/merged:", drawingData.length - cleanedData.length);
       const firstY = cleanedData[0].y;
       const scaledData = cleanedData.map((pt) => ({
         ...pt,
         x: +(pt.x * scale).toFixed(4),
         y: +((pt.y - firstY) * scale + 150).toFixed(4),
       }));
-      console.log("[scale] cssPpi:", cssPpi, "scale:", scale, "firstPoint:", scaledData[0], "lastPoint:", scaledData[scaledData.length - 1]);
-
-      // === CLIENT-SIDE COORDINATE DIAGNOSTICS (post-scale — these are the values sent to the API) ===
-      const xs = scaledData.map(p => p.x);
-      const ys = scaledData.map(p => p.y);
-      const ts = scaledData.map(p => p.t);
-      const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
-      const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
-      const radii = scaledData.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
-      console.log("=== COORDINATE DIAGNOSTICS (client, post-scale) ===");
-      console.log("Point count:", scaledData.length);
-      console.log("X range:", Math.min(...xs).toFixed(2), "→", Math.max(...xs).toFixed(2), " span:", (Math.max(...xs) - Math.min(...xs)).toFixed(2), "25-DPI units (×8→200 DPI in MATLAB)");
-      console.log("Y range:", Math.min(...ys).toFixed(2), "→", Math.max(...ys).toFixed(2), " span:", (Math.max(...ys) - Math.min(...ys)).toFixed(2), "25-DPI units");
-      console.log("Centroid:", meanX.toFixed(2), ",", meanY.toFixed(2));
-      console.log("Radial range:", Math.min(...radii).toFixed(2), "→", Math.max(...radii).toFixed(2), "25-DPI units");
-      console.log("Drawing duration:", Math.max(...ts) - Math.min(...ts), "ms");
-      console.log("Pressure range:", Math.min(...scaledData.map(p => p.p)), "→", Math.max(...scaledData.map(p => p.p)));
-      console.log("devicePixelRatio:", window.devicePixelRatio, " scale factor:", scale.toFixed(4));
-      console.log("====================================================");
       let lastError;
       for (let attempt = 1; attempt <= ANALYSIS_MAX_ATTEMPTS; attempt += 1) {
         const controller = new AbortController();
         try {
-          console.log(`[analysis] attempt ${attempt}/${ANALYSIS_MAX_ATTEMPTS}`);
           const response = await withTimeout(
             fetch("/api/analyze", {
               method: "POST",
@@ -492,7 +462,7 @@ export default function MachinePage() {
             message.includes("network");
 
           if (!retryable || attempt === ANALYSIS_MAX_ATTEMPTS) throw error;
-          console.warn(`[analysis] attempt ${attempt} failed; retrying`, error);
+          console.warn(`[analysis] attempt ${attempt} failed; retrying:`, error?.message || "unknown error");
           await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
         } finally {
           controller.abort();
@@ -646,7 +616,11 @@ export default function MachinePage() {
     });
     if (!res.ok) {
       const json = await res.json();
-      console.error("[remove] Failed to delete drawing from database:", json);
+      console.error(
+        "[remove] Failed to delete drawing from database:",
+        res.status,
+        json?.error || "unknown error"
+      );
     }
   };
 //hi
@@ -657,7 +631,6 @@ export default function MachinePage() {
     if (!ok) return;
 
     const sessionId = currentSessionId;
-    console.log("Clearing session:", sessionId);
 
     setCurrentDrawing([]);
     setSavedDrawings([]);
@@ -672,15 +645,11 @@ export default function MachinePage() {
     localStorage.removeItem("selectedHandSide");
 
     if (sessionId) {
-      const { data: selectData } = await supabase.from('drawings').select("id, session_id").eq('session_id', sessionId);
-      console.log("Rows visible before delete:", selectData);
-      const { data: drawingData, error: drawingsError } = await supabase.from('drawings').delete().eq('session_id', sessionId).select("id, created_at");
-      console.log("Deleted drawings count:", drawingData?.length ?? 0);
-      drawingData?.forEach((d) => console.log("Deleted drawing id:", d.id));
-      console.log("Drawing error: ", drawingsError);
-      const { data: resultsData, error: resultsError } = await supabase.from('api_results').delete().eq('session_id', sessionId).select("*");
-      console.log("API result data: ", resultsData);
-      console.log("API result error: ", resultsError);
+      await supabase.from('drawings').select("id, session_id").eq('session_id', sessionId);
+      const { error: drawingsError } = await supabase.from('drawings').delete().eq('session_id', sessionId).select("id, created_at");
+      if (drawingsError) console.error("Failed to delete drawings for session:", drawingsError.message);
+      const { error: resultsError } = await supabase.from('api_results').delete().eq('session_id', sessionId).select("*");
+      if (resultsError) console.error("Failed to delete analysis results for session:", resultsError.message);
     }
   // delete from drawing table via session_id, then make sure to delete related api_results
     if (canvasRef.current?.clearCanvas) canvasRef.current.clearCanvas();

@@ -4,12 +4,14 @@ import { computeWidthMetrics } from "@/lib/widthMetrics";
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("User: ", body.user);
     console.log("Received drawData length:", body.drawData.length);
 
     // Validate input data
     if (!Array.isArray(body.drawData) || body.drawData.length === 0) {
-      console.error("Invalid draw data received:", body.drawData);
+      console.error(
+        "Invalid draw data received: expected a non-empty array, got",
+        Array.isArray(body.drawData) ? "an empty array" : typeof body.drawData
+      );
       return NextResponse.json(
         {
           message: "Invalid draw data",
@@ -18,31 +20,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    console.log("Sending to external API:", {
-      pointCount: body.drawData.length,
-      firstPoint: body.drawData[0],
-      lastPoint: body.drawData[body.drawData.length - 1],
-      dataType: typeof body.drawData,
-      isArray: Array.isArray(body.drawData),
-      serializedSize: JSON.stringify(body.drawData).length,
-    });
-
-    // === COORDINATE DIAGNOSTICS ===
-    const pts = body.drawData;
-    const xs = pts.map(p => p.x);
-    const ys = pts.map(p => p.y);
-    const ts = pts.map(p => p.t);
-    const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
-    const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
-    const radii = pts.map(p => Math.sqrt((p.x - meanX) ** 2 + (p.y - meanY) ** 2));
-    console.log("=== COORDINATE DIAGNOSTICS ===");
-    console.log("X range:", Math.min(...xs).toFixed(1), "→", Math.max(...xs).toFixed(1), "  span:", (Math.max(...xs) - Math.min(...xs)).toFixed(1), "px");
-    console.log("Y range:", Math.min(...ys).toFixed(1), "→", Math.max(...ys).toFixed(1), "  span:", (Math.max(...ys) - Math.min(...ys)).toFixed(1), "px");
-    console.log("Centroid:", meanX.toFixed(1), ",", meanY.toFixed(1), "  (should be near canvas center)");
-    console.log("Radial range:", Math.min(...radii).toFixed(1), "→", Math.max(...radii).toFixed(1), "px  (inner → outer loop radius)");
-    console.log("Drawing duration:", (Math.max(...ts) - Math.min(...ts)), "ms");
-    console.log("Pressure range:", Math.min(...pts.map(p => p.p)), "→", Math.max(...pts.map(p => p.p)), "  (0–1000 scale)");
-    console.log("==============================");
 
     try {
       const externalResponse = await fetch(
@@ -57,16 +34,18 @@ export async function POST(req) {
         }
       );
 
-      console.log("External API Status:", externalResponse.status);
-      console.log("External API Status Text:", externalResponse.statusText);
+      console.log(
+        "External API status:",
+        externalResponse.status,
+        externalResponse.statusText
+      );
 
       if (!externalResponse.ok) {
         const errorText = await externalResponse.text();
-        console.error("External API Error Response:", {
+        console.error("External API error response:", {
           status: externalResponse.status,
           statusText: externalResponse.statusText,
-          errorBody: errorText,
-          requestData: body.drawData.slice(0, 5),
+          errorBodyLength: errorText.length,
         });
         return NextResponse.json(
           {
@@ -80,36 +59,12 @@ export async function POST(req) {
       let responseText;
       try {
         responseText = await externalResponse.text();
-        console.log("Raw External API Response:", responseText);
 
         if (!responseText.trim()) {
           throw new Error("Empty response from external API");
         }
 
         const externalApiData = JSON.parse(responseText);
-        console.log("=== EXTERNAL API RESPONSE ANALYSIS ===");
-        console.log("Response type:", typeof externalApiData);
-        console.log("Is array:", Array.isArray(externalApiData));
-        console.log("Response keys:", Object.keys(externalApiData));
-        console.log(
-          "Response structure:",
-          JSON.stringify(externalApiData, null, 2)
-        );
-
-        // Check if it has nested objects/arrays
-        Object.keys(externalApiData).forEach((key) => {
-          const value = externalApiData[key];
-          console.log(`Property "${key}":`, {
-            type: typeof value,
-            isArray: Array.isArray(value),
-            length: value?.length || "N/A",
-            keys:
-              typeof value === "object" && value !== null
-                ? Object.keys(value)
-                : "N/A",
-          });
-        });
-        console.log("Parsed External API Response:", externalApiData);
 
         if (!externalApiData || typeof externalApiData !== "object") {
           throw new Error("Invalid response format from external API");
@@ -135,7 +90,6 @@ export async function POST(req) {
                 (typeof existing === "string" && /^no axis$/i.test(existing.trim()));
               if (isBlank && wm[k] != null) externalApiData[k] = String(wm[k]);
             });
-            console.log("JS width metrics merged:", wm);
           }
         } catch (wmErr) {
           console.error("JS width metrics failed (non-fatal):", wmErr.message);
@@ -146,8 +100,12 @@ export async function POST(req) {
           result: externalApiData,
         });
       } catch (parseError) {
-        console.error("Error parsing API response:", parseError);
-        console.error("Raw response was:", responseText);
+        console.error(
+          "Error parsing external API response:",
+          parseError.message,
+          "response length:",
+          responseText?.length ?? 0
+        );
         return NextResponse.json(
           {
             message: "Failed to parse external API response",
@@ -158,7 +116,10 @@ export async function POST(req) {
         );
       }
     } catch (fetchError) {
-      console.error("Error fetching from external API:", fetchError);
+      console.error(
+        "Error fetching from external API:",
+        fetchError.message
+      );
       return NextResponse.json(
         {
           message: "Failed to communicate with external API",
@@ -168,7 +129,7 @@ export async function POST(req) {
       );
     }
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("Server error in analyze route:", error.message);
     return NextResponse.json(
       {
         message: "Server Error",

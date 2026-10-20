@@ -27,7 +27,7 @@ export async function POST(req) {
       .lt("created_at", `${today}T23:59:59.999Z`);
 
     if (countError) {
-      console.error("Error counting spirals:", countError);
+      console.error("Error counting spirals:", countError.message);
       return NextResponse.json(
         { error: "Failed to count spirals", details: countError },
         { status: 500 }
@@ -47,7 +47,7 @@ export async function POST(req) {
       .select();
 
     if (logError) {
-      console.error("Error logging daily spirals:", logError);
+      console.error("Error logging daily spirals:", logError.message);
       return NextResponse.json(
         { error: "Failed to log spirals", details: logError },
         { status: 500 }
@@ -63,7 +63,7 @@ export async function POST(req) {
       logId: logData?.[0]?.id,
     });
   } catch (error) {
-    console.error("Server error in log-daily-spirals:", error);
+    console.error("Server error in log-daily-spirals:", error.message);
     return NextResponse.json(
       { error: "Server error", details: error.message },
       { status: 500 }

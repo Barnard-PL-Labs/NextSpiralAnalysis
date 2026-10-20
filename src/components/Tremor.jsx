@@ -174,10 +174,6 @@ const TremorPolarPlot = ({ result }) => {
             return angleDiff < 5 || oppositeDiff < 5; // 5 degree tolerance
           });
           
-          if (overlappingAxes.length > 0) {
-            console.log(`Axis ${index + 1} overlaps with previous axes:`, overlappingAxes);
-          }
-          
           // Apply offset to prevent visual overlap
           const offset = overlappingAxes.length * 8; // 8 degree offset per overlap
           const adjustedAxis = axis + offset;
