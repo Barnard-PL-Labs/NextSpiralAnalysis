@@ -67,7 +67,7 @@ This creates all tables, RLS policies, and functions automatically. The schema i
 
 **Key columns by table:**
 
-`drawings`: id, user_id, email, username, drawing_data (JSONB), session_id, is_anonymous, hand_used, hand_side, user_name, user_age, user_sex, created_at
+`drawings`: id, user_id, email, username, drawing_data (JSONB), session_id, is_anonymous, hand_used, hand_side, user_name, user_age, user_sex, css_ppi, path_length_cm, device_recognized (false = unknown device, 264 PPI assumed), created_at
 
 `api_results`: id, user_id, email, username, drawing_id (FK to drawings), session_id, is_anonymous, status, result_data (JSONB), created_at
 

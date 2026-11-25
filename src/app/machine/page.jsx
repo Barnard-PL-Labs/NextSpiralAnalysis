@@ -516,6 +516,7 @@ export default function MachinePage() {
           username,
           drawing_data: drawingData,
           css_ppi: cssPpi,
+          device_recognized: deviceRecognized, // false = unknown device, 264 PPI assumed
           path_length_cm: +((pathPx * 2.54) / cssPpi).toFixed(2),
           session_id: sessionId,
           is_anonymous: isAnon,
