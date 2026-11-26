@@ -64,6 +64,7 @@ This creates all tables, RLS policies, and functions automatically. The schema i
 - `feedback` — stores user feedback ratings
 - `profiles` — user profile info (username, bio, avatar)
 - `app_superusers` — emails of superuser accounts
+- `analysis_batches`, `analysis_batch_items` — batch analysis: one row per batch, one per spiral
 
 **Key columns by table:**
 

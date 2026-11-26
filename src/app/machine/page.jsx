@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authProvider";
 import { supabase } from "@/lib/supabaseClient";
 import { FaHandPaper } from "react-icons/fa";
+import { prepareDrawData } from "@/lib/spiralPreprocess";
 
 function detectDevicePpi() {
   if (typeof window === "undefined") return { ppi: 264, recognized: true };
@@ -51,43 +52,6 @@ const withTimeout = (promise, timeoutMs, label) => {
   return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
     clearTimeout(timeoutId);
   });
-};
-
-const cleanPointsForMatlabTimestamps = (points) => {
-  const merged = [];
-
-  for (const point of points) {
-    const t = Math.max(0, Math.round(Number(point.t) || 0));
-    const x = Number(point.x);
-    const y = Number(point.y);
-    const p = Math.round(Number(point.p) || 0);
-
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-
-    const previous = merged[merged.length - 1];
-
-    if (previous && t === previous.t) {
-      const count = previous.__mergeCount + 1;
-      previous.x = previous.x + (x - previous.x) / count;
-      previous.y = previous.y + (y - previous.y) / count;
-      previous.p = Math.round(previous.p + (p - previous.p) / count);
-      previous.__mergeCount = count;
-      continue;
-    }
-
-    if (previous && t < previous.t) continue;
-
-    merged.push({ ...point, x, y, p, t, __mergeCount: 1 });
-  }
-
-  const firstT = merged[0]?.t ?? 0;
-  return merged.map(({ __mergeCount, ...point }, index) => ({
-    ...point,
-    n: index + 1,
-    t: point.t - firstT,
-    x: +point.x.toFixed(4),
-    y: +point.y.toFixed(4),
-  }));
 };
 
 export default function MachinePage() {
@@ -396,23 +360,11 @@ export default function MachinePage() {
 
   const backgroundAnalysis = async (drawingData) => {
     try {
-      // Scale x/y from CSS pixels to digitizer units (200 units = 1 inch),
-      // pre-divided by 8 to compensate for dataconvert.m's hardcoded *8 factor
-      // (a legacy Wacom tablet calibration that inflates all coordinates 8×).
-      // After dataconvert multiplies by 8, effective scale = 200/cssPpi as intended.
-      // y-center is 150 (= 1200/8) so after ×8 it maps to 1200, the center of
-      // MATLAB's hardcoded 2400-unit canvas height used in the y-flip (y2 = 2400 - y).
+      // Cleaning and scaling live in src/lib/spiralPreprocess.js so the batch
+      // API sends the backend exactly what this page does.
       if (!window.devicePixelRatio) console.warn("[scale] devicePixelRatio not detected, falling back to 1");
       const cssPpi = devicePpi / (window.devicePixelRatio || 1);
-      const scale = 200 / cssPpi / 8;
-      const cleanedData = cleanPointsForMatlabTimestamps(drawingData);
-      if (cleanedData.length < 3) throw new Error("Drawing does not have enough valid timed points for analysis");
-      const firstY = cleanedData[0].y;
-      const scaledData = cleanedData.map((pt) => ({
-        ...pt,
-        x: +(pt.x * scale).toFixed(4),
-        y: +((pt.y - firstY) * scale + 150).toFixed(4),
-      }));
+      const scaledData = prepareDrawData(drawingData, cssPpi);
       let lastError;
       for (let attempt = 1; attempt <= ANALYSIS_MAX_ATTEMPTS; attempt += 1) {
         const controller = new AbortController();
