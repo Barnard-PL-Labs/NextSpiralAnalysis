@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeWidthMetrics } from "@/lib/widthMetrics";
+import { MATLAB_BACKEND_URL, fillMissingWidthMetrics } from "@/lib/spiralBackend";
 
 export async function POST(req) {
   try {
@@ -23,7 +23,7 @@ export async function POST(req) {
 
     try {
       const externalResponse = await fetch(
-        "https://spiral-qihf6vxbsq-ue.a.run.app/run_spiral",
+        MATLAB_BACKEND_URL,
         {
           method: "POST",
           headers: {
@@ -70,30 +70,9 @@ export async function POST(req) {
           throw new Error("Invalid response format from external API");
         }
 
-        // Compute width metrics in JS and fill any blank values from the backend.
-        // MATLAB leaves width fields as "No Axis" when the interp1 bug fires.
-        const WIDTH_KEYS = [
-          "overall average of widths",
-          "std of widths.",
-          "COV of width",
-          "1st quad average median",
-          "2nd quad average median",
-          "3rd quad average median",
-          "4th quad average median",
-        ];
-        try {
-          const wm = computeWidthMetrics(body.drawData);
-          if (wm) {
-            WIDTH_KEYS.forEach(k => {
-              const existing = externalApiData[k];
-              const isBlank = existing == null || existing === "" ||
-                (typeof existing === "string" && /^no axis$/i.test(existing.trim()));
-              if (isBlank && wm[k] != null) externalApiData[k] = String(wm[k]);
-            });
-          }
-        } catch (wmErr) {
-          console.error("JS width metrics failed (non-fatal):", wmErr.message);
-        }
+        // MATLAB leaves width fields as "No Axis" when the interp1 bug fires;
+        // fill those blanks from the JS port.
+        fillMissingWidthMetrics(externalApiData, body.drawData);
 
         return NextResponse.json({
           message: "Analysis completed successfully",
